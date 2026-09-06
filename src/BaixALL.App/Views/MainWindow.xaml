@@ -43,11 +43,7 @@
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <!-- Aba Início / Baixar -->
                     <Button Style="{StaticResource NavButtonStyle}" Content="Início"
-                            Command="{Binding SwitchTabCommand}" CommandParameter="Downloader">
-                        <Button.Triggers>
-                            <!-- Visual State gerenciado pelo estilo -->
-                        </Button.Triggers>
-                    </Button>
+                            Command="{Binding SwitchTabCommand}" CommandParameter="Downloader" />
 
                     <!-- Aba Fila de Downloads -->
                     <Button Style="{StaticResource NavButtonStyle}"
@@ -75,9 +71,12 @@
                             Command="{Binding SwitchTabCommand}" CommandParameter="Settings" />
                 </StackPanel>
 
-                <!-- Indicador de Status das Ferramentas no Canto Superior -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Padding="10,4" Margin="0,0,8,0">
+                <!-- Indicador de Status das Ferramentas no Canto Superior - CLICÁVEL -->
+                <Button Grid.Column="2" Style="{StaticResource NavButtonStyle}"
+                        Command="{Binding OpenToolsCommand}"
+                        Padding="4" VerticalAlignment="Center"
+                        ToolTip="Clique para abrir o Gerenciador de Ferramentas">
+                    <Border Padding="10,4">
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Setter Property="Background" Value="#1A107C41" />
@@ -103,7 +102,7 @@
                             </TextBlock.Style>
                         </TextBlock>
                     </Border>
-                </StackPanel>
+                </Button>
             </Grid>
         </Border>
 
@@ -134,9 +133,17 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="{Binding StatusNotification}" FontWeight="Medium" FontSize="13" VerticalAlignment="Center" />
-                <Button Grid.Column="1" Style="{StaticResource SecondaryButtonStyle}" Content="✕" Padding="6,2"
+
+                <!-- Ação Direta "Configurar agora" no Banner quando componentes pendentes -->
+                <Button Grid.Column="1" Style="{StaticResource PrimaryButtonStyle}" Content="Configurar agora"
+                        Command="{Binding SetupNowCommand}"
+                        Visibility="{Binding ShowSetupPrompt, Converter={StaticResource BoolToVis}}"
+                        Padding="12,4" Margin="0,0,12,0" FontSize="12" />
+
+                <Button Grid.Column="2" Style="{StaticResource SecondaryButtonStyle}" Content="✕" Padding="6,2"
                         Command="{Binding ClearNotificationCommand}" BorderThickness="0" Background="Transparent" />
             </Grid>
         </Border>
@@ -167,7 +174,7 @@
                     </StackPanel>
 
                     <!-- BARRA DE ENTRADA DA URL - ÚNICO ELEMENTO COM CANTOS ARREDONDADOS (CornerRadius="8") -->
-                    <Border Style="{StaticResource CardBorderStyle}" Padding="16" Margin="0,0,0,24">
+                    <Border Style="{StaticResource CardBorderStyle}" Padding="16" Margin="0,0,0,16">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -196,8 +203,28 @@
                                     Style="{StaticResource PrimaryButtonStyle}"
                                     Content="Analisar"
                                     Command="{Binding AnalyzeCommand}"
-                                    IsEnabled="{Binding IsAnalyzing, Converter={StaticResource InverseBool}}"
-                                    Padding="24,10" />
+                                    IsEnabled="{Binding CanAnalyze}"
+                                    Padding="24,10"
+                                    ToolTip="Cole o link de um vídeo do YouTube para analisar as qualidades disponíveis" />
+                        </Grid>
+                    </Border>
+
+                    <!-- CARD DE ALERTA: CONFIGURE OS COMPONENTES PARA COMEÇAR (QUANDO PENDENTES) -->
+                    <Border Style="{StaticResource CardBorderStyle}" Background="#160078D4" BorderBrush="{DynamicResource AccentBrush}"
+                            Margin="0,0,0,24" Padding="16"
+                            Visibility="{Binding ShowSetupPrompt, Converter={StaticResource BoolToVis}}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Configure os componentes necessários para começar." FontSize="15" FontWeight="Bold" Margin="0,0,0,4" />
+                                <TextBlock Text="O BaixALL utiliza yt-dlp, FFmpeg e Deno para extrair e mesclar vídeos sem perda de qualidade. A instalação é 100% automática."
+                                           Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <Button Grid.Column="1" Style="{StaticResource PrimaryButtonStyle}" Content="Configurar agora"
+                                    Command="{Binding SetupNowCommand}" VerticalAlignment="Center" Padding="20,10" Margin="16,0,0,0" />
                         </Grid>
                     </Border>
 
@@ -318,6 +345,55 @@
                                     <TextBlock Text="Baixar Agora" Foreground="{DynamicResource AccentTextBrush}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- ÁREA DE DOWNLOADS NA HOME (QUANDO NÃO HÁ VÍDEO EM ANÁLISE) -->
+                    <Border Style="{StaticResource CardBorderStyle}" Margin="0,8,0,24" Padding="20"
+                            Visibility="{Binding HasVideoInfo, Converter={StaticResource InverseBoolToVis}}">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Atividade de Download" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                <Button Grid.Column="1" Style="{StaticResource SecondaryButtonStyle}" Content="Ver Fila Completa"
+                                        Command="{Binding SwitchTabCommand}" CommandParameter="Queue" Padding="12,5" FontSize="12" />
+                            </Grid>
+
+                            <!-- Seção de Fila Ativa se houver itens -->
+                            <ItemsControl ItemsSource="{Binding QueueItems}" MaxHeight="300">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{DynamicResource SurfaceBorderBrush}" BorderThickness="0,0,0,1" Padding="0,10">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis" />
+                                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,4">
+                                                        <TextBlock Text="{Binding Quality}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="0,0,10,0" />
+                                                        <TextBlock Text="{Binding StatusMessage}" Foreground="{Binding Status, Converter={StaticResource StatusToColor}}" FontSize="12" />
+                                                    </StackPanel>
+                                                    <ProgressBar Value="{Binding ProgressPercentage}" Maximum="100" Height="4" Margin="0,2,0,0"
+                                                                 Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}" />
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="1" Text="{Binding ProgressPercentage, StringFormat='{}{0:0}%'}"
+                                                           FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Margin="12,0,0,0"
+                                                           Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Informação quando a fila estiver vazia -->
+                            <TextBlock Text="Nenhum download em andamento. Cole a URL de um vídeo acima para começar."
+                                       Foreground="{DynamicResource TextMutedBrush}" FontSize="13" Margin="0,6,0,0"
+                                       Visibility="{Binding QueueItems.Count, Converter={StaticResource InverseNullToVis}}" />
                         </StackPanel>
                     </Border>
 
@@ -516,6 +592,124 @@
                     </Style>
                 </views:SettingsView.Style>
             </views:SettingsView>
+
+            <!-- OVERLAY MODAL: EXPERIÊNCIA DE CONFIGURAÇÃO INICIAL (PREPARANDO O BAIXALL) -->
+            <Grid Background="#C0000000"
+                  Visibility="{Binding IsInitialSetupVisible, Converter={StaticResource BoolToVis}}">
+                <Border Background="{DynamicResource SurfaceBgBrush}"
+                        BorderBrush="{DynamicResource SurfaceBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="0"
+                        MaxWidth="640"
+                        Margin="32"
+                        Padding="28"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        SnapsToDevicePixels="True">
+                    <StackPanel>
+                        <!-- Título e Subtítulo -->
+                        <TextBlock Text="Preparando o BaixALL" FontSize="22" FontWeight="Bold" Margin="0,0,0,8" />
+                        <TextBlock Text="Alguns componentes são necessários para analisar e baixar vídeos. O BaixALL pode instalá-los automaticamente."
+                                   Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14" TextWrapping="Wrap" Margin="0,0,0,20" />
+
+                        <!-- Lista Visual das Ferramentas Obrigatórias -->
+                        <Border BorderBrush="{DynamicResource SurfaceBorderBrush}" BorderThickness="1" Margin="0,0,0,20">
+                            <ItemsControl ItemsSource="{Binding DependenciesVm.Dependencies}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{DynamicResource SurfaceBorderBrush}" BorderThickness="0,0,0,1" Padding="14,12" Background="{DynamicResource SurfaceBgBrush}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel Grid.Column="0">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="15" Margin="0,0,10,0" />
+                                                        <TextBlock Text="{Binding Version}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                                                    </StackPanel>
+                                                    <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2,0,0" />
+                                                    <!-- Barra de progresso individual -->
+                                                    <ProgressBar Value="{Binding DownloadProgress}" Maximum="100" Height="4" Margin="0,6,0,0"
+                                                                 Visibility="{Binding IsDownloading, Converter={StaticResource BoolToVis}}" />
+                                                </StackPanel>
+
+                                                <!-- Badge de Estado (✓ Instalado / ↓ Não instalado / etc) -->
+                                                <Border Grid.Column="1" Padding="10,4" VerticalAlignment="Center" Margin="12,0,0,0">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="#22107C41" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsInstalled}" Value="False">
+                                                                    <Setter Property="Background" Value="#22D97706" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding HasError}" Value="True">
+                                                                    <Setter Property="Background" Value="#22D83B01" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock Text="{Binding StateBadgeText}" FontWeight="Bold" FontSize="12">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsInstalled}" Value="False">
+                                                                        <Setter Property="Foreground" Value="{DynamicResource WarningBrush}" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding HasError}" Value="True">
+                                                                        <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
+
+                        <!-- Barra de Progresso Geral -->
+                        <StackPanel Visibility="{Binding DependenciesVm.IsBusy, Converter={StaticResource BoolToVis}}" Margin="0,0,0,16">
+                            <TextBlock Text="{Binding DependenciesVm.StatusText}" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                            <ProgressBar Value="{Binding DependenciesVm.OverallProgress}" Maximum="100" Height="6" />
+                        </StackPanel>
+
+                        <!-- Mensagem de Erro se houver -->
+                        <Border Background="#26D83B01" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1"
+                                Padding="12" Margin="0,0,0,16"
+                                Visibility="{Binding DependenciesVm.HasError, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="{Binding DependenciesVm.ErrorMessage}" Foreground="{DynamicResource DangerBrush}" FontWeight="Medium" TextWrapping="Wrap" />
+                        </Border>
+
+                        <!-- Botões de Ação do Modal -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Content="{Binding DependenciesVm.MainActionText}"
+                                    Command="{Binding DependenciesVm.ExecuteMainActionCommand}"
+                                    IsEnabled="{Binding DependenciesVm.IsBusy, Converter={StaticResource InverseBool}}"
+                                    Padding="18,12" FontSize="14" FontWeight="Bold" Margin="0,0,12,0" />
+
+                            <Button Grid.Column="1"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Content="Lembrar mais tarde"
+                                    Command="{Binding CloseSetupCommand}"
+                                    IsEnabled="{Binding DependenciesVm.IsBusy, Converter={StaticResource InverseBool}}"
+                                    Padding="14,12" FontSize="13" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
 
         </Grid>
     </Grid>

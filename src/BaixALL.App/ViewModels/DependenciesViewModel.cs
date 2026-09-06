@@ -27,6 +27,7 @@ public partial class DependenciesViewModel : ObservableObject
     private string _statusText = "Verificando componentes necessários...";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MainActionText))]
     private bool _areAllInstalled;
 
     [ObservableProperty]
@@ -35,7 +36,12 @@ public partial class DependenciesViewModel : ObservableObject
     [ObservableProperty]
     private string _errorMessage = string.Empty;
 
+    public string MainActionText => AreAllInstalled
+        ? "Continuar para o BaixALL"
+        : "Instalar componentes necessários";
+
     public event EventHandler? AllReady;
+    public event EventHandler? CloseRequested;
 
     public DependenciesViewModel(IDependencyManager dependencyManager, ILoggerService? logger = null)
     {
@@ -44,6 +50,7 @@ public partial class DependenciesViewModel : ObservableObject
         Dependencies = _dependencyManager.GetDependencies();
     }
 
+    [RelayCommand]
     public async Task CheckAsync()
     {
         IsBusy = true;
@@ -52,7 +59,7 @@ public partial class DependenciesViewModel : ObservableObject
 
         try
         {
-            AreAllInstalled = await _dependencyManager.CheckDependenciesAsync();
+            AreAllInstalled = await _dependencyManager.CheckDependenciesAsync().ConfigureAwait(false);
             Dependencies = _dependencyManager.GetDependencies();
 
             if (AreAllInstalled)
@@ -63,7 +70,7 @@ public partial class DependenciesViewModel : ObservableObject
             else
             {
                 var missing = Dependencies.Where(d => !d.IsInstalled).Select(d => d.Name).ToList();
-                StatusText = $"Componentes ausentes: {string.Join(", ", missing)}. Clique em 'Instalar' para obter automaticamente.";
+                StatusText = $"Componentes ausentes: {string.Join(", ", missing)}. Clique abaixo para instalar automaticamente.";
             }
         }
         catch (Exception ex)
@@ -79,6 +86,18 @@ public partial class DependenciesViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public async Task ExecuteMainActionAsync()
+    {
+        if (AreAllInstalled)
+        {
+            CloseRequested?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
+        await InstallMissingAsync();
+    }
+
+    [RelayCommand]
     public async Task InstallMissingAsync()
     {
         if (IsBusy) return;
@@ -86,38 +105,30 @@ public partial class DependenciesViewModel : ObservableObject
         IsBusy = true;
         HasError = false;
         OverallProgress = 0;
-        StatusText = "Iniciando download e configuração das dependências oficiais...";
+        StatusText = "Iniciando download e configuração automática...";
 
         var progress = new Progress<(string ToolName, double Progress, string Status)>(report =>
         {
             StatusText = $"[{report.ToolName}] {report.Status}";
             OverallProgress = Math.Clamp(report.Progress, 0, 100);
-
-            var dep = Dependencies.FirstOrDefault(d => d.Name.Equals(report.ToolName, StringComparison.OrdinalIgnoreCase));
-            if (dep != null)
-            {
-                dep.DownloadProgress = report.Progress;
-                dep.StatusText = report.Status;
-                dep.IsDownloading = report.Progress > 0 && report.Progress < 100;
-            }
         });
 
         try
         {
-            var success = await _dependencyManager.EnsureAllDependenciesAsync(progress);
+            var success = await _dependencyManager.EnsureAllDependenciesAsync(progress).ConfigureAwait(false);
             Dependencies = _dependencyManager.GetDependencies();
             AreAllInstalled = success;
 
             if (success)
             {
-                StatusText = "Todas as dependências foram configuradas com sucesso!";
+                StatusText = "Todas as ferramentas foram instaladas e validadas com sucesso!";
                 OverallProgress = 100;
                 AllReady?.Invoke(this, EventArgs.Empty);
             }
             else
             {
                 HasError = true;
-                ErrorMessage = "Não foi possível concluir o download de todas as ferramentas. Verifique sua internet.";
+                ErrorMessage = "Não foi possível concluir a instalação de todas as ferramentas. Tente novamente.";
             }
         }
         catch (Exception ex)
@@ -130,5 +141,81 @@ public partial class DependenciesViewModel : ObservableObject
         {
             IsBusy = false;
         }
+    }
+
+    [RelayCommand]
+    public async Task InstallToolAsync(string? toolName)
+    {
+        if (string.IsNullOrWhiteSpace(toolName) || IsBusy) return;
+
+        IsBusy = true;
+        HasError = false;
+        StatusText = $"Instalando {toolName}...";
+
+        var progress = new Progress<(string ToolName, double Progress, string Status)>(report =>
+        {
+            StatusText = $"[{report.ToolName}] {report.Status}";
+            OverallProgress = Math.Clamp(report.Progress, 0, 100);
+        });
+
+        try
+        {
+            var success = await _dependencyManager.InstallDependencyByNameAsync(toolName, progress).ConfigureAwait(false);
+            Dependencies = _dependencyManager.GetDependencies();
+            AreAllInstalled = _dependencyManager.AreAllDependenciesInstalled();
+
+            if (success)
+            {
+                StatusText = $"{toolName} instalado e validado com sucesso!";
+                if (AreAllInstalled)
+                {
+                    AllReady?.Invoke(this, EventArgs.Empty);
+                }
+            }
+            else
+            {
+                HasError = true;
+                ErrorMessage = $"Não foi possível instalar {toolName}. Tente novamente.";
+            }
+        }
+        catch (Exception ex)
+        {
+            HasError = true;
+            ErrorMessage = $"Erro ao instalar {toolName}: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task VerifyToolAsync(string? toolName)
+    {
+        if (string.IsNullOrWhiteSpace(toolName) || IsBusy) return;
+
+        IsBusy = true;
+        StatusText = $"Validando {toolName}...";
+
+        try
+        {
+            var success = await _dependencyManager.ValidateDependencyAsync(toolName).ConfigureAwait(false);
+            Dependencies = _dependencyManager.GetDependencies();
+            AreAllInstalled = _dependencyManager.AreAllDependenciesInstalled();
+
+            StatusText = success
+                ? $"{toolName} validado com sucesso."
+                : $"Falha ao validar {toolName}.";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    public void CloseSetup()
+    {
+        CloseRequested?.Invoke(this, EventArgs.Empty);
     }
 }

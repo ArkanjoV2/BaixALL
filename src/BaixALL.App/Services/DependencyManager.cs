@@ -17,12 +17,23 @@ public class DependencyManager : IDependencyManager
     private readonly ILoggerService? _logger;
     private readonly HttpClient _httpClient;
     private readonly List<DependencyItem> _dependencies;
+    private readonly string _toolsFolder;
+    private readonly string _ytDlpExe;
+    private readonly string _ffmpegExe;
+    private readonly string _ffprobeExe;
+    private readonly string _denoExe;
 
-    public DependencyManager(ILoggerService? logger = null, HttpClient? httpClient = null)
+    public DependencyManager(ILoggerService? logger = null, HttpClient? httpClient = null, string? toolsDirectory = null)
     {
         _logger = logger;
         _httpClient = httpClient ?? new HttpClient();
         _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) BaixALL/1.0");
+
+        _toolsFolder = toolsDirectory ?? AppConstants.ToolsFolder;
+        _ytDlpExe = Path.Combine(_toolsFolder, "yt-dlp", "yt-dlp.exe");
+        _ffmpegExe = Path.Combine(_toolsFolder, "ffmpeg", "ffmpeg.exe");
+        _ffprobeExe = Path.Combine(_toolsFolder, "ffmpeg", "ffprobe.exe");
+        _denoExe = Path.Combine(_toolsFolder, "deno", "deno.exe");
 
         _dependencies = new List<DependencyItem>
         {
@@ -30,42 +41,39 @@ public class DependencyManager : IDependencyManager
             {
                 Name = "yt-dlp",
                 Description = "Motor principal de extração e download de vídeos",
-                LocalPath = AppConstants.YtDlpExe
+                LocalPath = _ytDlpExe
             },
             new()
             {
                 Name = "FFmpeg",
                 Description = "Mesclagem de fluxos de vídeo/áudio e conversão de formatos",
-                LocalPath = AppConstants.FFmpegExe
+                LocalPath = _ffmpegExe
             },
             new()
             {
                 Name = "ffprobe",
                 Description = "Analisador de codecs e streams multimídia",
-                LocalPath = AppConstants.FFprobeExe
+                LocalPath = _ffprobeExe
             },
             new()
             {
                 Name = "Deno",
                 Description = "Runtime JavaScript para desafios anti-bot e assinaturas do YouTube",
-                LocalPath = AppConstants.DenoExe
+                LocalPath = _denoExe
             }
         };
     }
 
     public IReadOnlyList<DependencyItem> GetDependencies() => _dependencies.AsReadOnly();
 
-    public string GetYtDlpPath() => AppConstants.YtDlpExe;
-    public string GetFFmpegPath() => AppConstants.FFmpegExe;
-    public string GetFFprobePath() => AppConstants.FFprobeExe;
-    public string GetDenoPath() => AppConstants.DenoExe;
+    public string GetYtDlpPath() => _ytDlpExe;
+    public string GetFFmpegPath() => _ffmpegExe;
+    public string GetFFprobePath() => _ffprobeExe;
+    public string GetDenoPath() => _denoExe;
 
     public bool AreAllDependenciesInstalled()
     {
-        return File.Exists(AppConstants.YtDlpExe) &&
-               File.Exists(AppConstants.FFmpegExe) &&
-               File.Exists(AppConstants.FFprobeExe) &&
-               File.Exists(AppConstants.DenoExe);
+        return _dependencies.All(d => d.State == DependencyState.Installed && File.Exists(d.LocalPath));
     }
 
     public async Task<bool> CheckDependenciesAsync()
@@ -74,28 +82,94 @@ public class DependencyManager : IDependencyManager
 
         foreach (var dep in _dependencies)
         {
+            dep.SetChecking();
+
             if (File.Exists(dep.LocalPath))
             {
-                dep.IsInstalled = true;
-                dep.StatusText = "Instalado";
+                dep.SetValidating();
                 try
                 {
-                    dep.Version = await GetToolVersionAsync(dep.Name, dep.LocalPath).ConfigureAwait(false);
+                    var version = await GetToolVersionAsync(dep.Name, dep.LocalPath).ConfigureAwait(false);
+                    if (!string.IsNullOrEmpty(version) && !version.Equals("Erro de execução", StringComparison.OrdinalIgnoreCase))
+                    {
+                        dep.SetInstalled(version);
+                    }
+                    else
+                    {
+                        dep.SetError("Binário presente, mas falhou ao executar.");
+                    }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    dep.Version = "Presente (versão não identificada)";
+                    _logger?.Warning($"Falha na validação de {dep.Name}: {ex.Message}");
+                    dep.SetError($"Falha na validação: {ex.Message}");
                 }
             }
             else
             {
-                dep.IsInstalled = false;
-                dep.Version = "Não instalado";
-                dep.StatusText = "Pendente";
+                dep.SetNotInstalled();
             }
         }
 
         return AreAllDependenciesInstalled();
+    }
+
+    public async Task<bool> ValidateDependencyAsync(string toolName)
+    {
+        var dep = _dependencies.FirstOrDefault(d => d.Name.Equals(toolName, StringComparison.OrdinalIgnoreCase));
+        if (dep == null) return false;
+
+        dep.SetValidating();
+
+        if (!File.Exists(dep.LocalPath))
+        {
+            dep.SetNotInstalled();
+            return false;
+        }
+
+        try
+        {
+            var version = await GetToolVersionAsync(dep.Name, dep.LocalPath).ConfigureAwait(false);
+            if (!string.IsNullOrEmpty(version) && !version.Equals("Erro de execução", StringComparison.OrdinalIgnoreCase))
+            {
+                dep.SetInstalled(version);
+                return true;
+            }
+            else
+            {
+                dep.SetError("Falha na validação do executável.");
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            dep.SetError(ex.Message);
+            return false;
+        }
+    }
+
+    public async Task<bool> InstallDependencyByNameAsync(
+        string toolName,
+        IProgress<(string ToolName, double Progress, string Status)>? progress = null,
+        CancellationToken ct = default)
+    {
+        var normalized = toolName.ToLowerInvariant();
+
+        if (normalized.Contains("yt-dlp"))
+        {
+            return await DownloadYtDlpAsync(progress, ct).ConfigureAwait(false);
+        }
+        else if (normalized.Contains("ffmpeg") || normalized.Contains("ffprobe"))
+        {
+            return await DownloadFFmpegAsync(progress, ct).ConfigureAwait(false);
+        }
+        else if (normalized.Contains("deno"))
+        {
+            return await DownloadDenoAsync(progress, ct).ConfigureAwait(false);
+        }
+
+        _logger?.Warning($"Dependência não reconhecida para instalação: {toolName}");
+        return false;
     }
 
     public async Task<bool> EnsureAllDependenciesAsync(
@@ -105,21 +179,25 @@ public class DependencyManager : IDependencyManager
         await CheckDependenciesAsync().ConfigureAwait(false);
 
         // 1. yt-dlp
-        if (!File.Exists(AppConstants.YtDlpExe))
+        var ytDep = _dependencies.First(d => d.Name.Equals("yt-dlp", StringComparison.OrdinalIgnoreCase));
+        if (ytDep.State != DependencyState.Installed)
         {
             var success = await DownloadYtDlpAsync(progress, ct).ConfigureAwait(false);
             if (!success) return false;
         }
 
         // 2. FFmpeg e ffprobe
-        if (!File.Exists(AppConstants.FFmpegExe) || !File.Exists(AppConstants.FFprobeExe))
+        var ffmpegDep = _dependencies.First(d => d.Name.Equals("FFmpeg", StringComparison.OrdinalIgnoreCase));
+        var ffprobeDep = _dependencies.First(d => d.Name.Equals("ffprobe", StringComparison.OrdinalIgnoreCase));
+        if (ffmpegDep.State != DependencyState.Installed || ffprobeDep.State != DependencyState.Installed)
         {
             var success = await DownloadFFmpegAsync(progress, ct).ConfigureAwait(false);
             if (!success) return false;
         }
 
         // 3. Deno
-        if (!File.Exists(AppConstants.DenoExe))
+        var denoDep = _dependencies.First(d => d.Name.Equals("Deno", StringComparison.OrdinalIgnoreCase));
+        if (denoDep.State != DependencyState.Installed)
         {
             var success = await DownloadDenoAsync(progress, ct).ConfigureAwait(false);
             if (!success) return false;
@@ -135,30 +213,7 @@ public class DependencyManager : IDependencyManager
         CancellationToken ct = default)
     {
         _logger?.Info($"Iniciando atualização de dependência: {toolName}");
-
-        var normalized = toolName.ToLowerInvariant();
-        bool success;
-
-        if (normalized.Contains("yt-dlp"))
-        {
-            success = await DownloadYtDlpAsync(progress, ct).ConfigureAwait(false);
-        }
-        else if (normalized.Contains("ffmpeg") || normalized.Contains("ffprobe"))
-        {
-            success = await DownloadFFmpegAsync(progress, ct).ConfigureAwait(false);
-        }
-        else if (normalized.Contains("deno"))
-        {
-            success = await DownloadDenoAsync(progress, ct).ConfigureAwait(false);
-        }
-        else
-        {
-            _logger?.Warning($"Dependência desconhecida para atualização: {toolName}");
-            return false;
-        }
-
-        await CheckDependenciesAsync().ConfigureAwait(false);
-        return success;
+        return await InstallDependencyByNameAsync(toolName, progress, ct).ConfigureAwait(false);
     }
 
     private async Task<bool> DownloadYtDlpAsync(
@@ -166,18 +221,26 @@ public class DependencyManager : IDependencyManager
         CancellationToken ct)
     {
         const string name = "yt-dlp";
+        var dep = _dependencies.First(d => d.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
         _logger?.Info("Baixando yt-dlp oficial...");
+        dep.SetDownloading(0, "Iniciando download...");
         progress?.Report((name, 0, "Iniciando download"));
 
-        FileHelper.EnsureDirectoryExists(AppConstants.YtDlpDir);
-        var tempFile = Path.Combine(AppConstants.YtDlpDir, "yt-dlp.exe.tmp");
+        var ytDlpDir = Path.GetDirectoryName(_ytDlpExe)!;
+        FileHelper.EnsureDirectoryExists(ytDlpDir);
+        var tempFile = _ytDlpExe + ".tmp";
 
         try
         {
             var downloaded = await DownloadFileWithProgressAsync(
                 AppConstants.YtDlpDownloadUrl,
                 tempFile,
-                p => progress?.Report((name, p, $"Baixando yt-dlp ({p:0}%)")),
+                p =>
+                {
+                    dep.SetDownloading(p, $"Baixando ({p:0}%)");
+                    progress?.Report((name, p, $"Baixando yt-dlp ({p:0}%)"));
+                },
                 ct).ConfigureAwait(false);
 
             if (!downloaded || !File.Exists(tempFile) || new FileInfo(tempFile).Length < 1000000)
@@ -185,12 +248,22 @@ public class DependencyManager : IDependencyManager
                 throw new InvalidOperationException("Download do yt-dlp incompleto ou corrompido.");
             }
 
-            progress?.Report((name, 90, "Validando executável..."));
+            dep.SetInstalling("Instalando executável...");
+            progress?.Report((name, 90, "Instalando executável..."));
 
             // Substituição atômica segura
-            AtomicReplaceFile(tempFile, AppConstants.YtDlpExe);
+            AtomicReplaceFile(tempFile, _ytDlpExe);
 
-            var version = await GetToolVersionAsync(name, AppConstants.YtDlpExe).ConfigureAwait(false);
+            dep.SetValidating();
+            progress?.Report((name, 95, "Validando execução (yt-dlp --version)..."));
+
+            var version = await GetToolVersionAsync(name, _ytDlpExe).ConfigureAwait(false);
+            if (string.IsNullOrEmpty(version) || version.Equals("Erro de execução", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("Falha na validação do yt-dlp após o download.");
+            }
+
+            dep.SetInstalled(version);
             _logger?.Info($"yt-dlp instalado com sucesso. Versão: {version}");
             progress?.Report((name, 100, $"Concluído ({version})"));
             return true;
@@ -199,6 +272,7 @@ public class DependencyManager : IDependencyManager
         {
             _logger?.Error("Falha ao baixar yt-dlp.", ex);
             FileHelper.SafeDeleteFile(tempFile);
+            dep.SetError($"Não foi possível instalar yt-dlp: {ex.Message}");
             progress?.Report((name, 0, $"Erro: {ex.Message}"));
             return false;
         }
@@ -209,18 +283,29 @@ public class DependencyManager : IDependencyManager
         CancellationToken ct)
     {
         const string name = "FFmpeg";
+        var ffmpegDep = _dependencies.First(d => d.Name.Equals("FFmpeg", StringComparison.OrdinalIgnoreCase));
+        var ffprobeDep = _dependencies.First(d => d.Name.Equals("ffprobe", StringComparison.OrdinalIgnoreCase));
+
         _logger?.Info("Baixando FFmpeg oficial...");
+        ffmpegDep.SetDownloading(0, "Iniciando download do pacote FFmpeg...");
+        ffprobeDep.SetDownloading(0, "Aguardando pacote FFmpeg...");
         progress?.Report((name, 0, "Iniciando download do pacote FFmpeg"));
 
-        FileHelper.EnsureDirectoryExists(AppConstants.FFmpegDir);
-        var tempZip = Path.Combine(AppConstants.FFmpegDir, "ffmpeg.zip.tmp");
+        var ffmpegDir = Path.GetDirectoryName(_ffmpegExe)!;
+        FileHelper.EnsureDirectoryExists(ffmpegDir);
+        var tempZip = Path.Combine(ffmpegDir, "ffmpeg.zip.tmp");
 
         try
         {
             var downloaded = await DownloadFileWithProgressAsync(
                 AppConstants.FFmpegDownloadUrl,
                 tempZip,
-                p => progress?.Report((name, p * 0.8, $"Baixando FFmpeg ({p:0}%)")),
+                p =>
+                {
+                    ffmpegDep.SetDownloading(p, $"Baixando pacote ({p:0}%)");
+                    ffprobeDep.SetDownloading(p, $"Baixando pacote ({p:0}%)");
+                    progress?.Report((name, p * 0.8, $"Baixando FFmpeg ({p:0}%)"));
+                },
                 ct).ConfigureAwait(false);
 
             if (!downloaded || !File.Exists(tempZip) || new FileInfo(tempZip).Length < 5000000)
@@ -228,6 +313,8 @@ public class DependencyManager : IDependencyManager
                 throw new InvalidOperationException("Download do FFmpeg incompleto ou corrompido.");
             }
 
+            ffmpegDep.SetInstalling("Extraindo ffmpeg.exe...");
+            ffprobeDep.SetInstalling("Extraindo ffprobe.exe...");
             progress?.Report((name, 85, "Extraindo ffmpeg.exe e ffprobe.exe..."));
 
             using (var archive = ZipFile.OpenRead(tempZip))
@@ -237,30 +324,46 @@ public class DependencyManager : IDependencyManager
 
                 if (ffmpegEntry == null || ffprobeEntry == null)
                 {
-                    throw new InvalidOperationException("Binários ffmpeg.exe ou ffprobe.exe não encontrados no arquivo compactado.");
+                    throw new InvalidOperationException("Binários ffmpeg.exe ou ffprobe.exe não encontrados no pacote baixado.");
                 }
 
-                var tempFfmpeg = Path.Combine(AppConstants.FFmpegDir, "ffmpeg.exe.tmp");
-                var tempFfprobe = Path.Combine(AppConstants.FFmpegDir, "ffprobe.exe.tmp");
+                var tempFfmpeg = _ffmpegExe + ".tmp";
+                var tempFfprobe = _ffprobeExe + ".tmp";
 
                 ffmpegEntry.ExtractToFile(tempFfmpeg, overwrite: true);
                 ffprobeEntry.ExtractToFile(tempFfprobe, overwrite: true);
 
-                AtomicReplaceFile(tempFfmpeg, AppConstants.FFmpegExe);
-                AtomicReplaceFile(tempFfprobe, AppConstants.FFprobeExe);
+                AtomicReplaceFile(tempFfmpeg, _ffmpegExe);
+                AtomicReplaceFile(tempFfprobe, _ffprobeExe);
             }
 
             FileHelper.SafeDeleteFile(tempZip);
 
-            var version = await GetToolVersionAsync(name, AppConstants.FFmpegExe).ConfigureAwait(false);
-            _logger?.Info($"FFmpeg instalado com sucesso. Versão: {version}");
-            progress?.Report((name, 100, $"Concluído ({version})"));
+            ffmpegDep.SetValidating();
+            ffprobeDep.SetValidating();
+            progress?.Report((name, 95, "Validando FFmpeg e ffprobe..."));
+
+            var ffmpegVersion = await GetToolVersionAsync("FFmpeg", _ffmpegExe).ConfigureAwait(false);
+            var ffprobeVersion = await GetToolVersionAsync("ffprobe", _ffprobeExe).ConfigureAwait(false);
+
+            if (string.IsNullOrEmpty(ffmpegVersion) || ffmpegVersion.Equals("Erro de execução", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("Falha na validação do FFmpeg após o download.");
+            }
+
+            ffmpegDep.SetInstalled(ffmpegVersion);
+            ffprobeDep.SetInstalled(ffprobeVersion);
+
+            _logger?.Info($"FFmpeg instalado com sucesso: {ffmpegVersion} / {ffprobeVersion}");
+            progress?.Report((name, 100, $"Concluído ({ffmpegVersion})"));
             return true;
         }
         catch (Exception ex)
         {
             _logger?.Error("Falha ao baixar FFmpeg.", ex);
             FileHelper.SafeDeleteFile(tempZip);
+            ffmpegDep.SetError($"Não foi possível instalar FFmpeg: {ex.Message}");
+            ffprobeDep.SetError($"Não foi possível instalar ffprobe: {ex.Message}");
             progress?.Report((name, 0, $"Erro: {ex.Message}"));
             return false;
         }
@@ -271,18 +374,26 @@ public class DependencyManager : IDependencyManager
         CancellationToken ct)
     {
         const string name = "Deno";
+        var dep = _dependencies.First(d => d.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
         _logger?.Info("Baixando Deno oficial...");
+        dep.SetDownloading(0, "Iniciando download do Deno...");
         progress?.Report((name, 0, "Iniciando download do Deno"));
 
-        FileHelper.EnsureDirectoryExists(AppConstants.DenoDir);
-        var tempZip = Path.Combine(AppConstants.DenoDir, "deno.zip.tmp");
+        var denoDir = Path.GetDirectoryName(_denoExe)!;
+        FileHelper.EnsureDirectoryExists(denoDir);
+        var tempZip = Path.Combine(denoDir, "deno.zip.tmp");
 
         try
         {
             var downloaded = await DownloadFileWithProgressAsync(
                 AppConstants.DenoDownloadUrl,
                 tempZip,
-                p => progress?.Report((name, p * 0.8, $"Baixando Deno ({p:0}%)")),
+                p =>
+                {
+                    dep.SetDownloading(p, $"Baixando ({p:0}%)");
+                    progress?.Report((name, p * 0.8, $"Baixando Deno ({p:0}%)"));
+                },
                 ct).ConfigureAwait(false);
 
             if (!downloaded || !File.Exists(tempZip) || new FileInfo(tempZip).Length < 5000000)
@@ -290,6 +401,7 @@ public class DependencyManager : IDependencyManager
                 throw new InvalidOperationException("Download do Deno incompleto ou corrompido.");
             }
 
+            dep.SetInstalling("Extraindo deno.exe...");
             progress?.Report((name, 85, "Extraindo deno.exe..."));
 
             using (var archive = ZipFile.OpenRead(tempZip))
@@ -297,18 +409,27 @@ public class DependencyManager : IDependencyManager
                 var denoEntry = archive.Entries.FirstOrDefault(e => e.Name.Equals("deno.exe", StringComparison.OrdinalIgnoreCase));
                 if (denoEntry == null)
                 {
-                    throw new InvalidOperationException("Binário deno.exe não encontrado no arquivo compactado.");
+                    throw new InvalidOperationException("Binário deno.exe não encontrado no pacote compactado.");
                 }
 
-                var tempDeno = Path.Combine(AppConstants.DenoDir, "deno.exe.tmp");
+                var tempDeno = _denoExe + ".tmp";
                 denoEntry.ExtractToFile(tempDeno, overwrite: true);
 
-                AtomicReplaceFile(tempDeno, AppConstants.DenoExe);
+                AtomicReplaceFile(tempDeno, _denoExe);
             }
 
             FileHelper.SafeDeleteFile(tempZip);
 
-            var version = await GetToolVersionAsync(name, AppConstants.DenoExe).ConfigureAwait(false);
+            dep.SetValidating();
+            progress?.Report((name, 95, "Validando execução do Deno..."));
+
+            var version = await GetToolVersionAsync(name, _denoExe).ConfigureAwait(false);
+            if (string.IsNullOrEmpty(version) || version.Equals("Erro de execução", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("Falha na validação do Deno após o download.");
+            }
+
+            dep.SetInstalled(version);
             _logger?.Info($"Deno instalado com sucesso. Versão: {version}");
             progress?.Report((name, 100, $"Concluído ({version})"));
             return true;
@@ -317,6 +438,7 @@ public class DependencyManager : IDependencyManager
         {
             _logger?.Error("Falha ao baixar Deno.", ex);
             FileHelper.SafeDeleteFile(tempZip);
+            dep.SetError($"Não foi possível instalar Deno: {ex.Message}");
             progress?.Report((name, 0, $"Erro: {ex.Message}"));
             return false;
         }
@@ -377,7 +499,7 @@ public class DependencyManager : IDependencyManager
             }
             catch
             {
-                // Se não conseguir mover (arquivo em uso ou permissão), tenta cópia
+                // Se não conseguir mover, tenta sobrescrever diretamente
             }
         }
 
@@ -388,7 +510,6 @@ public class DependencyManager : IDependencyManager
         }
         catch
         {
-            // Se falhou, tenta restaurar backup
             if (File.Exists(backupFile) && !File.Exists(destinationFile))
             {
                 try { File.Move(backupFile, destinationFile); } catch { }
@@ -397,7 +518,7 @@ public class DependencyManager : IDependencyManager
         }
     }
 
-    private static async Task<string> GetToolVersionAsync(string toolName, string exePath)
+    public static async Task<string> GetToolVersionAsync(string toolName, string exePath)
     {
         if (!File.Exists(exePath))
             return "Não instalado";
@@ -409,7 +530,7 @@ public class DependencyManager : IDependencyManager
                 ? new[] { "-version" }
                 : new[] { "--version" };
 
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(8));
             var result = await ProcessRunner.RunAsync(exePath, args, cancellationToken: cts.Token).ConfigureAwait(false);
 
             if (result.IsSuccess)
@@ -425,6 +546,11 @@ public class DependencyManager : IDependencyManager
                         var parts = firstLine.Split(' ');
                         return parts.Length > 2 ? parts[2] : firstLine;
                     }
+                    if (toolName.Equals("ffprobe", StringComparison.OrdinalIgnoreCase) && firstLine.StartsWith("ffprobe version", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var parts = firstLine.Split(' ');
+                        return parts.Length > 2 ? parts[2] : firstLine;
+                    }
                     if (toolName.Equals("Deno", StringComparison.OrdinalIgnoreCase) && firstLine.StartsWith("deno", StringComparison.OrdinalIgnoreCase))
                     {
                         var parts = firstLine.Split(' ');
@@ -436,9 +562,9 @@ public class DependencyManager : IDependencyManager
         }
         catch
         {
-            // Ignora erro de versão
+            return "Erro de execução";
         }
 
-        return "Presente";
+        return "Erro de execução";
     }
 }

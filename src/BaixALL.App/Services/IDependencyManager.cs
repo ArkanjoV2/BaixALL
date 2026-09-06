@@ -12,7 +12,9 @@ public interface IDependencyManager
     Task<bool> CheckDependenciesAsync();
     bool AreAllDependenciesInstalled();
     Task<bool> EnsureAllDependenciesAsync(IProgress<(string ToolName, double Progress, string Status)>? progress = null, CancellationToken ct = default);
+    Task<bool> InstallDependencyByNameAsync(string toolName, IProgress<(string ToolName, double Progress, string Status)>? progress = null, CancellationToken ct = default);
     Task<bool> UpdateDependencyAsync(string toolName, IProgress<(string ToolName, double Progress, string Status)>? progress = null, CancellationToken ct = default);
+    Task<bool> ValidateDependencyAsync(string toolName);
     string GetYtDlpPath();
     string GetFFmpegPath();
     string GetFFprobePath();

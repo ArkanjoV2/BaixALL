@@ -31,6 +31,7 @@ public partial class MainViewModel : ObservableObject
     private string _urlInput = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanAnalyze))]
     private bool _isAnalyzing;
 
     [ObservableProperty]
@@ -73,7 +74,15 @@ public partial class MainViewModel : ObservableObject
     private string _currentTab = "Downloader"; // "Downloader", "Queue", "History", "Settings", "Dependencies"
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanAnalyze))]
+    [NotifyPropertyChangedFor(nameof(ShowSetupPrompt))]
     private bool _dependenciesReady;
+
+    [ObservableProperty]
+    private bool _isInitialSetupVisible;
+
+    public bool CanAnalyze => DependenciesReady && !IsAnalyzing;
+    public bool ShowSetupPrompt => !DependenciesReady;
 
     public ObservableCollection<DownloadItemViewModel> QueueItems => _downloadService.QueueItems;
 
@@ -103,10 +112,14 @@ public partial class MainViewModel : ObservableObject
         DependenciesVm.AllReady += (_, _) =>
         {
             DependenciesReady = true;
-            if (CurrentTab == "Dependencies")
-            {
-                CurrentTab = "Downloader";
-            }
+            IsInitialSetupVisible = false;
+            ShowNotification("Todas as ferramentas estão prontas! Cole a URL para começar.", "Success");
+        };
+
+        DependenciesVm.CloseRequested += (_, _) =>
+        {
+            IsInitialSetupVisible = false;
+            DependenciesReady = _dependencyManager.AreAllDependenciesInstalled();
         };
 
         DestinationFolder = _settingsService.Settings.DownloadFolder;
@@ -130,17 +143,19 @@ public partial class MainViewModel : ObservableObject
     public async Task InitializeStartupAsync()
     {
         _logger?.Info("Inicializando BaixALL e verificando dependências...");
-        var ready = await _dependencyManager.CheckDependenciesAsync();
-        DependenciesReady = ready;
+        await DependenciesVm.CheckAsync();
+        DependenciesReady = DependenciesVm.AreAllInstalled;
 
-        if (!ready)
+        if (!DependenciesReady)
         {
-            CurrentTab = "Dependencies";
-            ShowNotification("Componentes necessários ausentes. Configure as ferramentas para prosseguir.", "Warning");
+            // Não remove o conteúdo da Home! Mantém a Home visível com banner e exibe o modal
+            CurrentTab = "Downloader";
+            IsInitialSetupVisible = true;
+            ShowNotification("Componentes necessários ausentes. O BaixALL pode instalá-los automaticamente.", "Warning");
         }
         else
         {
-            // Tenta colar da área de transferência se habilitado
+            IsInitialSetupVisible = false;
             if (_settingsService.Settings.AutoPasteClipboard)
             {
                 TryAutoPasteFromClipboard();
@@ -182,8 +197,8 @@ public partial class MainViewModel : ObservableObject
 
         if (!DependenciesReady && !_dependencyManager.AreAllDependenciesInstalled())
         {
-            CurrentTab = "Dependencies";
-            ShowNotification("Por favor, instale as ferramentas necessárias antes de analisar vídeos.", "Warning");
+            IsInitialSetupVisible = true;
+            ShowNotification("Instale os componentes necessários antes de analisar vídeos.", "Warning");
             return;
         }
 
@@ -311,6 +326,26 @@ public partial class MainViewModel : ObservableObject
         _downloadService.ClearCompleted();
     }
 
+    [RelayCommand]
+    private void SetupNow()
+    {
+        IsInitialSetupVisible = true;
+    }
+
+    [RelayCommand]
+    private void CloseSetup()
+    {
+        IsInitialSetupVisible = false;
+        DependenciesReady = _dependencyManager.AreAllDependenciesInstalled();
+    }
+
+    [RelayCommand]
+    private void OpenTools()
+    {
+        CurrentTab = "Dependencies";
+        ClearNotification();
+    }
+
     public void ShowNotification(string message, string type = "Info")
     {
         StatusNotification = message;
@@ -318,6 +353,7 @@ public partial class MainViewModel : ObservableObject
         HasStatusNotification = true;
     }
 
+    [RelayCommand]
     public void ClearNotification()
     {
         HasStatusNotification = false;
