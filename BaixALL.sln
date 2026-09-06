@@ -1,0 +1,27 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaixALL.App", "src\BaixALL.App\BaixALL.App.csproj", "{B8D4A801-4475-43CA-9B05-9DF888AA9EEA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaixALL.Tests", "tests\BaixALL.Tests\BaixALL.Tests.csproj", "{F7C8B642-DF23-4871-A3C9-9A2E7F3B59DA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B8D4A801-4475-43CA-9B05-9DF888AA9EEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8D4A801-4475-43CA-9B05-9DF888AA9EEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8D4A801-4475-43CA-9B05-9DF888AA9EEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8D4A801-4475-43CA-9B05-9DF888AA9EEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7C8B642-DF23-4871-A3C9-9A2E7F3B59DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7C8B642-DF23-4871-A3C9-9A2E7F3B59DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7C8B642-DF23-4871-A3C9-9A2E7F3B59DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7C8B642-DF23-4871-A3C9-9A2E7F3B59DA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

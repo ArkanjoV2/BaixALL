@@ -1,0 +1,24 @@
+## Build and Output Folders
+bin/
+obj/
+publish/
+installer_output/
+
+## Visual Studio & IDEs
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## OS Generated Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+## Test Results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
