@@ -12,6 +12,7 @@ namespace BaixALL.App.ViewModels;
 public partial class DependenciesViewModel : ObservableObject
 {
     private readonly IDependencyManager _dependencyManager;
+    private readonly IUpdateService? _updateService;
     private readonly ILoggerService? _logger;
 
     [ObservableProperty]
@@ -43,12 +44,24 @@ public partial class DependenciesViewModel : ObservableObject
     public event EventHandler? AllReady;
     public event EventHandler? CloseRequested;
 
-    public DependenciesViewModel(IDependencyManager dependencyManager, ILoggerService? logger = null)
+    public DependenciesViewModel(
+        IDependencyManager dependencyManager,
+        IUpdateService? updateService = null,
+        ILoggerService? logger = null)
     {
         _dependencyManager = dependencyManager;
+        _updateService = updateService;
         _logger = logger;
         Dependencies = _dependencyManager.GetDependencies();
+        AreAllInstalled = _dependencyManager.AreAllDependenciesInstalled();
+        if (AreAllInstalled)
+        {
+            StatusText = "Todas as ferramentas estão prontas.";
+        }
     }
+
+    [RelayCommand]
+    public async Task CheckAllAsync() => await CheckAsync();
 
     [RelayCommand]
     public async Task CheckAsync()
@@ -64,7 +77,7 @@ public partial class DependenciesViewModel : ObservableObject
 
             if (AreAllInstalled)
             {
-                StatusText = "Todas as ferramentas estão prontas para uso.";
+                StatusText = "Todas as ferramentas estão prontas.";
                 AllReady?.Invoke(this, EventArgs.Empty);
             }
             else
@@ -78,6 +91,62 @@ public partial class DependenciesViewModel : ObservableObject
             HasError = true;
             ErrorMessage = $"Falha ao verificar ferramentas: {ex.Message}";
             _logger?.Error("Erro ao verificar dependências.", ex);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task CheckUpdatesAsync()
+    {
+        if (IsBusy) return;
+        IsBusy = true;
+        StatusText = "Verificando atualizações online para as ferramentas...";
+
+        try
+        {
+            if (_updateService != null)
+            {
+                var ytDlpRes = await _updateService.CheckYtDlpUpdateAsync().ConfigureAwait(false);
+                var denoRes = await _updateService.CheckDenoUpdateAsync().ConfigureAwait(false);
+
+                var deps = _dependencyManager.GetDependencies();
+                var ytDep = deps.FirstOrDefault(d => d.Name.Equals("yt-dlp", StringComparison.OrdinalIgnoreCase));
+                if (ytDep != null && ytDlpRes.HasUpdate)
+                {
+                    ytDep.State = DependencyState.UpdateAvailable;
+                    ytDep.StatusText = $"Atualização disponível: {ytDlpRes.LatestVersion}";
+                }
+
+                var denoDep = deps.FirstOrDefault(d => d.Name.Equals("Deno", StringComparison.OrdinalIgnoreCase));
+                if (denoDep != null && denoRes.HasUpdate)
+                {
+                    denoDep.State = DependencyState.UpdateAvailable;
+                    denoDep.StatusText = $"Atualização disponível: {denoRes.LatestVersion}";
+                }
+
+                Dependencies = deps;
+
+                if (ytDlpRes.HasUpdate || denoRes.HasUpdate)
+                {
+                    StatusText = "Atualizações encontradas para os componentes do BaixALL.";
+                }
+                else
+                {
+                    StatusText = "Todas as ferramentas estão na versão mais recente.";
+                }
+            }
+            else
+            {
+                await CheckAsync().ConfigureAwait(false);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.Warning($"Erro ao verificar atualizações: {ex.Message}");
+            StatusText = "Não foi possível verificar atualizações online.";
         }
         finally
         {
@@ -188,6 +257,12 @@ public partial class DependenciesViewModel : ObservableObject
             IsBusy = false;
         }
     }
+
+    [RelayCommand]
+    public async Task ReinstallToolAsync(string? toolName) => await InstallToolAsync(toolName);
+
+    [RelayCommand]
+    public async Task UpdateToolAsync(string? toolName) => await InstallToolAsync(toolName);
 
     [RelayCommand]
     public async Task VerifyToolAsync(string? toolName)

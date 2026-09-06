@@ -81,6 +81,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _isInitialSetupVisible;
 
+    [ObservableProperty]
+    private bool _canRetryAnalysis;
+
     public bool CanAnalyze => DependenciesReady && !IsAnalyzing;
     public bool ShowSetupPrompt => !DependenciesReady;
 
@@ -107,7 +110,15 @@ public partial class MainViewModel : ObservableObject
 
         SettingsVm = new SettingsViewModel(_settingsService, _dependencyManager, updateService, _downloadService, _logger);
         HistoryVm = new HistoryViewModel(historyService, _logger);
-        DependenciesVm = new DependenciesViewModel(_dependencyManager, _logger);
+        DependenciesVm = new DependenciesViewModel(_dependencyManager, updateService, _logger);
+
+        DependenciesVm.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(DependenciesViewModel.AreAllInstalled))
+            {
+                DependenciesReady = DependenciesVm.AreAllInstalled;
+            }
+        };
 
         DependenciesVm.AllReady += (_, _) =>
         {
@@ -204,6 +215,7 @@ public partial class MainViewModel : ObservableObject
 
         IsAnalyzing = true;
         HasVideoInfo = false;
+        CanRetryAnalysis = false;
         ClearNotification();
 
         try
@@ -226,8 +238,16 @@ public partial class MainViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            _logger?.Error($"Erro ao analisar '{UrlInput}': {ex.Message}", ex);
-            ShowNotification(ex.Message, "Error");
+            _logger?.Error($"Erro ao analisar '{UrlInput}' no método AnalyzeAsync: {ex.GetType().FullName}: {ex.Message}", ex);
+
+            CanRetryAnalysis = true;
+            string friendlyMessage = ex switch
+            {
+                ArgumentException argEx => argEx.Message,
+                _ => "Não foi possível analisar este vídeo. Algumas informações retornadas pelo YouTube não puderam ser processadas."
+            };
+
+            ShowNotification(friendlyMessage, "Error");
             HasVideoInfo = false;
         }
         finally
@@ -317,6 +337,10 @@ public partial class MainViewModel : ObservableObject
         {
             CurrentTab = tab;
             ClearNotification();
+            if (tab == "Dependencies")
+            {
+                _ = DependenciesVm.CheckAsync();
+            }
         }
     }
 
@@ -344,6 +368,7 @@ public partial class MainViewModel : ObservableObject
     {
         CurrentTab = "Dependencies";
         ClearNotification();
+        _ = DependenciesVm.CheckAsync();
     }
 
     public void ShowNotification(string message, string type = "Info")
@@ -358,5 +383,6 @@ public partial class MainViewModel : ObservableObject
     {
         HasStatusNotification = false;
         StatusNotification = string.Empty;
+        CanRetryAnalysis = false;
     }
 }

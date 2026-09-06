@@ -137,11 +137,18 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="{Binding StatusNotification}" FontWeight="Medium" FontSize="13" VerticalAlignment="Center" />
 
-                <!-- Ação Direta "Configurar agora" no Banner quando componentes pendentes -->
-                <Button Grid.Column="1" Style="{StaticResource PrimaryButtonStyle}" Content="Configurar agora"
-                        Command="{Binding SetupNowCommand}"
-                        Visibility="{Binding ShowSetupPrompt, Converter={StaticResource BoolToVis}}"
-                        Padding="12,4" Margin="0,0,12,0" FontSize="12" />
+                <!-- Ações no Banner: Configurar agora ou Tentar novamente -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Style="{StaticResource PrimaryButtonStyle}" Content="Configurar agora"
+                            Command="{Binding SetupNowCommand}"
+                            Visibility="{Binding ShowSetupPrompt, Converter={StaticResource BoolToVis}}"
+                            Padding="12,4" Margin="0,0,12,0" FontSize="12" />
+
+                    <Button Style="{StaticResource SecondaryButtonStyle}" Content="Tentar novamente"
+                            Command="{Binding AnalyzeCommand}"
+                            Visibility="{Binding CanRetryAnalysis, Converter={StaticResource BoolToVis}}"
+                            Padding="12,4" Margin="0,0,12,0" FontSize="12" />
+                </StackPanel>
 
                 <Button Grid.Column="2" Style="{StaticResource SecondaryButtonStyle}" Content="✕" Padding="6,2"
                         Command="{Binding ClearNotificationCommand}" BorderThickness="0" Background="Transparent" />
@@ -552,9 +559,9 @@
             </Grid>
 
             <!-- 3. ABA HISTÓRICO -->
-            <views:HistoryView DataContext="{Binding HistoryVm}">
-                <views:HistoryView.Style>
-                    <Style TargetType="views:HistoryView">
+            <Grid>
+                <Grid.Style>
+                    <Style TargetType="Grid">
                         <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding CurrentTab}" Value="History">
@@ -562,13 +569,14 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </views:HistoryView.Style>
-            </views:HistoryView>
+                </Grid.Style>
+                <views:HistoryView DataContext="{Binding HistoryVm}" />
+            </Grid>
 
             <!-- 4. ABA FERRAMENTAS / DEPENDÊNCIAS -->
-            <views:DependenciesView DataContext="{Binding DependenciesVm}">
-                <views:DependenciesView.Style>
-                    <Style TargetType="views:DependenciesView">
+            <Grid>
+                <Grid.Style>
+                    <Style TargetType="Grid">
                         <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding CurrentTab}" Value="Dependencies">
@@ -576,13 +584,14 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </views:DependenciesView.Style>
-            </views:DependenciesView>
+                </Grid.Style>
+                <views:DependenciesView DataContext="{Binding DependenciesVm}" />
+            </Grid>
 
             <!-- 5. ABA CONFIGURAÇÕES -->
-            <views:SettingsView DataContext="{Binding SettingsVm}">
-                <views:SettingsView.Style>
-                    <Style TargetType="views:SettingsView">
+            <Grid>
+                <Grid.Style>
+                    <Style TargetType="Grid">
                         <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding CurrentTab}" Value="Settings">
@@ -590,8 +599,9 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </views:SettingsView.Style>
-            </views:SettingsView>
+                </Grid.Style>
+                <views:SettingsView DataContext="{Binding SettingsVm}" />
+            </Grid>
 
             <!-- OVERLAY MODAL: EXPERIÊNCIA DE CONFIGURAÇÃO INICIAL (PREPARANDO O BAIXALL) -->
             <Grid Background="#C0000000"

@@ -72,7 +72,7 @@ public class YtDlpJsonParsingTests
         Assert.Equal("abc12345678", info.Id);
         Assert.Equal("Vídeo sem título", info.Title);
         Assert.Equal("", info.Channel);
-        Assert.Equal(0, info.DurationSeconds);
+        Assert.Null(info.DurationSeconds);
         Assert.Empty(info.Formats);
     }
 }

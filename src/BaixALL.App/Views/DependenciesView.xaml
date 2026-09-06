@@ -8,8 +8,9 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="32" MaxWidth="880" HorizontalAlignment="Stretch">
             
-            <TextBlock Text="Gerenciador de Ferramentas" FontSize="26" FontWeight="Bold" Margin="0,0,0,6" />
-            <TextBlock Text="O BaixALL utiliza binários oficiais para analisar, baixar e mesclar streams de alta qualidade sem recodificação desnecessária."
+            <!-- Título e Subtítulo Conforme Requisitos -->
+            <TextBlock Text="Ferramentas" FontSize="28" FontWeight="Bold" Margin="0,0,0,6" />
+            <TextBlock Text="Componentes utilizados pelo BaixALL para analisar e processar seus downloads."
                        Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14" TextWrapping="Wrap" Margin="0,0,0,24" />
 
             <!-- Card de Visão Geral e Ações Globais -->
@@ -30,11 +31,11 @@
 
                         <StackPanel>
                             <TextBlock Text="{Binding StatusText}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
-                            <TextBlock Text="Instalação automática sem necessidade de Python ou Node.js instalados na máquina."
+                            <TextBlock Text="Binários oficiais configurados e executados localmente no seu computador."
                                        Foreground="{DynamicResource TextMutedBrush}" FontSize="12" Margin="0,3,0,0" />
                         </StackPanel>
 
-                        <!-- Indicador Geral -->
+                        <!-- Indicador Geral de Prontidão -->
                         <Border Grid.Column="1" Padding="12,6" VerticalAlignment="Center">
                             <Border.Style>
                                 <Style TargetType="Border">
@@ -49,7 +50,7 @@
                             <TextBlock FontWeight="Bold" FontSize="13">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="Text" Value="✓ Todas Prontas" />
+                                        <Setter Property="Text" Value="✓ Todas as ferramentas estão prontas." />
                                         <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding AreAllInstalled}" Value="False">
@@ -82,20 +83,27 @@
                         </Grid>
                     </Border>
 
-                    <!-- Ações Globais: Instalar Tudo / Verificar Atualizações -->
+                    <!-- Ações Globais: Verificar todas / Verificar atualizações / Instalar todas -->
                     <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,4,0,0"
                                 Visibility="{Binding HasError, Converter={StaticResource InverseBoolToVis}}">
                         <Button Style="{StaticResource PrimaryButtonStyle}"
-                                Content="Instalar Tudo"
-                                Command="{Binding InstallMissingCommand}"
+                                Content="Verificar todas"
+                                Command="{Binding CheckAllCommand}"
                                 IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBool}}"
-                                Margin="0,0,12,0" Padding="20,10" />
+                                Margin="0,0,12,0" Padding="18,9" />
 
                         <Button Style="{StaticResource SecondaryButtonStyle}"
-                                Content="Verificar Atualizações"
-                                Command="{Binding CheckCommand}"
+                                Content="Verificar atualizações"
+                                Command="{Binding CheckUpdatesCommand}"
                                 IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBool}}"
-                                Padding="16,10" />
+                                Margin="0,0,12,0" Padding="16,9" />
+
+                        <Button Style="{StaticResource SecondaryButtonStyle}"
+                                Content="Instalar todas"
+                                Command="{Binding InstallMissingCommand}"
+                                Visibility="{Binding AreAllInstalled, Converter={StaticResource InverseBoolToVis}}"
+                                IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBool}}"
+                                Padding="16,9" />
                     </StackPanel>
                 </Grid>
             </Border>
@@ -103,7 +111,7 @@
             <!-- Título da Seção de Componentes -->
             <TextBlock Text="Componentes do Sistema" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,14" />
 
-            <!-- Lista de Ferramentas com Cards Detalhados -->
+            <!-- Lista de Ferramentas com Cards Detalhados (yt-dlp, FFmpeg, ffprobe, Deno) -->
             <ItemsControl ItemsSource="{Binding Dependencies}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
@@ -114,40 +122,47 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <!-- Coluna da Esquerda: Detalhes -->
+                                <!-- Coluna da Esquerda: Nome, Status, Versão Detectada, Caminho Local -->
                                 <StackPanel Grid.Column="0">
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                        <TextBlock Text="{Binding Name}" FontSize="17" FontWeight="Bold" Margin="0,0,12,0" VerticalAlignment="Center" />
-                                        
-                                        <!-- Badge de Versão -->
-                                        <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,2" VerticalAlignment="Center" Margin="0,0,10,0">
-                                            <TextBlock Text="{Binding Version}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                        </Border>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                        <TextBlock Text="{Binding Name}" FontSize="18" FontWeight="Bold" Margin="0,0,12,0" VerticalAlignment="Center" />
 
-                                        <!-- Badge de Estado -->
-                                        <Border Padding="8,2" VerticalAlignment="Center">
+                                        <!-- Badge de Status -->
+                                        <Border Padding="10,3" VerticalAlignment="Center">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Background" Value="#22107C41" />
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsInstalled}" Value="False">
+                                                        <DataTrigger Binding="{Binding State}" Value="NotInstalled">
                                                             <Setter Property="Background" Value="#22D97706" />
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding HasError}" Value="True">
+                                                        <DataTrigger Binding="{Binding State}" Value="Checking">
+                                                            <Setter Property="Background" Value="#220078D4" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding State}" Value="UpdateAvailable">
+                                                            <Setter Property="Background" Value="#220078D4" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding State}" Value="Error">
                                                             <Setter Property="Background" Value="#22D83B01" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="{Binding StateBadgeText}" FontSize="12" FontWeight="SemiBold">
+                                            <TextBlock Text="{Binding Status}" FontSize="12" FontWeight="SemiBold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}" />
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsInstalled}" Value="False">
+                                                            <DataTrigger Binding="{Binding State}" Value="NotInstalled">
                                                                 <Setter Property="Foreground" Value="{DynamicResource WarningBrush}" />
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding HasError}" Value="True">
+                                                            <DataTrigger Binding="{Binding State}" Value="Checking">
+                                                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding State}" Value="UpdateAvailable">
+                                                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding State}" Value="Error">
                                                                 <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
@@ -157,13 +172,20 @@
                                         </Border>
                                     </StackPanel>
 
-                                    <!-- Descrição -->
-                                    <TextBlock Text="{Binding Description}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" Margin="0,0,0,6" />
-                                    
-                                    <!-- Metadados de Caminho e Última Verificação -->
+                                    <!-- Versão Detectada -->
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                        <TextBlock Text="Caminho: " Foreground="{DynamicResource TextMutedBrush}" FontSize="11" />
-                                        <TextBlock Text="{Binding LocalPath}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" TextTrimming="CharacterEllipsis" Margin="0,0,16,0" />
+                                        <TextBlock Text="Versão detectada: " FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" />
+                                        <TextBlock Text="{Binding Version}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13" />
+                                    </StackPanel>
+
+                                    <!-- Caminho Local -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <TextBlock Text="Caminho local: " FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" FontSize="12" />
+                                        <TextBlock Text="{Binding LocalPath}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+
+                                    <!-- Última Verificação -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                                         <TextBlock Text="Última checagem: " Foreground="{DynamicResource TextMutedBrush}" FontSize="11" />
                                         <TextBlock Text="{Binding LastCheckedText}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" />
                                     </StackPanel>
@@ -173,28 +195,35 @@
                                                  Visibility="{Binding IsDownloading, Converter={StaticResource BoolToVis}}" />
                                 </StackPanel>
 
-                                <!-- Coluna da Direita: Ações por Componente -->
+                                <!-- Coluna da Direita: Ações Disponíveis (Verificar, Atualizar, Reinstalar) -->
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
                                     
-                                    <!-- Botão Instalar (se não instalado) -->
+                                    <!-- Botão Instalar (se não instalado ou erro) -->
                                     <Button Style="{StaticResource PrimaryButtonStyle}" Content="Instalar"
                                             Command="{Binding DataContext.InstallToolCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding Name}"
                                             Visibility="{Binding IsInstalled, Converter={StaticResource InverseBoolToVis}}"
                                             Margin="0,0,8,0" Padding="14,6" FontSize="12" />
 
-                                    <!-- Botão Atualizar / Reinstalar (se instalado) -->
-                                    <Button Style="{StaticResource SecondaryButtonStyle}" Content="Reinstalar"
-                                            Command="{Binding DataContext.InstallToolCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding Name}"
-                                            Visibility="{Binding IsInstalled, Converter={StaticResource BoolToVis}}"
-                                            Margin="0,0,8,0" Padding="12,6" FontSize="12" ToolTip="Baixar e sobrescrever com a versão mais recente" />
-
-                                    <!-- Botão Verificar / Validar -->
+                                    <!-- Botão Verificar -->
                                     <Button Style="{StaticResource SecondaryButtonStyle}" Content="Verificar"
                                             Command="{Binding DataContext.VerifyToolCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding Name}"
-                                            Padding="12,6" FontSize="12" ToolTip="Executar comando de versão para validar funcionamento" />
+                                            Margin="0,0,8,0" Padding="12,6" FontSize="12" ToolTip="Executar teste de validação do executável" />
+
+                                    <!-- Botão Atualizar (se instalado) -->
+                                    <Button Style="{StaticResource SecondaryButtonStyle}" Content="Atualizar"
+                                            Command="{Binding DataContext.UpdateToolCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding Name}"
+                                            Visibility="{Binding IsInstalled, Converter={StaticResource BoolToVis}}"
+                                            Margin="0,0,8,0" Padding="12,6" FontSize="12" ToolTip="Atualizar para a versão mais recente oficial" />
+
+                                    <!-- Botão Reinstalar (se instalado) -->
+                                    <Button Style="{StaticResource SecondaryButtonStyle}" Content="Reinstalar"
+                                            Command="{Binding DataContext.ReinstallToolCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding Name}"
+                                            Visibility="{Binding IsInstalled, Converter={StaticResource BoolToVis}}"
+                                            Padding="12,6" FontSize="12" ToolTip="Baixar novamente e reinstalar o componente" />
                                 </StackPanel>
                             </Grid>
                         </Border>

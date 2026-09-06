@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using BaixALL.App.Helpers;
 using BaixALL.App.Models;
 
 namespace BaixALL.App.Services;
@@ -12,42 +13,52 @@ public class FormatSelectionService : IFormatSelectionService
     {
         var root = json.RootElement;
 
-        var id = root.TryGetProperty("id", out var idProp) ? idProp.GetString() ?? "" : "";
-        var title = root.TryGetProperty("title", out var titleProp) ? titleProp.GetString() ?? "Vídeo sem título" : "Vídeo sem título";
-        var channel = root.TryGetProperty("uploader", out var uploaderProp)
-            ? uploaderProp.GetString() ?? ""
-            : (root.TryGetProperty("channel", out var chProp) ? chProp.GetString() ?? "" : "");
+        var id = root.GetStringSafe("id");
+        var title = root.GetStringSafe("title", "Vídeo sem título");
+        var channel = root.GetStringNullable("uploader")
+            ?? root.GetStringNullable("channel")
+            ?? root.GetStringSafe("uploader_id", "");
 
-        var duration = root.TryGetProperty("duration", out var durProp) && durProp.TryGetDouble(out var d) ? d : 0;
-        var thumbnail = root.TryGetProperty("thumbnail", out var thumbProp) ? thumbProp.GetString() ?? "" : "";
-        var uploadDate = root.TryGetProperty("upload_date", out var dateProp) ? dateProp.GetString() ?? "" : "";
+        var duration = root.GetDoubleNullable("duration");
+        var thumbnail = root.GetStringSafe("thumbnail");
+        var uploadDate = root.GetStringSafe("upload_date");
 
         // Formata data YYYYMMDD para DD/MM/YYYY se possível
-        if (uploadDate.Length == 8)
+        if (uploadDate.Length == 8 && int.TryParse(uploadDate, out _))
         {
             uploadDate = $"{uploadDate.Substring(6, 2)}/{uploadDate.Substring(4, 2)}/{uploadDate.Substring(0, 4)}";
         }
 
         var rawFormats = new List<VideoFormatRaw>();
-        int maxFps = 0;
+        int? maxFps = null;
         int maxHeight = 0;
 
         if (root.TryGetProperty("formats", out var formatsProp) && formatsProp.ValueKind == JsonValueKind.Array)
         {
             foreach (var f in formatsProp.EnumerateArray())
             {
+                if (f.ValueKind != JsonValueKind.Object)
+                {
+                    continue;
+                }
+
                 var formatRaw = new VideoFormatRaw
                 {
-                    FormatId = f.TryGetProperty("format_id", out var fid) ? fid.GetString() ?? "" : "",
-                    FormatNote = f.TryGetProperty("format_note", out var fn) ? fn.GetString() ?? "" : "",
-                    Ext = f.TryGetProperty("ext", out var ext) ? ext.GetString() ?? "" : "",
-                    Width = f.TryGetProperty("width", out var w) && w.TryGetInt32(out var widthVal) ? widthVal : null,
-                    Height = f.TryGetProperty("height", out var h) && h.TryGetInt32(out var heightVal) ? heightVal : null,
-                    Fps = f.TryGetProperty("fps", out var fps) && fps.TryGetDouble(out var fpsVal) ? fpsVal : null,
-                    VCodec = f.TryGetProperty("vcodec", out var vc) ? vc.GetString() : null,
-                    ACodec = f.TryGetProperty("acodec", out var ac) ? ac.GetString() : null,
-                    FileSize = f.TryGetProperty("filesize", out var fs) && fs.TryGetInt64(out var fsVal) ? fsVal : null,
-                    FileSizeApprox = f.TryGetProperty("filesize_approx", out var fsa) && fsa.TryGetInt64(out var fsaVal) ? fsaVal : null
+                    FormatId = f.GetStringSafe("format_id"),
+                    FormatNote = f.GetStringSafe("format_note"),
+                    Ext = f.GetStringSafe("ext"),
+                    Width = f.GetInt32Nullable("width"),
+                    Height = f.GetInt32Nullable("height"),
+                    Fps = f.GetDoubleNullable("fps"),
+                    VCodec = f.GetStringNullable("vcodec"),
+                    ACodec = f.GetStringNullable("acodec"),
+                    FileSize = f.GetInt64Nullable("filesize"),
+                    FileSizeApprox = f.GetInt64Nullable("filesize_approx"),
+                    Tbr = f.GetDoubleNullable("tbr"),
+                    Vbr = f.GetDoubleNullable("vbr"),
+                    Abr = f.GetDoubleNullable("abr"),
+                    Asr = f.GetInt32Nullable("asr"),
+                    AudioChannels = f.GetInt32Nullable("audio_channels")
                 };
 
                 if (formatRaw.Height.HasValue && formatRaw.Height.Value > maxHeight)
@@ -55,16 +66,20 @@ public class FormatSelectionService : IFormatSelectionService
                     maxHeight = formatRaw.Height.Value;
                 }
 
-                if (formatRaw.Fps.HasValue && (int)Math.Round(formatRaw.Fps.Value) > maxFps)
+                if (formatRaw.Fps.HasValue)
                 {
-                    maxFps = (int)Math.Round(formatRaw.Fps.Value);
+                    var roundedFps = (int)Math.Round(formatRaw.Fps.Value);
+                    if (!maxFps.HasValue || roundedFps > maxFps.Value)
+                    {
+                        maxFps = roundedFps;
+                    }
                 }
 
                 rawFormats.Add(formatRaw);
             }
         }
 
-        var maxResName = GetResolutionLabel(maxHeight);
+        var maxResName = maxHeight > 0 ? GetResolutionLabel(maxHeight) : "Automática";
 
         return new VideoInfo
         {

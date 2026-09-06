@@ -56,6 +56,19 @@ public partial class DependencyItem : ObservableObject
     [ObservableProperty]
     private string _lastCheckedText = "Nunca verificado";
 
+    public string Status => State switch
+    {
+        DependencyState.Installed => "Pronto",
+        DependencyState.NotInstalled => "Não instalado",
+        DependencyState.Checking => "Verificando",
+        DependencyState.Downloading => $"Baixando ({DownloadProgress:0}%)",
+        DependencyState.Installing => "Instalando",
+        DependencyState.Validating => "Validando",
+        DependencyState.UpdateAvailable => "Atualização disponível",
+        DependencyState.Error => "Erro",
+        _ => "Não instalado"
+    };
+
     public string StateBadgeText => State switch
     {
         DependencyState.Installed => "✓ Instalado",
@@ -74,6 +87,7 @@ public partial class DependencyItem : ObservableObject
         IsInstalled = value == DependencyState.Installed;
         HasError = value == DependencyState.Error;
         IsDownloading = value == DependencyState.Downloading;
+        OnPropertyChanged(nameof(Status));
         OnPropertyChanged(nameof(StateBadgeText));
     }
 
@@ -81,6 +95,7 @@ public partial class DependencyItem : ObservableObject
     {
         if (State == DependencyState.Downloading)
         {
+            OnPropertyChanged(nameof(Status));
             OnPropertyChanged(nameof(StateBadgeText));
         }
     }
