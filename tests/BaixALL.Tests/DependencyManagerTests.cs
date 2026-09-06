@@ -30,4 +30,18 @@ public class DependencyManagerTests
         Assert.Equal(AppConstants.FFprobeExe, manager.GetFFprobePath());
         Assert.Equal(AppConstants.DenoExe, manager.GetDenoPath());
     }
+
+    [Fact]
+    public async Task CheckDependenciesAsync_ShouldReturnStatusForTools()
+    {
+        var manager = new DependencyManager();
+        var allReady = await manager.CheckDependenciesAsync();
+        var deps = manager.GetDependencies();
+
+        Assert.Equal(4, deps.Count);
+        foreach (var d in deps)
+        {
+            Assert.False(string.IsNullOrWhiteSpace(d.StatusText));
+        }
+    }
 }
