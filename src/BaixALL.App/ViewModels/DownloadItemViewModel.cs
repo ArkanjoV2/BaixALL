@@ -68,8 +68,13 @@ public partial class DownloadItemViewModel : ObservableObject
     public event EventHandler? CancelRequested;
     public event EventHandler? RemoveRequested;
 
+    [ObservableProperty]
+    private string _formattedFinalFileSize = string.Empty;
+
     public void UpdateProgress(DownloadProgressReport report)
     {
+        if (!IsActive) return;
+
         Status = report.Status;
         StatusMessage = report.StatusMessage;
         ProgressPercentage = Math.Clamp(report.Percentage, 0, 100);
@@ -89,10 +94,21 @@ public partial class DownloadItemViewModel : ObservableObject
     {
         DestinationPath = finalFilePath;
         Status = DownloadStatus.Completed;
-        StatusMessage = "Download concluído com sucesso!";
+        StatusMessage = "✓ Download concluído com sucesso!";
         ProgressPercentage = 100;
         SpeedText = "--";
         EtaText = "--";
+
+        try
+        {
+            if (File.Exists(finalFilePath))
+            {
+                var len = new FileInfo(finalFilePath).Length;
+                FormattedFinalFileSize = ByteSizeFormatter.Format(len);
+            }
+        }
+        catch { }
+
         UpdateStateBooleans();
     }
 

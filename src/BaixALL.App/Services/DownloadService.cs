@@ -15,6 +15,7 @@ public class DownloadService : IDownloadService
     private readonly IYtDlpService _ytDlpService;
     private readonly IHistoryService _historyService;
     private readonly ISettingsService _settingsService;
+    private readonly IDispatcherService _dispatcher;
     private readonly ILoggerService? _logger;
 
     private SemaphoreSlim _concurrencySemaphore;
@@ -28,11 +29,13 @@ public class DownloadService : IDownloadService
         IYtDlpService ytDlpService,
         IHistoryService historyService,
         ISettingsService settingsService,
+        IDispatcherService? dispatcher = null,
         ILoggerService? logger = null)
     {
         _ytDlpService = ytDlpService;
         _historyService = historyService;
         _settingsService = settingsService;
+        _dispatcher = dispatcher ?? new DispatcherService();
         _logger = logger;
 
         _maxConcurrent = Math.Clamp(_settingsService.Settings.MaxConcurrentDownloads, 1, 3);
@@ -71,7 +74,7 @@ public class DownloadService : IDownloadService
         item.CancelRequested += (_, _) => CancelDownload(item.Id);
         item.RemoveRequested += (_, _) => RemoveDownload(item.Id);
 
-        RunOnUI(() => QueueItems.Insert(0, item));
+        _dispatcher.Invoke(() => QueueItems.Insert(0, item));
         _logger?.Info($"Download enfileirado: '{request.VideoTitle}'");
 
         // Dispara processamento em segundo plano
@@ -103,14 +106,14 @@ public class DownloadService : IDownloadService
             {
                 CancelDownload(id);
             }
-            RunOnUI(() => QueueItems.Remove(item));
+            _dispatcher.Invoke(() => QueueItems.Remove(item));
         }
     }
 
     public void ClearCompleted()
     {
         var completed = QueueItems.Where(x => !x.IsActive).ToList();
-        RunOnUI(() =>
+        _dispatcher.Invoke(() =>
         {
             foreach (var item in completed)
             {
@@ -127,7 +130,7 @@ public class DownloadService : IDownloadService
         }
         catch (OperationCanceledException)
         {
-            RunOnUI(() => item.MarkCanceled());
+            _dispatcher.Invoke(() => item.MarkCanceled());
             return;
         }
 
@@ -135,13 +138,13 @@ public class DownloadService : IDownloadService
         {
             if (item.CancellationTokenSource.IsCancellationRequested)
             {
-                RunOnUI(() => item.MarkCanceled());
+                _dispatcher.Invoke(() => item.MarkCanceled());
                 return;
             }
 
             var progress = new Progress<DownloadProgressReport>(report =>
             {
-                RunOnUI(() => item.UpdateProgress(report));
+                _dispatcher.Invoke(() => item.UpdateProgress(report));
             });
 
             var completedFilePath = await _ytDlpService.DownloadAsync(
@@ -149,9 +152,25 @@ public class DownloadService : IDownloadService
                 progress,
                 item.CancellationTokenSource.Token).ConfigureAwait(false);
 
-            RunOnUI(() => item.MarkCompleted(completedFilePath));
+            // Validação estrita da existência do arquivo final no disco
+            if (!File.Exists(completedFilePath))
+            {
+                var baseFileName = Path.GetFileNameWithoutExtension(completedFilePath);
+                var candidate = YtDlpService.FindActualOutputFile(item.Request.DestinationFolder, baseFileName);
+                if (!string.IsNullOrEmpty(candidate) && File.Exists(candidate))
+                {
+                    completedFilePath = candidate;
+                }
+                else
+                {
+                    throw new FileNotFoundException("O arquivo resultante não foi localizado após a conclusão do processamento.", completedFilePath);
+                }
+            }
 
-            // Salva no histórico
+            // Marca o item como concluído com mensagem positiva na UI Thread
+            _dispatcher.Invoke(() => item.MarkCompleted(completedFilePath));
+
+            // Salva no histórico de forma segura
             long fileSize = 0;
             try
             {
@@ -175,28 +194,22 @@ public class DownloadService : IDownloadService
         }
         catch (OperationCanceledException)
         {
-            RunOnUI(() => item.MarkCanceled());
+            _dispatcher.Invoke(() => item.MarkCanceled());
         }
         catch (Exception ex)
         {
             _logger?.Error($"Erro durante download de '{item.Title}'.", ex);
-            RunOnUI(() => item.MarkError(ex.Message));
+            string friendlyMessage = ex switch
+            {
+                FileNotFoundException => "O arquivo resultante não foi localizado após o download.",
+                OperationCanceledException => "Download cancelado pelo usuário.",
+                _ => "O download não pôde ser concluído."
+            };
+            _dispatcher.Invoke(() => item.MarkError(friendlyMessage));
         }
         finally
         {
             _concurrencySemaphore.Release();
-        }
-    }
-
-    private static void RunOnUI(Action action)
-    {
-        if (Application.Current != null && Application.Current.Dispatcher != null && !Application.Current.Dispatcher.CheckAccess())
-        {
-            Application.Current.Dispatcher.Invoke(action);
-        }
-        else
-        {
-            action();
         }
     }
 }

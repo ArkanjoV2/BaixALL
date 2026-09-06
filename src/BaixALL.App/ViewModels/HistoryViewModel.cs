@@ -12,6 +12,7 @@ namespace BaixALL.App.ViewModels;
 public partial class HistoryViewModel : ObservableObject
 {
     private readonly IHistoryService _historyService;
+    private readonly IDispatcherService _dispatcher;
     private readonly ILoggerService? _logger;
 
     public ObservableCollection<HistoryItem> Items { get; } = new();
@@ -19,9 +20,13 @@ public partial class HistoryViewModel : ObservableObject
     [ObservableProperty]
     private bool _hasItems;
 
-    public HistoryViewModel(IHistoryService historyService, ILoggerService? logger = null)
+    public HistoryViewModel(
+        IHistoryService historyService,
+        IDispatcherService? dispatcher = null,
+        ILoggerService? logger = null)
     {
         _historyService = historyService;
+        _dispatcher = dispatcher ?? new DispatcherService();
         _logger = logger;
 
         _historyService.HistoryChanged += (_, _) => ReloadHistory();
@@ -30,13 +35,16 @@ public partial class HistoryViewModel : ObservableObject
 
     public void ReloadHistory()
     {
-        Items.Clear();
-        var history = _historyService.GetHistory();
-        foreach (var item in history)
+        _dispatcher.Invoke(() =>
         {
-            Items.Add(item);
-        }
-        HasItems = Items.Count > 0;
+            Items.Clear();
+            var history = _historyService.GetHistory();
+            foreach (var item in history)
+            {
+                Items.Add(item);
+            }
+            HasItems = Items.Count > 0;
+        });
     }
 
     [RelayCommand]

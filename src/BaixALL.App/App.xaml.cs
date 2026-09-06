@@ -40,13 +40,14 @@ public partial class App : Application
         try
         {
             // Composição de Serviços (Injeção de Dependência)
+            var dispatcherService = new DispatcherService();
             var settingsService = new SettingsService(_logger);
             var historyService = new HistoryService(_logger);
             var dependencyManager = new DependencyManager(_logger);
             var ytDlpService = new YtDlpService(dependencyManager, _logger);
             var formatSelectionService = new FormatSelectionService();
             var youtubeService = new YoutubeService(ytDlpService, formatSelectionService, _logger);
-            var downloadService = new DownloadService(ytDlpService, historyService, settingsService, _logger);
+            var downloadService = new DownloadService(ytDlpService, historyService, settingsService, dispatcherService, _logger);
             var updateService = new UpdateService(dependencyManager, downloadService, _logger);
 
             var mainViewModel = new MainViewModel(
@@ -57,6 +58,7 @@ public partial class App : Application
                 dependencyManager,
                 updateService,
                 historyService,
+                dispatcherService,
                 _logger);
 
             var mainWindow = new MainWindow(mainViewModel);

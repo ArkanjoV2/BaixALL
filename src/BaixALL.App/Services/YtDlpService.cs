@@ -363,7 +363,7 @@ public class YtDlpService : IYtDlpService
         }
     }
 
-    private static string? FindActualOutputFile(string folder, string baseFileName)
+    public static string? FindActualOutputFile(string folder, string baseFileName)
     {
         try
         {

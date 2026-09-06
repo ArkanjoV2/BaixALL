@@ -344,6 +344,7 @@
 
                             <!-- BOTÃO PRINCIPAL: BAIXAR -->
                             <Button Style="{StaticResource PrimaryButtonStyle}"
+                                    AutomationProperties.Name="Baixar Agora"
                                     Command="{Binding StartDownloadCommand}"
                                     Padding="0,14" FontSize="16" FontWeight="Bold">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -540,6 +541,10 @@
                                                     <TextBlock Text=" / " Foreground="{DynamicResource TextMutedBrush}" FontSize="12" />
                                                     <TextBlock Text="{Binding TotalSizeText}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
                                                 </StackPanel>
+
+                                                <!-- Tamanho Final Concluído -->
+                                                <TextBlock Text="{Binding FormattedFinalFileSize}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="0,0,16,0"
+                                                           Visibility="{Binding IsCompleted, Converter={StaticResource BoolToVis}}" />
 
                                                 <!-- Velocidade -->
                                                 <TextBlock Text="{Binding SpeedText}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="0,0,16,0"

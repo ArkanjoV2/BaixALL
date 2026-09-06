@@ -144,27 +144,55 @@ public class FormatSelectionService : IFormatSelectionService
         foreach (var height in uniqueHeights)
         {
             var formatsForHeight = videoFormats.Where(f => f.Height == height).ToList();
-            var maxFpsForHeight = formatsForHeight
-                .Where(f => f.Fps.HasValue)
+            var fpsList = formatsForHeight
+                .Where(f => f.Fps.HasValue && f.Fps.Value > 0)
                 .Select(f => (int)Math.Round(f.Fps!.Value))
-                .DefaultIfEmpty(0)
-                .Max();
+                .Distinct()
+                .OrderByDescending(fps => fps)
+                .ToList();
 
             var resName = GetResolutionLabel(height);
-            var label = maxFpsForHeight > 30
-                ? $"{resName} • {maxFpsForHeight} FPS"
-                : resName;
 
-            options.Add(new FormatOption
+            if (fpsList.Count > 1)
             {
-                Label = label,
-                Height = height,
-                Fps = maxFpsForHeight > 0 ? maxFpsForHeight : null,
-                FormatSelector = $"bestvideo[height<={height}]+bestaudio/best[height<={height}]/best",
-                IsBestQuality = false,
-                IsAudioOnly = false,
-                Description = $"Vídeo até {resName} com áudio original."
-            });
+                // Múltiplas taxas de quadros disponíveis para esta resolução (ex: 60 FPS e 30 FPS)
+                foreach (var fps in fpsList)
+                {
+                    var label = $"{resName} • {fps} FPS";
+                    var selector = fps > 30
+                        ? $"bestvideo[height<={height}][fps>{30}]+bestaudio/bestvideo[height<={height}]+bestaudio/best"
+                        : $"bestvideo[height<={height}][fps<={fps}]+bestaudio/bestvideo[height<={height}]+bestaudio/best";
+
+                    options.Add(new FormatOption
+                    {
+                        Label = label,
+                        Height = height,
+                        Fps = fps,
+                        FormatSelector = selector,
+                        IsBestQuality = false,
+                        IsAudioOnly = false,
+                        Description = $"Vídeo {resName} a {fps} FPS com áudio original."
+                    });
+                }
+            }
+            else
+            {
+                var fps = fpsList.FirstOrDefault();
+                var label = fps > 30
+                    ? $"{resName} • {fps} FPS"
+                    : resName;
+
+                options.Add(new FormatOption
+                {
+                    Label = label,
+                    Height = height,
+                    Fps = fps > 0 ? fps : null,
+                    FormatSelector = $"bestvideo[height<={height}]+bestaudio/best[height<={height}]/best",
+                    IsBestQuality = false,
+                    IsAudioOnly = false,
+                    Description = $"Vídeo até {resName} com áudio original."
+                });
+            }
         }
 
         // 3. Opção: Somente Áudio

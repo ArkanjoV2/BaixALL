@@ -99,6 +99,7 @@ public partial class MainViewModel : ObservableObject
         IDependencyManager dependencyManager,
         IUpdateService updateService,
         IHistoryService historyService,
+        IDispatcherService? dispatcher = null,
         ILoggerService? logger = null)
     {
         _youtubeService = youtubeService;
@@ -109,7 +110,7 @@ public partial class MainViewModel : ObservableObject
         _logger = logger;
 
         SettingsVm = new SettingsViewModel(_settingsService, _dependencyManager, updateService, _downloadService, _logger);
-        HistoryVm = new HistoryViewModel(historyService, _logger);
+        HistoryVm = new HistoryViewModel(historyService, dispatcher, _logger);
         DependenciesVm = new DependenciesViewModel(_dependencyManager, updateService, _logger);
 
         DependenciesVm.PropertyChanged += (s, e) =>
