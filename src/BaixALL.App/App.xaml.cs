@@ -9,6 +9,7 @@ namespace BaixALL.App;
 public partial class App : Application
 {
     private ILoggerService? _logger;
+    private IDownloadService? _downloadService;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -48,6 +49,7 @@ public partial class App : Application
             var formatSelectionService = new FormatSelectionService();
             var youtubeService = new YoutubeService(ytDlpService, formatSelectionService, _logger);
             var downloadService = new DownloadService(ytDlpService, historyService, settingsService, dispatcherService, _logger);
+            _downloadService = downloadService;
             var updateService = new UpdateService(dependencyManager, downloadService, _logger);
 
             var mainViewModel = new MainViewModel(
@@ -75,5 +77,15 @@ public partial class App : Application
                 MessageBoxImage.Error);
             Shutdown(1);
         }
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        try
+        {
+            _downloadService?.CancelAllDownloads();
+        }
+        catch { }
+        base.OnExit(e);
     }
 }

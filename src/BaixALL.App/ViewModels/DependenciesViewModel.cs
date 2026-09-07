@@ -13,6 +13,7 @@ public partial class DependenciesViewModel : ObservableObject
 {
     private readonly IDependencyManager _dependencyManager;
     private readonly IUpdateService? _updateService;
+    private readonly IDownloadService? _downloadService;
     private readonly ILoggerService? _logger;
 
     [ObservableProperty]
@@ -47,10 +48,12 @@ public partial class DependenciesViewModel : ObservableObject
     public DependenciesViewModel(
         IDependencyManager dependencyManager,
         IUpdateService? updateService = null,
+        IDownloadService? downloadService = null,
         ILoggerService? logger = null)
     {
         _dependencyManager = dependencyManager;
         _updateService = updateService;
+        _downloadService = downloadService;
         _logger = logger;
         Dependencies = _dependencyManager.GetDependencies();
         AreAllInstalled = _dependencyManager.AreAllDependenciesInstalled();
@@ -171,6 +174,14 @@ public partial class DependenciesViewModel : ObservableObject
     {
         if (IsBusy) return;
 
+        if (_downloadService?.HasActiveDownloads == true)
+        {
+            HasError = true;
+            ErrorMessage = "Não é possível atualizar ferramentas enquanto houver downloads em andamento.";
+            StatusText = "Operação bloqueada: downloads ativos na fila.";
+            return;
+        }
+
         IsBusy = true;
         HasError = false;
         OverallProgress = 0;
@@ -216,6 +227,14 @@ public partial class DependenciesViewModel : ObservableObject
     public async Task InstallToolAsync(string? toolName)
     {
         if (string.IsNullOrWhiteSpace(toolName) || IsBusy) return;
+
+        if (_downloadService?.HasActiveDownloads == true)
+        {
+            HasError = true;
+            ErrorMessage = "Não é possível atualizar ferramentas enquanto houver downloads em andamento.";
+            StatusText = "Operação bloqueada: downloads ativos na fila.";
+            return;
+        }
 
         IsBusy = true;
         HasError = false;

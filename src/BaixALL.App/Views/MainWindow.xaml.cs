@@ -22,6 +22,14 @@ public partial class MainWindow : Window
         {
             await _viewModel.InitializeStartupAsync();
         };
+
+        Closing += (_, _) =>
+        {
+            if (_viewModel.HasActiveDownloads)
+            {
+                _viewModel.CancelAllDownloads();
+            }
+        };
     }
 
     private void OnThemeChanged(string theme)

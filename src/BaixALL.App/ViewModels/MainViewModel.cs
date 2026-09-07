@@ -91,6 +91,10 @@ public partial class MainViewModel : ObservableObject
 
     public int ActiveDownloadsCount => QueueItems.Count(x => x.IsActive);
 
+    public bool HasActiveDownloads => _downloadService.HasActiveDownloads;
+
+    public void CancelAllDownloads() => _downloadService.CancelAllDownloads();
+
     public MainViewModel(
         IYoutubeService youtubeService,
         IFormatSelectionService formatSelectionService,
@@ -111,7 +115,7 @@ public partial class MainViewModel : ObservableObject
 
         SettingsVm = new SettingsViewModel(_settingsService, _dependencyManager, updateService, _downloadService, _logger);
         HistoryVm = new HistoryViewModel(historyService, dispatcher, _logger);
-        DependenciesVm = new DependenciesViewModel(_dependencyManager, updateService, _logger);
+        DependenciesVm = new DependenciesViewModel(_dependencyManager, updateService, _downloadService, _logger);
 
         DependenciesVm.PropertyChanged += (s, e) =>
         {

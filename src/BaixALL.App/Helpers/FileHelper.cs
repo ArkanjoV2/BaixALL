@@ -70,17 +70,34 @@ public static class FileHelper
 
         var sanitized = SanitizeFileName(baseFileName);
         var ext = extension.TrimStart('.');
-        var candidate = Path.Combine(folder, $"{sanitized}.{ext}");
 
-        if (!File.Exists(candidate))
-            return candidate;
+        bool BaseNameExists(string baseName)
+        {
+            var candidateWithExt = Path.Combine(folder, $"{baseName}.{ext}");
+            if (File.Exists(candidateWithExt)) return true;
+
+            try
+            {
+                var matches = Directory.GetFiles(folder, $"{baseName}.*");
+                return matches.Any(f => !f.EndsWith(".part", StringComparison.OrdinalIgnoreCase) &&
+                                       !f.EndsWith(".ytdl", StringComparison.OrdinalIgnoreCase) &&
+                                       !f.EndsWith(".tmp", StringComparison.OrdinalIgnoreCase));
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        if (!BaseNameExists(sanitized))
+            return Path.Combine(folder, $"{sanitized}.{ext}");
 
         var counter = 1;
         while (true)
         {
-            candidate = Path.Combine(folder, $"{sanitized} ({counter}).{ext}");
-            if (!File.Exists(candidate))
-                return candidate;
+            var candidateBase = $"{sanitized} ({counter})";
+            if (!BaseNameExists(candidateBase))
+                return Path.Combine(folder, $"{candidateBase}.{ext}");
 
             counter++;
         }

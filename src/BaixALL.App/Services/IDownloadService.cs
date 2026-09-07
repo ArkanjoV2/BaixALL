@@ -14,4 +14,5 @@ public interface IDownloadService
     void RemoveDownload(Guid id);
     void ClearCompleted();
     void UpdateConcurrencyLimit(int maxConcurrent);
+    void CancelAllDownloads();
 }

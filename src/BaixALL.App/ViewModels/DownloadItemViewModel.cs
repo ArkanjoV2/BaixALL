@@ -93,6 +93,14 @@ public partial class DownloadItemViewModel : ObservableObject
     public void MarkCompleted(string finalFilePath)
     {
         DestinationPath = finalFilePath;
+        if (!string.IsNullOrWhiteSpace(finalFilePath))
+        {
+            var ext = Path.GetExtension(finalFilePath).TrimStart('.').ToUpperInvariant();
+            if (!string.IsNullOrEmpty(ext))
+            {
+                Format = ext;
+            }
+        }
         Status = DownloadStatus.Completed;
         StatusMessage = "✓ Download concluído com sucesso!";
         ProgressPercentage = 100;

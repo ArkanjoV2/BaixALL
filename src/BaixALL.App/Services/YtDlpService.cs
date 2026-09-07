@@ -383,8 +383,14 @@ public class YtDlpService : IYtDlpService
     {
         try
         {
+            if (!Directory.Exists(folder)) return;
+
             var partialFiles = Directory.GetFiles(folder, $"{baseFileName}*")
-                .Where(f => f.EndsWith(".part") || f.EndsWith(".ytdl") || f.EndsWith(".temp") || f.EndsWith(".tmp"));
+                .Where(f => f.EndsWith(".part", StringComparison.OrdinalIgnoreCase) ||
+                            f.EndsWith(".ytdl", StringComparison.OrdinalIgnoreCase) ||
+                            f.EndsWith(".temp", StringComparison.OrdinalIgnoreCase) ||
+                            f.EndsWith(".tmp", StringComparison.OrdinalIgnoreCase) ||
+                            System.Text.RegularExpressions.Regex.IsMatch(f, @"\.f\d+\.[^.]+$", System.Text.RegularExpressions.RegexOptions.IgnoreCase));
 
             foreach (var file in partialFiles)
             {
@@ -425,10 +431,10 @@ public class YtDlpService : IYtDlpService
         if (lower.Contains("private video"))
             return "Este vídeo é privado e não pode ser acessado publicamente.";
 
-        if (lower.Contains("video unavailable"))
+        if (lower.Contains("video unavailable") || lower.Contains("is unavailable") || lower.Contains("not available") || lower.Contains("video is unavailable"))
             return "Este vídeo não está disponível no YouTube.";
 
-        if (lower.Contains("this video has been removed"))
+        if (lower.Contains("this video has been removed") || lower.Contains("video has been removed"))
             return "Este vídeo foi removido pelo YouTube ou pelo criador.";
 
         if (lower.Contains("sign in to confirm your age"))

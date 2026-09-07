@@ -122,6 +122,20 @@ public class DownloadService : IDownloadService
         });
     }
 
+    public void CancelAllDownloads()
+    {
+        var activeItems = QueueItems.Where(x => x.IsActive).ToList();
+        foreach (var item in activeItems)
+        {
+            try
+            {
+                item.CancellationTokenSource.Cancel();
+            }
+            catch { }
+        }
+        _logger?.Info($"Cancelamento solicitado para {activeItems.Count} download(s) ativo(s).");
+    }
+
     private async Task ProcessDownloadItemAsync(DownloadItemViewModel item)
     {
         try
