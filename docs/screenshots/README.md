@@ -1,29 +1,38 @@
 # Diretório de Capturas de Tela Oficiais — BaixALL
 
-Esta pasta armazena as capturas de tela reais da interface do BaixALL para inclusão no `README.md` e na documentação do projeto.
+Esta pasta armazena as capturas de tela reais da interface do BaixALL utilizadas no `README.md` e na documentação do projeto.
 
 ---
 
-## 📸 Capturas Recomendadas
+## 📸 Capturas Oficiais (v1.0.0)
 
-Para fornecer uma visão visual completa aos novos usuários, recomenda-se adicionar as seguintes imagens (formato PNG, resolução original da janela sem distorção):
+Todas as imagens são capturas reais da janela do aplicativo executado em ambiente Windows 11 x64, sem molduras fictícias, sem geração por inteligência artificial e sem simulações gráficas:
 
-1. **`01-home-analise.png`**  
-   *Descrição:* Tela inicial (*Downloader*) após a análise de um vídeo público, exibindo título, canal, miniatura em alta definição e botão de download.
-2. **`02-selecao-qualidade.png`**  
-   *Descrição:* Destaque para o menu suspenso de seleção de resoluções (ex.: 4K, 1080p 60 FPS) e formato do container (MP4 / MKV).
-3. **`03-fila-download.png`**  
-   *Descrição:* Aba **Fila** com downloads em andamento, exibindo progresso percentual, velocidade de transferência e botão de cancelamento individual.
-4. **`04-historico.png`**  
-   *Descrição:* Aba **Histórico** com itens concluídos registrados, tamanho dos arquivos e botões para abrir o arquivo ou visualizar na pasta.
-5. **`05-ferramentas.png`**  
-   *Descrição:* Aba **Ferramentas** mostrando o status das dependências gerenciadas (`yt-dlp`, `FFmpeg`, `ffprobe`, `Deno`) com indicativo "Pronto".
+| Arquivo | Resolução | Tamanho | Finalidade / Descrição |
+| :--- | :---: | :---: | :--- |
+| **`01-home-analise.png`** | 1916 × 1010 | ~144 KB | **Tela Inicial (Downloader):** Exibe a análise de um vídeo público com miniatura em alta resolução, metadados (título, canal, duração, FPS), seletores e botão de download. |
+| **`02-selecao-qualidade.png`** | 1915 × 1013 | ~145 KB | **Seleção de Qualidade:** Menu suspenso de resoluções aberto, exibindo opções disponíveis (1080p, 720p, 480p, 360p, 240p, 144p e somente áudio). |
+| **`03-fila-download.png`** | 1916 × 1004 | ~58 KB | **Fila de Downloads:** Download ativo em andamento com barra de progresso, percentual (26%), tamanho transferido, taxa de transferência (11.8 MB/s) e botão Cancelar. |
+| **`04-historico.png`** | 1917 × 1006 | ~99 KB | **Histórico de Downloads:** Mídias baixadas concluídas com formato, data/hora e botões de ação para abrir o arquivo ou exibir a pasta no Explorer. |
+| **`05-ferramentas.png`** | 1917 × 1004 | ~139 KB | **Ferramentas do Sistema:** Status operacional de `yt-dlp`, `FFmpeg`, `ffprobe` e `Deno`, indicando status "Pronto" e versões detectadas. |
 
 ---
 
-## 🔒 Checklist de Privacidade antes de Adicionar Imagens
+## 🔒 Diretrizes de Privacidade
 
-Antes de salvar qualquer captura nesta pasta:
-- [ ] **Ocultar caminhos de diretórios pessoais:** Certifique-se de que caminhos exibindo seu nome de usuário do Windows (ex.: `C:\Users\NomeDoUsuario\...`) não estejam visíveis.
-- [ ] **Utilizar mídias públicas:** Utilize vídeos de domínio público ou vídeos amplamente conhecidos (como trailers públicos ou testes abertos como *Big Buck Bunny*).
-- [ ] **Sem credenciais:** Assegure-se de que não há tokens, chaves, abas de navegador com dados privados ou notificações do Windows visíveis na captura.
+Ao capturar ou atualizar imagens neste diretório:
+1. **Dados Pessoais e Credenciais:** Nunca exponha tokens, chaves de API, cookies, credenciais de login ou informações de contas privadas.
+2. **Caminhos de Diretórios:** Mantenha caminhos genéricos padrão do sistema operacional, sem expor nomes de usuário pessoais ou pastas restritas.
+3. **Mídias Utilizadas:** Utilize exclusivamente vídeos de domínio público, canais oficiais abertos (ex.: trailers públicos ou conteúdos livres).
+4. **Sem Elementos Externos:** Não capture a barra de tarefas do Windows, notificações do sistema operacional ou janelas de terceiros em segundo plano.
+
+---
+
+## 🔄 Como Atualizar as Capturas no Futuro
+
+1. Execute a versão estável oficial do BaixALL no Windows.
+2. Configure o tema desejado (padrão escuro recomendado para consistência visual).
+3. Utilize a ferramenta nativa de captura de janela do Windows (ex.: `Alt + PrtScn` ou `Win + Shift + S` selecionando a janela do aplicativo).
+4. Salve as imagens em formato PNG preservando a proporção e legibilidade original da interface.
+5. Otimize os arquivos PNG (mantenha compressão sem perdas, garantindo carregamento rápido no GitHub).
+6. Substitua os arquivos correspondentes em `docs/screenshots/` e envie as alterações via Pull Request para revisão.

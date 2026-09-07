@@ -55,17 +55,21 @@ O **BaixALL** é um aplicativo desktop nativo desenvolvido em **C#** e **.NET 10
 
 ## 🖥️ Apresentação da Interface
 
-A interface do BaixALL é organizada em abas de navegação direta:
+Interface nativa do BaixALL focada em clareza, produtividade e feedback em tempo real:
 
-| Seção | Finalidade Principal |
-| :--- | :--- |
-| **Downloader (Home)** | Campo para inserção de links, análise com exibição de miniatura em alta resolução, título, canal, duração e escolha rápida de formato. |
-| **Seleção de Resoluções** | Menu inteligente de fluxos com suporte a resoluções de 360p até 4K (2160p) e identificação de 60 FPS quando disponível. |
-| **Fila de Downloads** | Acompanhamento em tempo real de itens ativos e em espera, percentual, velocidade de transferência e botão de cancelamento individual. |
-| **Histórico** | Registro local das conclusões com opções para reproduzir o arquivo de mídia diretamente ou destacá-lo no Windows Explorer. |
-| **Ferramentas** | Gerenciador integrado com status e atualização sob demanda de `yt-dlp`, `FFmpeg`, `ffprobe` e `Deno`. |
+### Tela Principal — Análise de Vídeo e Opções de Download
+![Tela Principal do BaixALL após análise de vídeo público](docs/screenshots/01-home-analise.png)
+*Análise imediata da URL com exibição de miniatura em alta resolução, título, duração, taxas disponíveis e formulário de configuração.*
 
-> ℹ️ *Capturas de tela reais da interface estão sendo organizadas e serão adicionadas em breve. Para consultar as diretrizes e especificações de imagens recomendadas, veja o [diretório de screenshots](docs/screenshots/README.md).*
+<br>
+
+| Seleção de Qualidade e Formato | Fila de Downloads em Tempo Real |
+| :---: | :---: |
+| [![Seleção de Qualidade](docs/screenshots/02-selecao-qualidade.png)](docs/screenshots/02-selecao-qualidade.png)<br><sub>Menu inteligente de resoluções (144p até 4K) e opções de container</sub> | [![Fila de Downloads](docs/screenshots/03-fila-download.png)](docs/screenshots/03-fila-download.png)<br><sub>Progresso percentual, taxa de transferência e cancelamento individual</sub> |
+| **Histórico Local de Downloads** | **Gerenciamento de Ferramentas** |
+| [![Histórico de Downloads](docs/screenshots/04-historico.png)](docs/screenshots/04-historico.png)<br><sub>Registro local das conclusões com atalhos para abrir mídia ou pasta</sub> | [![Gerenciador de Ferramentas](docs/screenshots/05-ferramentas.png)](docs/screenshots/05-ferramentas.png)<br><sub>Status operacional e versão de yt-dlp, FFmpeg, ffprobe e Deno</sub> |
+
+> 📸 *Todas as capturas acima foram obtidas diretamente da versão oficial 1.0.0 em ambiente Windows. Detalhes técnicos e diretrizes de atualização estão documentados em [docs/screenshots/README.md](docs/screenshots/README.md).*
 
 ---
 
