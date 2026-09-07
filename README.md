@@ -69,7 +69,7 @@ A interface do BaixALL é organizada em abas de navegação direta:
 
 ---
 
-## ✨ Recursos Principais
+## 📚 Recursos Principais
 
 - **Download com Mesclagem Automática:** Identifica os fluxos de vídeo e áudio fornecidos separadamente pela plataforma e realiza a junção nos containers **MP4** ou **MKV** utilizando o FFmpeg.
 - **Seleção de Resolução e FPS:** Escolha resoluções entre 360p e 4K (2160p), com suporte à taxa de 60 FPS quando oferecida pelo provedor de mídia.
