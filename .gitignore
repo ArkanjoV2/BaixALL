@@ -22,3 +22,5 @@ TestResults/
 *.trx
 *.coverage
 *.coveragexml
+
+dist/

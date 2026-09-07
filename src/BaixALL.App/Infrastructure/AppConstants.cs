@@ -10,7 +10,7 @@ namespace BaixALL.App.Infrastructure;
 public static class AppConstants
 {
     public const string AppName = "BaixALL";
-    public const string AppVersion = "1.0.0";
+    public const string AppVersion = "1.0.0-rc.1";
     public const string AppTitle = "BaixALL - Baixar Vídeos do YouTube";
     public const string AppTagline = "Baixe seus vídeos na melhor qualidade disponível";
 

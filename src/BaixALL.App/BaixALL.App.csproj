@@ -5,9 +5,18 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <AssemblyName>BaixALL</AssemblyName>
     <RootNamespace>BaixALL.App</RootNamespace>
-    <Version>1.0.0</Version>
+    <Version>1.0.0-rc.1</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <InformationalVersion>1.0.0-rc.1</InformationalVersion>
     <Product>BaixALL</Product>
+    <Company>BaixALL</Company>
+    <Authors>BaixALL Team</Authors>
+    <Copyright>Copyright © 2026 BaixALL</Copyright>
     <Description>Aplicativo desktop para download de vídeos do YouTube com yt-dlp e FFmpeg</Description>
+    <PackageProjectUrl>https://github.com/BaixALL/BaixALL</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/BaixALL/BaixALL</RepositoryUrl>
+    <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>

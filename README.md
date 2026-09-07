@@ -1,191 +1,167 @@
 # BaixALL — Aplicativo Desktop para Download de Vídeos
 
-**BaixALL** é um aplicativo desktop nativo para Windows desenvolvido em **C#**, **.NET 10 LTS** e **WPF** com o padrão arquitetural **MVVM**. Ele foi projetado para baixar vídeos e áudios do YouTube utilizando **yt-dlp**, **FFmpeg** e **Deno**, priorizando preservação da qualidade original, interface moderna estilo Windows 11 Fluent e privacidade absoluta (100% local, sem telemetria ou servidores externos).
+**BaixALL** é um aplicativo desktop nativo para Windows desenvolvido em **C#**, **.NET 10** e **WPF** com o padrão arquitetural **MVVM**. Ele foi projetado para permitir o download simples, rápido e seguro de vídeos e áudios do YouTube, utilizando **yt-dlp**, **FFmpeg** e **Deno** nos bastidores, com interface moderna estilo Fluent Design (Windows 11) e privacidade absoluta (100% local, sem telemetria, sem anúncios e sem comunicação com servidores externos além dos canais oficiais de mídia e ferramentas).
 
 ---
 
-## 🎯 Características Principais
+## 📋 Índice
 
-- **Preservação Máxima da Qualidade:** O modo padrão *"Melhor qualidade disponível"* seleciona as faixas originais de vídeo e áudio em resolução máxima (4K, 1080p, 60 FPS, etc.) e utiliza o FFmpeg para remux ou mesclagem direta sem recodificação desnecessária.
-- **Interface Windows 11 Nativa:** Design limpo, tipografia Segoe UI Variable, temas Claro e Escuro dinâmicos, cantos retos em todos os controles estruturais e cantos arredondados exclusivos na caixa de entrada da URL.
-- **Independência Total de Runtimes Externos:** Não exige Python, Node.js ou Visual Studio no computador do usuário final.
-- **DependencyManager Autônomo:** Detecta, baixa e atualiza atômica e seguramente os binários oficiais de `yt-dlp.exe`, `ffmpeg.exe`, `ffprobe.exe` e `deno.exe`.
-- **Comunicação Estruturada:** Uso exclusivo de saídas estruturadas do yt-dlp (`-J` / `--dump-single-json` e `--progress-template`) com leitura assíncrona de stdout e stderr.
-- **Segurança contra Injeção de Comandos:** Uso estrito de `ProcessStartInfo.ArgumentList` em todas as invocações de processos externos.
-- **Fila com Limite de Concorrência:** Suporte a múltiplos downloads com controle de concorrência configurável (1 a 3 simultâneos).
-- **Cancelamento Limpo:** Finalização da árvore de processos (`Kill(entireProcessTree: true)`) e exclusão de arquivos parciais (`.part`, `.ytdl`), preservando arquivos íntegros do usuário.
-- **Modo Somente Áudio:** Extração direta de áudio (Original, M4A, Opus) e conversão para MP3 em alta qualidade através do FFmpeg.
-- **Histórico e Logs Locais:** Histórico de downloads persistido em JSON e logs rotativos protegidos contra dados sensíveis.
-
----
-
-## 🏗️ Arquitetura da Aplicação
-
-```
-BaixALL/
-├── src/
-│   └── BaixALL.App/
-│       ├── App.xaml / App.xaml.cs            # Injeção de dependência e tratamento global de erros
-│       ├── Infrastructure/
-│       │   ├── AppConstants.cs               # Nome da aplicação e caminhos locais
-│       │   └── ProcessRunner.cs              # Execução segura com ArgumentList e cancelamento
-│       ├── Models/
-│       │   ├── VideoInfo.cs                  # Metadados de vídeos do YouTube
-│       │   ├── FormatOption.cs               # Resoluções amigáveis (4K 60fps, 1080p, etc.)
-│       │   ├── DownloadRequest.cs            # Requisição e progresso de download
-│       │   ├── DownloadStatus.cs             # Ciclo de vida do download
-│       │   ├── AppSettings.cs                # Modelo de preferências salvas
-│       │   └── DependencyItem.cs             # Estado das ferramentas gerenciadas
-│       ├── Services/
-│       │   ├── IYtDlpService.cs / YtDlpService.cs                 # Execução do yt-dlp com JSON e progresso
-│       │   ├── IYoutubeService.cs / YoutubeService.cs             # Validação e orquestração de metadados
-│       │   ├── IFormatSelectionService.cs / FormatSelectionService.cs # Agrupamento de resoluções e FPS
-│       │   ├── IDownloadService.cs / DownloadService.cs           # Fila com semáforo de concorrência
-│       │   ├── IDependencyManager.cs / DependencyManager.cs       # Gerenciamento de ferramentas oficiais
-│       │   ├── ISettingsService.cs / SettingsService.cs           # Persistência de preferências em JSON
-│       │   ├── IHistoryService.cs / HistoryService.cs             # Histórico local de downloads
-│       │   ├── ILoggerService.cs / LoggerService.cs               # Logging rotativo sanitizado
-│       │   └── IUpdateService.cs / UpdateService.cs               # Verificação de atualizações no GitHub
-│       ├── Helpers/
-│       │   ├── UrlValidator.cs               # Validação e normalização de URLs
-│       │   ├── FileHelper.cs                 # Sanitização de nomes de arquivos para Windows
-│       │   ├── ByteSizeFormatter.cs          # Formatação legível de bytes e velocidade
-│       │   └── TimeFormatter.cs              # Formatação de duração e tempo restante (ETA)
-│       ├── ViewModels/
-│       │   ├── MainViewModel.cs              # Orquestrador da tela principal e abas
-│       │   ├── SettingsViewModel.cs          # Gerenciamento de preferências
-│       │   ├── HistoryViewModel.cs           # Gerenciamento do histórico
-│       │   ├── DependenciesViewModel.cs      # Instalação inicial e status das ferramentas
-│       │   └── DownloadItemViewModel.cs      # Estado reativo de cada item em download
-│       ├── Views/
-│       │   ├── MainWindow.xaml / .cs         # Janela principal com design Fluent Windows 11
-│       │   ├── SettingsView.xaml / .cs       # Visualização de preferências e atualizações
-│       │   ├── HistoryView.xaml / .cs        # Visualização do histórico
-│       │   └── DependenciesView.xaml / .cs   # Visualização e download de dependências
-│       └── Resources/
-│           ├── Icons.xaml                    # Geometrias vetoriais XAML de ícones
-│           ├── Styles.xaml                   # Design System (cantos retos, cantos arredondados na URL)
-│           └── Themes/
-│               ├── DarkTheme.xaml            # Tema escuro Fluent
-│               └── LightTheme.xaml           # Tema claro Fluent
-├── tests/
-│   └── BaixALL.Tests/                        # Testes unitários com xUnit
-├── installer/
-│   └── BaixALL_Setup.iss                     # Script de instalador Windows (Inno Setup)
-├── publish/win-x64/                          # Executável compilado self-contained
-└── README.md
-```
+1. [Requisitos do Sistema](#-requisitos-do-sistema)
+2. [Instalação](#-instalação)
+3. [Primeiros Passos e Primeiro Download](#-primeiros-passos-e-primeiro-download)
+4. [Seleção de Qualidade e Formatos](#-seleção-de-qualidade-e-formatos)
+5. [Modo Somente Áudio](#-modo-somente-áudio)
+6. [Pasta de Destino](#-pasta-de-destino)
+7. [Fila de Downloads e Concorrência](#-fila-de-downloads-e-concorrência)
+8. [Histórico de Downloads](#-histórico-de-downloads)
+9. [Atualização das Ferramentas](#-atualização-das-ferramentas)
+10. [Desinstalação e Preservação de Dados](#-desinstalação-e-preservação-de-dados)
+11. [Limitações Conhecidas](#-limitações-conhecidas)
+12. [Aviso Legal e Direitos Autorais](#-aviso-legal-e-direitos-autorais)
+13. [Licenças de Terceiros](#-licenças-de-terceiros)
 
 ---
 
-## 💻 Pré-requisitos de Desenvolvimento
+## 💻 Requisitos do Sistema
 
-- **Sistema Operacional:** Windows 10/11 (x64)
-- **SDK:** .NET 10.0 SDK (ou superior)
-- **Git:** Git para Windows
-- *(Opcional)* **Inno Setup 6+:** Para compilação do script `.iss` do instalador
-
----
-
-## 🚀 Como Executar em Desenvolvimento
-
-Para rodar a aplicação diretamente pelo código-fonte:
-
-```powershell
-# Restaurar dependências
-dotnet restore
-
-# Executar a aplicação WPF
-dotnet run --project src/BaixALL.App/BaixALL.App.csproj
-```
+- **Sistema Operacional:** Windows 10 (versão 1809 ou superior) ou Windows 11.
+- **Arquitetura:** 64-bit (x64 / AMD64).
+- **Runtimes:** Nenhum runtime adicional é necessário. O BaixALL é distribuído em modo *self-contained* (autônomo), não exigindo instalação de .NET SDK, Visual Studio, Python ou Node.js.
+- **Conexão:** Acesso à internet para análise de links e downloads.
 
 ---
 
-## 🧪 Como Executar os Testes Unitários
+## 🚀 Instalação
 
-O projeto conta com suíte completa de testes que não depende de conexão ativa com o YouTube (com dados mockados e testes determinísticos):
+O BaixALL está disponível em dois formatos de distribuição:
 
-```powershell
-dotnet test
-```
+### 1. Instalador Oficial (`BaixALL-Setup-1.0.0-rc.1.exe`)
+1. Baixe o executável de instalação.
+2. Execute o assistente de instalação. Você pode optar por criar um atalho na Área de Trabalho e no Menu Iniciar.
+3. Não são necessários privilégios de administrador obrigatórios para a instalação padrão no perfil do usuário (`%LOCALAPPDATA%\Programs\BaixALL` ou `Program Files`).
 
-Suítes testadas:
-- Validação e extração de identificadores de URLs (`UrlValidationTests`)
-- Sanitização de nomes de arquivo e proteção de nomes reservados do DOS/Windows (`FilenameSanitizerTests`)
-- Análise de fluxos, detecção de 60 FPS e seleção de formatos (`FormatSelectionTests`)
-- Interpretação de JSON estruturado retornado pelo yt-dlp (`YtDlpJsonParsingTests`)
-- Parsing de modelos de progresso e tradução de mensagens de erro (`ProgressParsingTests`)
-- Verificação de caminhos e rotinas do gerenciador de dependências (`DependencyManagerTests`)
-- Persistência e integridade das configurações (`SettingsTests`)
-- Fila de downloads, cálculo de taxas e histórico (`DownloadQueueTests`)
-- Validações de entrada do serviço do YouTube (`YoutubeServiceTests`)
+### 2. Pacote Portátil (`BaixALL-1.0.0-rc.1-win-x64.zip`)
+1. Baixe o arquivo compactado `.zip`.
+2. Extraia o conteúdo para a pasta de sua preferência.
+3. Execute diretamente o arquivo `BaixALL.exe`.
 
 ---
 
-## 📦 Como Publicar a Versão Release (Self-Contained)
+## 🎬 Primeiros Passos e Primeiro Download
 
-Para gerar o executável autônomo para Windows 64-bit que roda em qualquer computador sem exigir que o .NET esteja instalado:
-
-```powershell
-dotnet publish src/BaixALL.App/BaixALL.App.csproj `
-  -c Release `
-  -r win-x64 `
-  --self-contained true `
-  -p:PublishSingleFile=true `
-  -p:IncludeNativeLibrariesForSelfExtract=true `
-  -o publish/win-x64
-```
-
-O arquivo final gerado será:
-`publish\win-x64\BaixALL.exe`
+1. **Primeira Execução:** Na primeira abertura, o BaixALL verifica a presença das ferramentas de apoio (`yt-dlp`, `FFmpeg`, `ffprobe` e `Deno`). Se alguma estiver ausente, o gerenciador exibirá uma interface clara para baixá-las automaticamente com apenas um clique.
+2. **Análise do Link:**
+   - Copie a URL do vídeo do YouTube no navegador.
+   - Cole o link no campo de entrada no BaixALL (o aplicativo suporta colagem automática ao focar o campo).
+   - Clique em **"Analisar"** (ou pressione Enter).
+   - O aplicativo carregará o título, canal, duração e a miniatura em alta resolução do vídeo.
+3. **Iniciar Download:**
+   - Escolha a qualidade desejada ou marque "Somente Áudio".
+   - Clique no botão principal **"Baixar Agora"**.
+   - O vídeo será enviado para a aba **Fila** e o download iniciará imediatamente.
 
 ---
 
-## 🛠️ Onde Ficam Armazenados os Dados
+## 🎥 Seleção de Qualidade e Formatos
 
-Para garantir total conformidade com as diretrizes do Windows e preservar a integridade do sistema, todos os dados locais são salvos no perfil do usuário:
+O BaixALL analisa todas as faixas de vídeo e áudio disponibilizadas pelo YouTube e oferece opções inteligentes:
 
-| Componente | Caminho no Sistema |
-| :--- | :--- |
-| **Ferramentas (`yt-dlp`, `FFmpeg`, `Deno`)** | `%LOCALAPPDATA%\BaixALL\tools\` |
-| **Configurações (`settings.json`)** | `%LOCALAPPDATA%\BaixALL\settings.json` |
-| **Histórico (`history.json`)** | `%LOCALAPPDATA%\BaixALL\history.json` |
-| **Logs de Diagnóstico** | `%LOCALAPPDATA%\BaixALL\logs\baixall_YYYYMMDD.log` |
-| **Pasta Padrão de Downloads** | `%USERPROFILE%\Downloads` (configurável) |
+- **"Melhor qualidade disponível" (Recomendado):** Seleciona automaticamente o fluxo de vídeo de maior resolução e taxa de quadros (como 4K a 60 FPS ou 1080p a 60 FPS) e a melhor faixa de áudio, mesclando-os com o FFmpeg sem perda de qualidade.
+- **Resoluções Específicas:** Você pode selecionar resoluções exatas (ex: 2160p 4K, 1440p 2K, 1080p Full HD, 720p HD, 480p, etc.) com indicação precisa da taxa de quadros (60 FPS ou 30 FPS).
+- **Formato/Container:** Opções de saída em **MP4** ou **MKV**.
 
 ---
 
-## 🔄 Como Atualizar yt-dlp, FFmpeg e Deno
+## 🎵 Modo Somente Áudio
 
-1. Abra a aplicação BaixALL.
-2. Acesse a aba **Configurações** ou **Ferramentas**.
-3. Clique no botão **"Verificar Atualizações"**.
-4. O BaixALL consultará as APIs oficiais do GitHub e permitirá atualizar os executáveis com um clique.
-5. As atualizações utilizam substituição atômica (download em arquivo temporário -> validação com `--version` -> substituição segura).
+Se você deseja apenas a faixa sonora do vídeo (músicas, podcasts, aulas):
+
+1. Marque a caixa de seleção **"Somente Áudio"** na tela inicial.
+2. Selecione o formato desejado no menu de containers:
+   - **Melhor áudio disponível (Original):** Mantém a faixa nativa sem nenhuma recodificação (geralmente M4A/AAC ou Opus em WebM).
+   - **M4A:** Container com codec AAC de alta compatibilidade para reprodutores portáteis e dispositivos Apple.
+   - **Opus:** Codec aberto de última geração com alta fidelidade e compressão eficiente.
+   - **MP3:** Converte o áudio via FFmpeg em alta qualidade (bitrate variável ou 320 kbps), compatível com qualquer dispositivo.
+
+---
+
+## 📂 Pasta de Destino
+
+- Por padrão, os arquivos concluídos são salvos na sua pasta padrão de **Downloads** do Windows (`%USERPROFILE%\Downloads`).
+- Você pode alterar a pasta de destino padrão na aba **Configurações** clicando em **"Procurar Pasta"**.
+- O BaixALL sanitiza automaticamente o nome dos arquivos para evitar caracteres proibidos no Windows (`:`, `*`, `?`, `"`, `<`, `>`, `|`, etc.).
+
+---
+
+## ⚡ Fila de Downloads e Concorrência
+
+O BaixALL conta com um motor de fila assíncrono projetado para máxima eficiência:
+
+- **Adição Contínua:** Você pode analisar e enfileirar múltiplos vídeos sucessivamente sem esperar os anteriores terminarem.
+- **Limite de Downloads Simultâneos:** Na aba **Configurações**, configure a concorrência desejada:
+  - **1 download simultâneo (Padrão):** Ideal para conexões limitadas. Executa um item por vez; os demais aguardam.
+  - **2 downloads simultâneos:** Equilíbrio ideal entre velocidade e uso de banda.
+  - **3 downloads simultâneos:** Para conexões de alta velocidade.
+- **Transição Automática:** Quando um download termina, o próximo item com status *Aguardando* inicia imediatamente.
+- **Cancelamento Individual:** Ao cancelar um download em andamento, apenas aquele processo é encerrado de forma limpa; os demais continuam normalmente e a vaga liberada é assumida pelo próximo item da fila.
+
+---
+
+## 📖 Histórico de Downloads
+
+- Acesse a aba **Histórico** na barra lateral.
+- Todos os downloads concluídos ficam registrados de forma persistente com título, duração, formato, tamanho final e data.
+- **Ações Rápidas:**
+  - **Abrir arquivo:** Reproduz o vídeo/áudio no player padrão do Windows.
+  - **Abrir pasta:** Abre o Windows Explorer com o arquivo selecionado em destaque.
+  - **Limpar Histórico:** Remove o registro visual do histórico sem apagar os arquivos físicos do disco.
+
+---
+
+## 🔧 Atualização das Ferramentas
+
+O YouTube atualiza frequentemente seus protocolos e assinaturas de streaming. Para garantir funcionamento contínuo:
+
+1. Acesse a aba **Ferramentas** ou **Configurações**.
+2. Clique no botão **"Verificar Atualizações"**.
+3. Se houver uma versão mais recente do `yt-dlp`, `FFmpeg` ou `Deno`, o BaixALL realizará a atualização com substituição atômica e segura.
 
 > [!NOTE]
-> O aplicativo impede atualizações de ferramentas enquanto houver downloads ativos na fila para evitar corrupção de arquivos em uso.
+> Por segurança e para evitar corrupção de arquivos em uso, o BaixALL impede a atualização das ferramentas enquanto houver downloads ativos em execução.
 
 ---
 
-## 💿 Como Gerar o Instalador Windows
+## 🗑️ Desinstalação e Preservação de Dados
 
-Se o compilador do **Inno Setup** (`iscc.exe`) estiver instalado:
+Você pode desinstalar o BaixALL a qualquer momento com total segurança:
 
-```powershell
-iscc installer/BaixALL_Setup.iss
-```
-
-O instalador `BaixALL_Setup_v1.0.0.exe` será gerado automaticamente na pasta `installer_output/`. Ele:
-- Instala o executável self-contained;
-- Cria atalhos opcionais na Área de Trabalho e Menu Iniciar;
-- Registra o desinstalador oficial no Windows;
-- **Não apaga os vídeos baixados** ao desinstalar.
+1. Abra o menu **Iniciar** > **Configurações** > **Aplicativos** > **Aplicativos Instalados**.
+2. Localize **BaixALL** e clique em **Desinstalar** (ou utilize o atalho de desinstalação na pasta do Menu Iniciar).
+3. **Preservação de Dados:**
+   - **Seus vídeos baixados NUNCA são excluídos.** A desinstalação remove apenas os arquivos do programa.
+   - Suas preferências e histórico em `%LOCALAPPDATA%\BaixALL` são mantidos intactos, permitindo que você reinstale o aplicativo futuramente sem perder suas configurações.
 
 ---
 
-## ⚠️ Limitações Conhecidas e Segurança
+## ⚠️ Limitações Conhecidas
 
-- **Vídeos Privados / Protegidos por DRM:** O aplicativo não suporta download de vídeos privados ou com proteção DRM.
-- **Vídeos com Restrição de Idade:** Podem requerer autenticação ou desafio bot. O BaixALL inclui o Deno para responder a assinaturas de scripts modernos do YouTube, mas respeita as restrições impostas pela plataforma.
-- **Uso Responsável:** Utilize o BaixALL exclusivamente para baixar conteúdos sob permissão do autor ou sob regras de uso legítimo e domínio público.
+- **Vídeos Privados ou Restritos:** O BaixALL opera sem login do usuário por razões de privacidade. Portanto, vídeos marcados como privados ou que exijam login com verificação de idade rigorosa do YouTube podem não ser passíveis de download.
+- **Vídeos com DRM Comercial:** Vídeos protegidos por sistemas de gerenciamento de direitos digitais (DRM) não são suportados.
+- **Instabilidade na Conexão:** Downloads interrompidos por perda prolongada de sinal de rede podem necessitar de reinício.
+- **Não promessa de suporte universal:** O YouTube pode alterar seus algoritmos sem aviso prévio. Caso um vídeo falhe na análise, atualize o `yt-dlp` na aba Ferramentas.
+
+---
+
+## ⚖️ Aviso Legal e Direitos Autorais
+
+O **BaixALL** é uma ferramenta de software desenvolvida para fins educacionais, arquivamento pessoal e interoperabilidade técnica.
+
+> [!IMPORTANT]
+> O usuário é o único responsável pelo uso que faz do aplicativo. Certifique-se de baixar apenas vídeos e conteúdos sobre os quais você detenha os direitos autorais, que estejam em **Domínio Público**, disponibilizados sob licenças abertas (como **Creative Commons**) ou para os quais você possua autorização expressa do titular dos direitos. Não utilize o aplicativo para violar termos de serviço ou leis de propriedade intelectual vigentes.
+
+---
+
+## 📜 Licenças de Terceiros
+
+- O código-fonte do **BaixALL** está sob licença **MIT** (consulte o arquivo [LICENSE](LICENSE)).
+- Componentes de terceiros (`yt-dlp`, `FFmpeg`, `ffprobe`, `Deno` e bibliotecas .NET) possuem suas respectivas licenças e atribuições documentadas detalhadamente em [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

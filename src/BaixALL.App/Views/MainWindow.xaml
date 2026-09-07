@@ -6,6 +6,7 @@
         xmlns:views="clr-namespace:BaixALL.App.Views"
         mc:Ignorable="d"
         Title="BaixALL - Download de Vídeos do YouTube"
+        Icon="../Resources/icon.ico"
         Height="780" Width="1080"
         MinHeight="650" MinWidth="850"
         WindowStartupLocation="CenterScreen"
