@@ -43,6 +43,23 @@
     <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}" />
     <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}" />
     
+    <!-- Header Degradê Claro Refinado -->
+    <LinearGradientBrush x:Key="HeaderGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#FFFFFF" Offset="0.0" />
+        <GradientStop Color="#F4F8FC" Offset="0.65" />
+        <GradientStop Color="#E8F1FC" Offset="1.0" />
+    </LinearGradientBrush>
     <SolidColorBrush x:Key="HeaderBgBrush" Color="#FFFFFF" />
-    <SolidColorBrush x:Key="NavSelectedBgBrush" Color="#E5E5E5" />
+    <SolidColorBrush x:Key="HeaderBorderBrush" Color="#D0DFEE" />
+    
+    <!-- Navegação e Destaques Visuais -->
+    <SolidColorBrush x:Key="NavHoverBgBrush" Color="#E5EFF9" />
+    <SolidColorBrush x:Key="NavSelectedBgBrush" Color="#DAE9F7" />
+    <SolidColorBrush x:Key="NavSelectedBorderBrush" Color="{StaticResource AccentColor}" />
+    
+    <!-- Branding 'ALL' em Azul Tech -->
+    <SolidColorBrush x:Key="BrandAccentBrush" Color="#0284C7" />
+    
+    <!-- Elementos Decorativos de Fundo da Home (Baixa Opacidade) -->
+    <SolidColorBrush x:Key="HomeDecorBrush" Color="#94A3B8" />
 </ResourceDictionary>
