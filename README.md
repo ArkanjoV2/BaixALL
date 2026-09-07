@@ -16,9 +16,10 @@
 8. [Histórico de Downloads](#-histórico-de-downloads)
 9. [Atualização das Ferramentas](#-atualização-das-ferramentas)
 10. [Desinstalação e Preservação de Dados](#-desinstalação-e-preservação-de-dados)
-11. [Limitações Conhecidas](#-limitações-conhecidas)
-12. [Aviso Legal e Direitos Autorais](#-aviso-legal-e-direitos-autorais)
-13. [Licenças de Terceiros](#-licenças-de-terceiros)
+11. [Segurança, SmartScreen e Assinatura Digital](#-segurança-smartscreen-e-assinatura-digital)
+12. [Limitações Conhecidas](#-limitações-conhecidas)
+13. [Aviso Legal e Direitos Autorais](#-aviso-legal-e-direitos-autorais)
+14. [Licenças de Terceiros](#-licenças-de-terceiros)
 
 ---
 
@@ -143,6 +144,21 @@ Você pode desinstalar o BaixALL a qualquer momento com total segurança:
 
 ---
 
+## 🛡️ Segurança, SmartScreen e Assinatura Digital
+
+- **Aviso do Windows SmartScreen na Primeira Execução:**
+  Ao executar um instalador de código aberto recém-compilado, o Windows Defender SmartScreen pode exibir o diálogo *"O Windows protegeu o seu computador"*, informando que se trata de um aplicativo não comumente baixado.
+  - Para prosseguir, clique em **"Mais informações"** e em seguida no botão **"Executar assim mesmo"**.
+- **Distinção entre Assinatura Digital e Reputação do SmartScreen:**
+  - A **Assinatura Digital (Authenticode)** atesta a identidade do desenvolvedor e garante que o binário não sofreu alterações maliciosas após a compilação.
+  - A **Reputação do SmartScreen**, por sua vez, é um sistema autônomo baseado no volume e histórico de downloads benignos ao longo do tempo no ecossistema Windows. Mesmo softwares assinados digitalmente passam por um período inicial de acúmulo de reputação.
+- **Compromisso de Segurança:**
+  - O BaixALL **nunca desabilita** o Windows Defender, o SmartScreen ou quaisquer proteções nativas do sistema operacional.
+  - Não são utilizados certificados autoassinados fictícios que simulem falsamente uma autoridade certificadora pública.
+  - A integração de um certificado comercial Authenticode formal é considerada uma pendência opcional de distribuição para futuras versões de ampla escala pública.
+
+---
+
 ## ⚠️ Limitações Conhecidas
 
 - **Vídeos Privados ou Restritos:** O BaixALL opera sem login do usuário por razões de privacidade. Portanto, vídeos marcados como privados ou que exijam login com verificação de idade rigorosa do YouTube podem não ser passíveis de download.
@@ -164,4 +180,4 @@ O **BaixALL** é uma ferramenta de software desenvolvida para fins educacionais,
 ## 📜 Licenças de Terceiros
 
 - O código-fonte do **BaixALL** está sob licença **MIT** (consulte o arquivo [LICENSE](LICENSE)).
-- Componentes de terceiros (`yt-dlp`, `FFmpeg`, `ffprobe`, `Deno` e bibliotecas .NET) possuem suas respectivas licenças e atribuições documentadas detalhadamente em [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+- Componentes de terceiros (`yt-dlp`, `FFmpeg`, `ffprobe`, `Deno` e bibliotecas .NET) possuem suas respectivas licenças, configurações de build e ofertas de código-fonte documentadas detalhadamente em [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

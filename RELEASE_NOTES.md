@@ -33,3 +33,4 @@ O BaixALL é um aplicativo desktop nativo para Windows (desenvolvido em C# e .NE
 - **100% Local:** Sem telemetria, rastreamento ou chamadas a servidores de terceiros não autorizados.
 - **Desinstalação Segura:** O instalador e o desinstalador nunca excluem seus vídeos baixados ou dados pessoais.
 - **Código Aberto:** Licenciado sob a Licença MIT. Detalhes de componentes de terceiros em `THIRD-PARTY-NOTICES.md`.
+- **Aviso sobre o Windows SmartScreen:** Por ser um binário de código aberto recém-compilado, o SmartScreen pode exibir um alerta de reputação. Para executar, clique em *"Mais informações"* e *"Executar assim mesmo"*. O projeto não desativa proteções do sistema e trata a assinatura digital como uma etapa opcional de distribuição ampla.
