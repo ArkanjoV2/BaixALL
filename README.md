@@ -30,7 +30,7 @@
 ## 📋 Sumário
 
 - [Visão Geral](#-visão-geral)
-- [Capturas de Tela](#-capturas-de-tela)
+- [Apresentação da Interface](#-apresentação-da-interface)
 - [Recursos Principais](#-recursos-principais)
 - [Requisitos do Sistema](#-requisitos-do-sistema)
 - [Instalação](#-instalação)
@@ -49,66 +49,72 @@
 
 ## 💡 Visão Geral
 
-O **BaixALL** é um aplicativo desktop nativo desenvolvido em **C#** e **.NET 10** com interface gráfica moderna em **WPF** (padrão MVVM). Criado para proporcionar simplicidade e confiabilidade, ele integra ferramentas consagradas de código aberto (**yt-dlp**, **FFmpeg** e **Deno**) em um único fluxo acessível, sem anúncios, sem telemetria e com execução 100% local no seu computador.
+O **BaixALL** é um aplicativo desktop nativo desenvolvido em **C#** e **.NET 10** com interface gráfica em **WPF** (padrão MVVM). Criado para oferecer um fluxo prático e transparente, ele integra ferramentas consagradas de código aberto (**yt-dlp**, **FFmpeg** e **Deno**) em um único executável, sem anúncios, sem telemetria e com processamento local no seu computador.
 
 ---
 
-## 📸 Capturas de Tela
+## 🖥️ Apresentação da Interface
 
-Abaixo estão os pontos de destaque da interface do BaixALL:
+A interface do BaixALL é organizada em abas de navegação direta:
 
-| Aba Principal (Downloader) | Seleção de Resoluções e FPS |
-| :---: | :---: |
-| ![Tela Principal](docs/screenshots/01-home-analise.png) <br><sub>*Análise de link com título, miniatura e metadados*</sub> | ![Seleção de Qualidade](docs/screenshots/02-selecao-qualidade.png) <br><sub>*Menu inteligente com suporte a 4K e 60 FPS*</sub> |
+| Seção | Finalidade Principal |
+| :--- | :--- |
+| **Downloader (Home)** | Campo para inserção de links, análise com exibição de miniatura em alta resolução, título, canal, duração e escolha rápida de formato. |
+| **Seleção de Resoluções** | Menu inteligente de fluxos com suporte a resoluções de 360p até 4K (2160p) e identificação de 60 FPS quando disponível. |
+| **Fila de Downloads** | Acompanhamento em tempo real de itens ativos e em espera, percentual, velocidade de transferência e botão de cancelamento individual. |
+| **Histórico** | Registro local das conclusões com opções para reproduzir o arquivo de mídia diretamente ou destacá-lo no Windows Explorer. |
+| **Ferramentas** | Gerenciador integrado com status e atualização sob demanda de `yt-dlp`, `FFmpeg`, `ffprobe` e `Deno`. |
 
-| Fila de Downloads | Histórico Persistente |
-| :---: | :---: |
-| ![Fila de Downloads](docs/screenshots/03-fila-download.png) <br><sub>*Acompanhamento de progresso e cancelamento individual*</sub> | ![Histórico de Mídias](docs/screenshots/04-historico.png) <br><sub>*Histórico de conclusões com botões de abrir arquivo e pasta*</sub> |
-
-> ℹ️ *Caso deseje consultar detalhes ou adicionar novas capturas à documentação, consulte o [diretório de screenshots](docs/screenshots/README.md).*
+> ℹ️ *Capturas de tela reais da interface estão sendo organizadas e serão adicionadas em breve. Para consultar as diretrizes e especificações de imagens recomendadas, veja o [diretório de screenshots](docs/screenshots/README.md).*
 
 ---
 
 ## ✨ Recursos Principais
 
-- **Download com Mesclagem Automática:** Detecta as faixas separadas de vídeo e áudio fornecidas pelos servidores e realiza a união em alta definição utilizando o FFmpeg nos containers **MP4** ou **MKV**.
-- **Seleção de Resolução e FPS:** Escolha resoluções de 360p até 4K (2160p), com identificação clara de taxas de quadros elevadas (60 FPS ou 30 FPS).
-- **Modo Somente Áudio:** Extraia o áudio preservando o fluxo original (M4A/AAC ou Opus) ou converta para **MP3** (320 kbps estéreo) para máxima compatibilidade.
-- **Fila com Concorrência Configurável:** Adicione múltiplos downloads sucessivamente e controle o limite de concorrência (1, 2 ou 3 downloads simultâneos) na aba Configurações.
-- **Cancelamento Individual Seguro:** Interrompa um download específico em andamento sem interferir nos outros downloads ativos, limpando arquivos temporários parciais (`.part`, `.ytdl`).
-- **Histórico Persistente:** Registra downloads concluídos em arquivo local `%LOCALAPPDATA%\BaixALL\history.json`, com atalhos para abrir o arquivo no player ou destacá-lo no Windows Explorer.
-- **Gerenciamento Automático de Ferramentas:** Detecta, baixa e atualiza `yt-dlp`, `FFmpeg`, `ffprobe` e `Deno` diretamente dos lançamentos oficiais do GitHub, mantidos em pasta isolada (`%LOCALAPPDATA%\BaixALL\tools`) sem alterar o `PATH` do sistema.
-- **Autônomo (Self-Contained):** O runtime .NET 10 LTS já está embutido no aplicativo. Não é necessário instalar .NET SDK, Python, Node.js ou Visual Studio.
-- **Interface em Português:** Estilo visual Fluent inspirado no Windows 11, com suporte completo aos temas Claro e Escuro.
+- **Download com Mesclagem Automática:** Identifica os fluxos de vídeo e áudio fornecidos separadamente pela plataforma e realiza a junção nos containers **MP4** ou **MKV** utilizando o FFmpeg.
+- **Seleção de Resolução e FPS:** Escolha resoluções entre 360p e 4K (2160p), com suporte à taxa de 60 FPS quando oferecida pelo provedor de mídia.
+- **Modo Somente Áudio:** Extraia o áudio preservando o fluxo original (M4A/AAC ou Opus) ou realize a conversão para **MP3** (320 kbps estéreo) para maior compatibilidade com reprodutores diversos.
+- **Fila com Concorrência Configurável:** Enfileire múltiplos downloads sucessivamente com controle de 1, 2 ou 3 downloads concorrentes na aba Configurações.
+- **Cancelamento Individual:** Interrompa um download específico em andamento sem interferir nos demais itens ativos da fila, removendo arquivos temporários parciais (`.part`, `.ytdl`).
+- **Histórico Local:** Gravação das conclusões em arquivo JSON local (`%LOCALAPPDATA%\BaixALL\history.json`), com atalhos para abrir o arquivo de mídia ou localizá-lo na pasta de destino.
+- **Gerenciamento Automático de Ferramentas:** Detecta, baixa e atualiza `yt-dlp`, `FFmpeg`, `ffprobe` e `Deno` diretamente dos lançamentos oficiais do GitHub, mantidos em diretório isolado do usuário (`%LOCALAPPDATA%\BaixALL\tools`) sem modificar o `PATH` do sistema operacional.
+- **Distribuição Autônoma (Self-Contained):** O runtime .NET 10 LTS já está embutido no aplicativo. Não é necessária a instalação prévia de .NET SDK, Python, Node.js ou Visual Studio.
+- **Interface em Português:** Estilo visual moderno inspirado no Fluent Design do Windows 11, com suporte nativo a temas Claro e Escuro.
 
 ---
 
 ## 💻 Requisitos do Sistema
 
-- **Sistema Operacional:** Windows 10 (versão 1809 ou superior) ou Windows 11.
 - **Arquitetura:** 64-bit (x64 / AMD64).
-- **Runtimes Externos:** Nenhum (arquivos autônomos embutidos).
-- **Espaço Livre em Disco:** Mínimo de 300 MB para o programa e ferramentas auxiliares, além do espaço livre necessário para as mídias baixadas.
-- **Conexão:** Acesso à internet para análise de links e downloads.
+- **Sistema Operacional:**
+  - **Windows 11 (64-bit):** Totalmente suportado (sistema operacional com suporte oficial ativo pela Microsoft).
+  - **Windows 10 (64-bit):** Recomendado para versões mantidas no ciclo de suporte oficial da Microsoft (como edições 22H2 dentro do período de atualização ou canais LTSC corporativos).
+  - *Nota sobre versões legadas:* Embora o aplicativo seja tecnicamente executável em compilações x64 do Windows 10 a partir da versão 1809 (build 17763), o suporte e correções de segurança do sistema operacional dependem das políticas oficiais de ciclo de vida da Microsoft.
+- **Runtimes Externos:** Nenhum runtime adicional é necessário (binários autônomos embutidos).
+- **Espaço Livre em Disco:** Mínimo de 300 MB livres para a aplicação e ferramentas de apoio, além do espaço livre necessário para as mídias baixadas.
+- **Conexão:** Acesso à internet para análise e download de links e ferramentas.
 
 ---
 
 ## 🚀 Instalação
 
-Para instruções detalhadas, consulte o [Guia Completo de Instalação](docs/GUIA_INSTALACAO.md).
+Para instruções completas passo a passo, consulte o [Guia de Instalação](docs/GUIA_INSTALACAO.md).
 
 ### Opção 1: Instalador Oficial (Recomendado)
 1. Baixe o instalador oficial: [BaixALL-Setup-1.0.0.exe](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.0.0/BaixALL-Setup-1.0.0.exe).
-2. Execute o instalador e escolha se deseja criar atalhos na Área de Trabalho e no Menu Iniciar.
-3. A instalação ocorre no perfil do usuário (`%LOCALAPPDATA%\Programs\BaixALL`) sem exigir permissões de administrador.
+2. Execute o assistente de instalação e selecione se deseja criar atalhos na Área de Trabalho e no Menu Iniciar.
+3. A instalação é realizada na pasta do usuário (`%LOCALAPPDATA%\Programs\BaixALL`) sem exigir privilégios de administrador.
 
 ### Opção 2: Pacote Portátil
-1. Baixe o arquivo: [BaixALL-1.0.0-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.0.0/BaixALL-1.0.0-win-x64.zip).
+1. Baixe o arquivo compactado: [BaixALL-1.0.0-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.0.0/BaixALL-1.0.0-win-x64.zip).
 2. Extraia o conteúdo para a pasta de sua preferência.
-3. Dê um duplo clique no arquivo `BaixALL.exe` para iniciar imediatamente.
+3. Execute diretamente o arquivo `BaixALL.exe`.
 
-> 🛡️ **Sobre o aviso do Windows SmartScreen:**  
-> Por ser um projeto independente e recém-publicado, o Windows Defender SmartScreen pode exibir o alerta *"O Windows protegeu o seu computador"*. Trata-se de um aviso padrão de reputação para novos executáveis na nuvem da Microsoft. Para prosseguir: clique em **"Mais informações"** e depois no botão **"Executar assim mesmo"**. Consulte nosso [Guia de Instalação](docs/GUIA_INSTALACAO.md#3-avisos-de-reputação-do-windows-smartscreen) para mais detalhes.
+> 🛡️ **Orientações de Segurança sobre o Windows SmartScreen:**  
+> Ao executar o instalador ou executável em novas máquinas, o Windows Defender SmartScreen pode exibir um alerta de reputação (*"O Windows protegeu o seu computador"*). Isso ocorre porque programas recém-lançados ainda não acumularam histórico estatístico suficiente nos servidores da Microsoft.
+> - **Recomendação de segurança:** Sempre confirme que você baixou o arquivo da [Release oficial](https://github.com/ArkanjoV2/BaixALL/releases/tag/v1.0.0) e compare o hash SHA-256 com o arquivo [checksums.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.0.0/checksums.txt).
+> - **Não execute o arquivo se tiver dúvidas sobre sua autenticidade ou integridade.**
+> - O BaixALL não desabilita defesas do Windows e não utiliza certificados fictícios. Consulte a explicação detalhada no [Guia de Instalação](docs/GUIA_INSTALACAO.md#3-avisos-de-reputação-do-windows-smartscreen).
 
 ---
 
@@ -116,56 +122,54 @@ Para instruções detalhadas, consulte o [Guia Completo de Instalação](docs/GU
 
 ### 1. Analisar e Baixar um Vídeo
 1. Copie o endereço (URL) do vídeo do YouTube no navegador.
-2. Na aba **Downloader** do BaixALL, cole o link no campo de entrada e clique em **"Analisar"** (ou pressione `Enter`).
-3. O aplicativo exibirá título, miniatura em alta resolução, canal e duração.
-4. Clique em **"Baixar Vídeo"** (ou **"Baixar Áudio"**) para enviar à fila.
+2. Na aba inicial **Downloader** do BaixALL, cole o link no campo de entrada e clique em **"Analisar"** (ou pressione `Enter`).
+3. O aplicativo consultará os dados do vídeo e exibirá título, canal, miniatura e duração.
+4. Escolha a configuração desejada e clique em **"Baixar Vídeo"** (ou **"Baixar Áudio"**) para enviar à fila.
 
 ### 2. Selecionar Qualidade e Formato
-- **"Melhor qualidade disponível" (Padrão):** O BaixALL seleciona o fluxo de vídeo de resolução mais alta e a melhor faixa de áudio, mesclando-os automaticamente com o FFmpeg.
-- **Resoluções personalizadas:** Selecione opções como 2160p (4K), 1440p (2K), 1080p, 720p, etc., com suporte a taxas de 60 FPS quando fornecidas pela plataforma.
-- **Container:** Escolha entre **MP4** (máxima compatibilidade) ou **MKV**.
+- **"Melhor qualidade disponível" (Padrão):** O aplicativo seleciona a melhor faixa de vídeo e a melhor faixa de áudio disponibilizadas, unindo-as com o FFmpeg.
+- **Resoluções personalizadas:** Selecione resoluções como 2160p (4K), 1440p (2K), 1080p, 720p, etc., com identificação de 60 FPS quando disponível.
+- **Container:** Opções em **MP4** (ampla compatibilidade com reprodutores e dispositivos móveis) ou **MKV**.
 
 ### 3. Baixar Somente Áudio
-1. Marque a caixa **"Somente Áudio"** na tela inicial.
+1. Marque a caixa de seleção **"Somente Áudio"** na tela inicial.
 2. Selecione o formato desejado:
-   - **Melhor áudio disponível (Original):** Mantém a faixa original sem recodificação (geralmente M4A/AAC ou Opus em WebM).
-   - **M4A:** Codec AAC em container MP4, ideal para dispositivos Apple e reprodutores comuns.
-   - **Opus:** Codec de alta compressão e excelente fidelidade.
-   - **MP3:** Conversão em 320 kbps via FFmpeg para compatibilidade universal (aparelhos de som, rádios automotivos).
+   - **Melhor áudio disponível (Original):** Mantém a faixa de áudio original sem recodificação (geralmente M4A/AAC ou Opus em WebM).
+   - **M4A:** Codec AAC em container MP4, recomendado para dispositivos Apple e reprodutores comuns.
+   - **Opus:** Codec de alta fidelidade e compressão eficiente.
+   - **MP3:** Conversão em 320 kbps estéreo via FFmpeg para compatibilidade ampla.
 
 ### 4. Fila com Downloads Simultâneos
-- Acesse a aba **Fila** para acompanhar os itens ativos com barra de progresso, percentual, velocidade e tamanho transferido.
-- Na aba **Configurações**, configure o limite de downloads simultâneos (1, 2 ou 3). Ao concluir um download, o próximo item com status *Aguardando* inicia de forma automática.
-- Clicar no botão **"Cancelar"** encerra imediatamente o processo correspondente e limpa os arquivos parciais, sem interromper os demais downloads ativos.
+- Acesse a aba **Fila** para acompanhar os itens ativos com barra de progresso, percentual, velocidade estimada e tamanho transferido.
+- Na aba **Configurações**, configure o limite de downloads simultâneos (1, 2 ou 3). Ao concluir um download, o próximo item aguardando inicia automaticamente.
+- Clicar no botão **"Cancelar"** encerra imediatamente aquele processo e remove arquivos temporários parciais, mantendo intactos os outros downloads ativos.
 
 ### 5. Acessar o Histórico
-- Na aba **Histórico**, consulte o registro de mídias concluídas.
-- Use o botão **"Abrir arquivo"** para reproduzir a mídia no aplicativo padrão do Windows ou **"Abrir pasta"** para localizar o arquivo no Windows Explorer.
-- O botão **"Limpar Histórico"** limpa o registro visual sem apagar os arquivos físicos do disco.
+- Na aba **Histórico**, visualize a listagem de mídias concluídas.
+- Utilize o botão **"Abrir arquivo"** para reproduzir a mídia no aplicativo padrão do Windows ou **"Abrir pasta"** para localizá-la no Windows Explorer.
+- O botão **"Limpar Histórico"** remove os registros visuais sem apagar os arquivos físicos do disco.
 
 ### 6. Atualizar as Ferramentas
-O YouTube atualiza periodicamente seus formatos e desafios de assinatura.
+O YouTube atualiza periodicamente seus formatos e regras de entrega de mídia.
 - Acesse a aba **Ferramentas** (ou **Configurações**) e clique em **"Verificar Atualizações"**.
-- O aplicativo consultará os repositórios oficiais e atualizará `yt-dlp`, `FFmpeg` ou `Deno` de forma atômica e segura.
+- O aplicativo consultará os lançamentos oficiais e atualizará `yt-dlp`, `FFmpeg` ou `Deno` de forma atômica e segura.
 
 ---
 
 ## ⚠️ Limitações Conhecidas
 
-- **Disponibilidade no YouTube:** O BaixALL depende da disponibilidade dos vídeos e da capacidade do motor `yt-dlp`. Vídeos privados, vídeos restritos por região geográfica, conteúdos com proteção comercial por DRM ou com exigência de login com verificação humana não são suportados. **Não há promessa de compatibilidade universal com todo e qualquer vídeo.**
-- **Atualização das Ferramentas:** Caso uma URL apresente falha na análise, utilize a aba **Ferramentas** para atualizar o `yt-dlp` antes de relatar um problema.
-- **Instabilidade de Conexão:** Quedas prolongadas de rede durante downloads de arquivos pesados podem exigir o reinício do download correspondente.
+- **Disponibilidade no YouTube:** O BaixALL depende da disponibilidade dos vídeos e da capacidade técnica do motor `yt-dlp`. Vídeos privados, vídeos restritos por região geográfica, conteúdos com proteção comercial por DRM ou com exigência de login com desafios severos de verificação humana não são suportados. **Não há promessa de compatibilidade universal com todo e qualquer vídeo.**
+- **Atualização das Ferramentas:** Caso uma URL apresente falha na análise, utilize a aba **Ferramentas** para atualizar o `yt-dlp` antes de abrir um chamado de suporte.
+- **Conexão de Rede:** Quedas de conexão prolongadas durante downloads pesados podem exigir o reinício do download correspondente.
 
 ---
 
 ## 💬 Como Relatar Problemas e Obter Suporte
 
-Agradecemos o seu feedback para manter o BaixALL confiável:
-
 - **Encontrou um erro ou falha?** Abra um [Relato de Bug](https://github.com/ArkanjoV2/BaixALL/issues/new?template=bug_report.yml).
-- **Tem uma ideia de melhoria?** Abra uma [Sugestão de Funcionalidade](https://github.com/ArkanjoV2/BaixALL/issues/new?template=feature_request.yml).
-- **Dúvidas gerais de uso:** Consulte o nosso [Guia de Suporte](SUPPORT.md).
-- **Relatório Privado de Vulnerabilidades:** Consulte a nossa política em [SECURITY.md](SECURITY.md).
+- **Tem uma sugestão de melhoria?** Abra uma [Sugestão de Funcionalidade](https://github.com/ArkanjoV2/BaixALL/issues/new?template=feature_request.yml).
+- **Orientações gerais de suporte:** Consulte nosso [Guia de Suporte](SUPPORT.md).
+- **Relatório Privado de Vulnerabilidades:** Consulte a nossa política de divulgação responsável em [SECURITY.md](SECURITY.md).
 
 ---
 

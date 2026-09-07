@@ -32,9 +32,11 @@ Esta versão foi validada através de suíte de testes automatizados e verificad
 
 ## 💻 Requisitos do Sistema
 
-- **Sistema Operacional:** Windows 10 (versão 1809 ou superior) ou Windows 11.
 - **Arquitetura:** 64-bit (x64 / AMD64).
-- **Runtimes:** Nenhum runtime adicional necessário.
+- **Sistema Operacional:**
+  - **Windows 11:** Totalmente suportado (suporte ativo da Microsoft).
+  - **Windows 10:** Recomendado para versões mantidas no ciclo oficial de suporte da Microsoft (como 22H2 ou edições corporativas LTSC). O aplicativo requer no mínimo a build 17763 (versão 1809) para execução técnica básica das APIs, cabendo ao usuário manter seu sistema operacional com as atualizações de segurança oficiais.
+- **Runtimes Externos:** Nenhum runtime adicional necessário.
 - **Espaço Livre em Disco:** Pelo menos 300 MB livres para a aplicação e ferramentas auxiliares, além do espaço livre necessário para as mídias baixadas.
 - **Rede:** Conexão ativa com a internet.
 
@@ -44,8 +46,8 @@ Esta versão foi validada através de suíte de testes automatizados e verificad
 
 - **Disponibilidade no YouTube:** O BaixALL depende da disponibilidade dos vídeos e da capacidade técnica do motor `yt-dlp`. Vídeos privados, restritos por região geográfica, conteúdos com proteção comercial por DRM ou com exigência de login com desafios severos de verificação humana não são suportados. O projeto **não promete compatibilidade universal com todo e qualquer vídeo**.
 - **Atualização Contínua das Ferramentas:** Como a plataforma de vídeos atualiza periodicamente seus formatos e desafios, recomendamos utilizar a aba **Ferramentas** do BaixALL para verificar e atualizar o `yt-dlp` caso alguma análise falhe.
-- **Aviso de Reputação do Windows SmartScreen:**
-  O Windows Defender SmartScreen pode exibir um alerta de reputação (*"O Windows protegeu o seu computador"*) para novos binários de código aberto recém-lançados. Isso ocorre em virtude da ausência de histórico acumulado na nuvem da Microsoft e não representa ameaça.
-  - Para prosseguir: confirme a origem oficial da release, clique em **"Mais informações"** e no botão **"Executar assim mesmo"**.
+- **Avisos de Reputação do Windows SmartScreen:**
+  O Windows Defender SmartScreen pode exibir um alerta de reputação (*"O Windows protegeu o seu computador"*) para novos binários de código aberto recém-lançados, em razão da ausência de histórico estatístico acumulado nos servidores da Microsoft.
+  - **Orientações de Segurança:** Sempre confirme a procedência oficial da release e valide o hash SHA-256 contra o `checksums.txt`. Não execute o arquivo caso tenha dúvidas sobre a autenticidade ou integridade do download.
   - **Sobre Assinatura Digital:** Aplicativos novos podem apresentar avisos de reputação do SmartScreen mesmo quando assinados digitalmente (inclusive com certificados comerciais OV ou EV), uma vez que a reputação no ecossistema Windows é construída progressivamente com a adoção e telemetria ao longo do tempo. O BaixALL não desabilita proteções do sistema operacional e não utiliza certificados falsos/autoassinados. A assinatura com certificado comercial válido poderá ser avaliada futuramente.
 - **Desinstalação Segura:** O assistente de desinstalação remove estritamente os executáveis do programa. Seus vídeos salvos na pasta Downloads e os dados em `%LOCALAPPDATA%\BaixALL` permanecem preservados.
