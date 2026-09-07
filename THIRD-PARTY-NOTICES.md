@@ -22,7 +22,7 @@ O **BaixALL** foi desenhado com arquitetura de processos desacoplados:
 - O executável principal (`BaixALL.exe`) é uma aplicação autônoma em C# e .NET 10.
 - As ferramentas externas (`yt-dlp.exe`, `ffmpeg.exe`, `ffprobe.exe` e `deno.exe`) **não são linkadas estática ou dinamicamente** ao código-fonte ou aos binários do BaixALL.
 - A comunicação entre o BaixALL e as ferramentas externas ocorre exclusivamente no nível do sistema operacional através de processos independentes (`System.Diagnostics.Process`), passagem de argumentos via `ProcessStartInfo.ArgumentList` e leitura assíncrona de fluxos de entrada/saída (`stdout` / `stderr`).
-- No pacote de instalação padrão do BaixALL (`BaixALL-Setup-1.0.0-rc.1.exe`), os binários de terceiros não são embutidos; eles são baixados pelo usuário através do `DependencyManager` a partir de seus repositórios oficiais. Caso um pacote redistribuível completo futuro venha a incluir os binários pré-baixados, as obrigações da Seção 3 e Seção 6 da GPLv3 são plenamente satisfeitas pelas informações e ofertas de código-fonte aqui documentadas.
+- No pacote de instalação padrão do BaixALL (`BaixALL-Setup-1.0.0.exe`), os binários de terceiros não são embutidos; eles são baixados pelo usuário através do `DependencyManager` a partir de seus repositórios oficiais. Caso um pacote redistribuível completo futuro venha a incluir os binários pré-baixados, as obrigações da Seção 3 e Seção 6 da GPLv3 são plenamente satisfeitas pelas informações e ofertas de código-fonte aqui documentadas.
 
 ---
 
@@ -174,8 +174,13 @@ Todas as dependências NuGet utilizadas no BaixALL são de código aberto sob li
 
 ## 7. Status de Conformidade e Pendências Pré-Publicação
 
-1. **Separação de Processos:** Plenamente atendida. Não há links estáticos/dinâmicos com o FFmpeg.
-2. **Atribuições e Textos de Licença:** Plenamente atendidos e consolidados nesta documentação.
-3. **Oferta de Código-Fonte:** Plenamente atendida com a inclusão de links permanentes para os repositórios upstream e commits correspondentes.
-4. **Pendências Identificadas:**
-   - Caso uma distribuição empacotada "tudo-em-um" (offline bundle contendo os binários pré-baixados de FFmpeg/yt-dlp) seja criada no futuro, este arquivo `THIRD-PARTY-NOTICES.md` deverá acompanhar obrigatoriamente a raiz dessa distribuição.
+1. **Separação de Processos:** Plenamente atendida. Não há vinculação estática ou dinâmica (`.dll`/C-bindings) entre o código do BaixALL e as ferramentas externas.
+2. **Atribuições e Textos de Licença:** Textos integrais de licença e avisos de direitos autorais documentados formalmente neste arquivo.
+3. **Oferta de Código-Fonte:** Links permanentes fornecidos para os repositórios oficiais e commits exatos dos componentes.
+4. **Esclarecimento Legal sobre Conformidade GPLv3:** A inclusão do texto da licença e dos avisos de direitos autorais nesta documentação é uma exigência formal necessária, porém não é suficiente, por si só, para comprovar conformidade legal plena em todos os cenários de distribuição. A conformidade efetiva com a GPLv3 (Seção 6) exige também:
+   - A disponibilização contínua e acessível do código-fonte correspondente exato das ferramentas compiladas;
+   - A preservação estrita da fronteira de processos (comunicação CLI isolada via `Process.Start`);
+   - Caso uma versão empacotada futura inclua os binários compilados do FFmpeg pré-instalados no instalador, o distribuidor deverá disponibilizar ativamente o código-fonte correspondente e as instruções completas de compilação diretamente ao destinatário.
+5. **Pendências Identificadas para Distribuição Pública Ampla:**
+   - Obtenção opcional de certificado de assinatura de código Authenticode emitido por autoridade certificadora comercial para estabelecer reputação no Windows SmartScreen ao longo do tempo.
+   - Manutenção periódica dos links de download e verificação de novas versões das ferramentas através da aba Ferramentas.

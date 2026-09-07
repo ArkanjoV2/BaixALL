@@ -36,12 +36,12 @@
 
 O BaixALL está disponível em dois formatos de distribuição:
 
-### 1. Instalador Oficial (`BaixALL-Setup-1.0.0-rc.2.exe`)
+### 1. Instalador Oficial (`BaixALL-Setup-1.0.0.exe`)
 1. Baixe o executável de instalação.
 2. Execute o assistente de instalação. Você pode optar por criar um atalho na Área de Trabalho e no Menu Iniciar.
 3. Não são necessários privilégios de administrador obrigatórios para a instalação padrão no perfil do usuário (`%LOCALAPPDATA%\Programs\BaixALL` ou `Program Files`).
 
-### 2. Pacote Portátil (`BaixALL-1.0.0-rc.2-win-x64.zip`)
+### 2. Pacote Portátil (`BaixALL-1.0.0-win-x64.zip`)
 1. Baixe o arquivo compactado `.zip`.
 2. Extraia o conteúdo para a pasta de sua preferência.
 3. Execute diretamente o arquivo `BaixALL.exe`.

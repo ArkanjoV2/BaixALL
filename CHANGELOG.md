@@ -7,6 +7,20 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ---
 
+## [1.0.0] - 2026-09-07
+
+### Versão Estável Oficial (Definitiva)
+
+Primeira versão estável oficial do **BaixALL** para Windows 10 e Windows 11 (x64), totalmente validada e aprovada em ambiente limpo de máquina virtual:
+
+- **Validação Completa em VM Windows Limpa:** Confirmada a inicialização perfeita, resolução canônica de recursos BAML (pack URIs), carregamento do ícone oficial e ausência de dependências de desenvolvimento externas no sistema hospedeiro.
+- **Resiliência e Concorrência:** Motor de fila assíncrono com suporte a downloads concorrentes configuráveis (1, 2 ou 3), cancelamento seletivo de árvore de processos e isolamento estrito por job (`DownloadContext`).
+- **Blindagem Operacional:** Despachante WPF com fallback síncrono automático contra deadlocks e desligamentos, e sistema de logs detalhado com inspeção recursiva de toda a cadeia de `InnerException`.
+- **Suíte de Testes 100% Aprovada:** 122 testes automatizados cobrindo parsing de formatos, merge com FFmpeg, concorrência, histórico persistente e ciclo de vida da interface.
+- **Distribuição Segura:** Instalador Inno Setup e pacote portátil com integridade verificada via SHA-256 e desinstalador seguro que preserva vídeos e dados do usuário.
+
+---
+
 ## [1.0.0-rc.2] - 2026-09-07
 
 ### Release Candidate 2
