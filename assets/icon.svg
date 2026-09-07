@@ -1,34 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#0F1623" />
-      <stop offset="100%" stop-color="#080B12" />
+      <stop offset="0%" stop-color="#101726" />
+      <stop offset="100%" stop-color="#070A10" />
     </linearGradient>
-    <linearGradient id="glyphGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#38BDF8" />
-      <stop offset="100%" stop-color="#0284C7" />
+    <linearGradient id="playGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00C6FF" />
+      <stop offset="50%" stop-color="#008CF0" />
+      <stop offset="100%" stop-color="#005AC8" />
+    </linearGradient>
+    <linearGradient id="dockGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0096FF" />
+      <stop offset="50%" stop-color="#007CE6" />
+      <stop offset="100%" stop-color="#0054C2" />
     </linearGradient>
     <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="130%">
-      <feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#000000" flood-opacity="0.45" />
+      <feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#000000" flood-opacity="0.5" />
     </filter>
   </defs>
 
   <!-- Squircle Base -->
   <rect x="16" y="16" width="480" height="480" rx="104" ry="104"
-        fill="url(#bgGrad)" stroke="#1E304D" stroke-width="2.5" />
+        fill="url(#bgGrad)" stroke="#1E3558" stroke-width="2.5" />
   <rect x="18" y="18" width="476" height="476" rx="102" ry="102"
-        fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+        fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
 
-  <!-- Play Symbol Tech -->
-  <polygon points="194,140 212,126 358,223 370,234 358,245 212,342 194,328"
-           fill="url(#glyphGrad)" stroke="#7DD3FC" stroke-width="2.2"
+  <!-- Play Symbol Tech (Simétrico, Limpo e Forte) -->
+  <polygon points="176,140 196,124 354,218 368,230 354,242 196,336 176,320"
+           fill="url(#playGrad)" stroke="#7DD3FC" stroke-width="2.2"
            filter="url(#dropShadow)" stroke-linejoin="round" />
-  <!-- Faceta Interna Prisma -->
-  <polygon points="195,142 362,234 195,234"
-           fill="rgba(255,255,255,0.13)" />
 
-  <!-- Dock / Base Bar -->
-  <path d="M 124,376 L 388,376 A 10,10 0 0 1 398,386 L 398,422 A 10,10 0 0 1 388,432 L 310,432 L 297,414 L 215,414 L 202,432 L 124,432 A 10,10 0 0 1 114,422 L 114,386 A 10,10 0 0 1 124,376 Z"
-        fill="url(#glyphGrad)" stroke="#7DD3FC" stroke-width="2.2"
-        filter="url(#dropShadow)" stroke-linejoin="round" />
+  <!-- Dock / Base Bar com Entalhe Tecnológico e Degradê Rico -->
+  <polygon points="116,370 212,370 224,390 288,390 300,370 396,370 396,426 116,426"
+           fill="url(#dockGrad)" stroke="#7DD3FC" stroke-width="2.2"
+           filter="url(#dropShadow)" stroke-linejoin="round" />
 </svg>

@@ -43,25 +43,31 @@
     <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}" />
     <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}" />
     
-    <!-- Header Degradê Refinado: escuro profundo quase preto para azul muito sutil -->
+    <!-- Header Degradê Mais Azul e Presente (Adaptado do Light para o Dark) -->
     <LinearGradientBrush x:Key="HeaderGradientBrush" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#0F131C" Offset="0.0" />
-        <GradientStop Color="#131B29" Offset="0.65" />
-        <GradientStop Color="#182438" Offset="1.0" />
+        <GradientStop Color="#0B1E33" Offset="0.0" />
+        <GradientStop Color="#102844" Offset="0.5" />
+        <GradientStop Color="#143254" Offset="1.0" />
     </LinearGradientBrush>
-    <SolidColorBrush x:Key="HeaderBgBrush" Color="#111622" />
-    <SolidColorBrush x:Key="HeaderBorderBrush" Color="#222C3E" />
-    <SolidColorBrush x:Key="HeaderTextPrimaryBrush" Color="#F8FAFC" />
-    <SolidColorBrush x:Key="HeaderTextSecondaryBrush" Color="#94A3B8" />
+    <SolidColorBrush x:Key="HeaderBgBrush" Color="#0B1E33" />
+    <SolidColorBrush x:Key="HeaderBorderBrush" Color="#1A3D66" />
+    <SolidColorBrush x:Key="HeaderTextPrimaryBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="HeaderTextSecondaryBrush" Color="#CBD5E1" />
     
     <!-- Navegação e Destaques Visuais -->
-    <SolidColorBrush x:Key="NavHoverBgBrush" Color="#1E283A" />
-    <SolidColorBrush x:Key="NavSelectedBgBrush" Color="#1C273C" />
+    <SolidColorBrush x:Key="NavHoverBgBrush" Color="#1A3F6B" />
+    <SolidColorBrush x:Key="NavSelectedBgBrush" Color="#102947" />
     <SolidColorBrush x:Key="NavSelectedBorderBrush" Color="#38BDF8" />
     
     <!-- Branding 'ALL' em Azul Tech Vibrante -->
     <SolidColorBrush x:Key="BrandAccentBrush" Color="#38BDF8" />
     
-    <!-- Elementos Decorativos de Fundo da Home (Baixa Opacidade) -->
-    <SolidColorBrush x:Key="HomeDecorBrush" Color="#64748B" />
+    <!-- Elementos Decorativos de Fundo da Home (Tech Cyan Glow) -->
+    <SolidColorBrush x:Key="HomeDecorBrush" Color="#38BDF8" />
+
+    <!-- Barra de Rolagem (ScrollBar) Dark Moderna -->
+    <SolidColorBrush x:Key="ScrollBarTrackBrush" Color="#0B0F19" />
+    <SolidColorBrush x:Key="ScrollBarThumbBrush" Color="#334155" />
+    <SolidColorBrush x:Key="ScrollBarThumbHoverBrush" Color="#475569" />
+    <SolidColorBrush x:Key="ScrollBarThumbDraggingBrush" Color="#38BDF8" />
 </ResourceDictionary>

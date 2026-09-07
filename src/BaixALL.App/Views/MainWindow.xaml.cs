@@ -126,9 +126,9 @@ public partial class MainWindow : Window
             }
 
             // 2. Cor exata da barra superior no Windows 11 (DWMWA_CAPTION_COLOR em formato 0x00BBGGRR)
-            // Dark: #0F131C -> 0x001C130F
-            // Light: Deep Tech Blue #0B2239 -> 0x0039220B
-            int captionColor = isDark ? 0x001C130F : 0x0039220B;
+            // Dark: #0B1E33 -> 0x00331E0B
+            // Light: Refined Blue #1C3A60 -> 0x00603A1C
+            int captionColor = isDark ? 0x00331E0B : 0x00603A1C;
             DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, ref captionColor, sizeof(int));
 
             // 3. Cor do texto e ícones na barra de título (Branco puro nos dois temas)
