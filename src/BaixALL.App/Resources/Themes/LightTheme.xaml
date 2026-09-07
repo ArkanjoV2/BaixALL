@@ -62,8 +62,8 @@
     <!-- Branding 'ALL' em Azul Ciano Elétrico -->
     <SolidColorBrush x:Key="BrandAccentBrush" Color="#38BDF8" />
     
-    <!-- Elementos Decorativos de Fundo da Home (Linhas Azuis Tech Visíveis) -->
-    <SolidColorBrush x:Key="HomeDecorBrush" Color="#0284C7" />
+    <!-- Elementos Decorativos de Fundo da Home (Cinza Grafite Elegante e Visível) -->
+    <SolidColorBrush x:Key="HomeDecorBrush" Color="#475569" />
 
     <!-- Barra de Rolagem (ScrollBar) Light Sofisticada -->
     <SolidColorBrush x:Key="ScrollBarTrackBrush" Color="#F1F5F9" />

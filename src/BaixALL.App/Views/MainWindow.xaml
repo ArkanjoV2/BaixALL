@@ -209,61 +209,79 @@
                     </Style>
                 </Grid.Style>
 
-                <!-- ELEMENTOS VETORIAIS DECORATIVOS NO PLANO DE FUNDO (TECH WATERMARK AMPLIADO) -->
+                <!-- ELEMENTOS VETORIAIS DECORATIVOS NO PLANO DE FUNDO (WATERMARK CINZA AMPLIADO EM QUANTIDADE E ESCALA) -->
                 <!-- IsHitTestVisible="False" garante 0 interferência com cliques, seleção ou rolagem -->
-                <Grid IsHitTestVisible="False" Opacity="0.28" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Grid IsHitTestVisible="False" Opacity="0.45" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <!-- Topo Esquerdo: Waveform Amplo, Play e Marcador de Keyframe -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="32,20,0,0">
-                        <Path Data="{StaticResource DecorWaveform}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
-                              Stretch="Uniform" Width="180" Height="28" Margin="0,0,16,0" />
-                        <Path Data="{StaticResource DecorPlay}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.5"
-                              Stretch="Uniform" Width="28" Height="28" Margin="0,0,16,0" VerticalAlignment="Center" />
-                        <Path Data="{StaticResource DecorKeyframe}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.2"
-                              Stretch="Uniform" Width="52" Height="24" VerticalAlignment="Center" />
-                    </StackPanel>
-
-                    <!-- Topo Direito: Download Chevron, Timeline de Edição e Fotograma de Cinema -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,20,32,0">
-                        <Path Data="{StaticResource DecorFilmStrip}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.2"
-                              Stretch="Uniform" Width="44" Height="34" Margin="0,0,16,0" VerticalAlignment="Center" />
-                        <Path Data="{StaticResource DecorDownload}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="28,16,0,0">
+                        <Path Data="{StaticResource DecorWaveform}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="2.0"
+                              Stretch="Uniform" Width="230" Height="34" Margin="0,0,16,0" />
+                        <Path Data="{StaticResource DecorPlay}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.8"
                               Stretch="Uniform" Width="32" Height="32" Margin="0,0,16,0" VerticalAlignment="Center" />
-                        <Path Data="{StaticResource DecorTimeline}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.2"
-                              Stretch="Uniform" Width="160" Height="32" />
+                        <Path Data="{StaticResource DecorKeyframe}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="60" Height="28" VerticalAlignment="Center" />
                     </StackPanel>
 
-                    <!-- Meio Esquerdo: Nota Musical e Equalizador de Áudio -->
-                    <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="24,0,0,0">
-                        <Path Data="{StaticResource DecorMusic}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.5"
-                              Stretch="Uniform" Width="46" Height="46" Margin="0,0,0,16" />
-                        <Path Data="{StaticResource DecorEqualizer}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.3"
-                              Stretch="Uniform" Width="42" Height="36" />
+                    <!-- Topo Direito: Fotograma de Cinema, Download Chevron e Timeline Ampla -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,28,0">
+                        <Path Data="{StaticResource DecorFilmStrip}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="54" Height="42" Margin="0,0,16,0" VerticalAlignment="Center" />
+                        <Path Data="{StaticResource DecorDownload}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="2.0"
+                              Stretch="Uniform" Width="38" Height="38" Margin="0,0,16,0" VerticalAlignment="Center" />
+                        <Path Data="{StaticResource DecorTimeline}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="200" Height="36" />
                     </StackPanel>
 
-                    <!-- Meio Direito: Waveform Secundário e Play -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,24,0">
-                        <Path Data="{StaticResource DecorPlay}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.4"
-                              Stretch="Uniform" Width="26" Height="26" Margin="0,0,14,0" VerticalAlignment="Center" />
-                        <Path Data="{StaticResource DecorWaveform}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.4"
-                              Stretch="Uniform" Width="150" Height="26" VerticalAlignment="Center" />
+                    <!-- Flanco Superior Esquerdo: Nota Musical e Equalizador -->
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,110,0,0">
+                        <Path Data="{StaticResource DecorMusic}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.8"
+                              Stretch="Uniform" Width="50" Height="50" Margin="0,0,0,14" />
+                        <Path Data="{StaticResource DecorEqualizer}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="48" Height="40" />
                     </StackPanel>
 
-                    <!-- Base Esquerda: Fotograma de Vídeo e Timeline -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="32,0,0,24">
-                        <Path Data="{StaticResource DecorFilmStrip}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.2"
-                              Stretch="Uniform" Width="46" Height="34" Margin="0,0,16,0" VerticalAlignment="Center" />
-                        <Path Data="{StaticResource DecorTimeline}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.2"
-                              Stretch="Uniform" Width="150" Height="30" />
+                    <!-- Flanco Superior Direito: Equalizador e Play -->
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,110,20,0">
+                        <Path Data="{StaticResource DecorEqualizer}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="48" Height="40" Margin="0,0,0,14" />
+                        <Path Data="{StaticResource DecorPlay}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.8"
+                              Stretch="Uniform" Width="32" Height="32" HorizontalAlignment="Center" />
                     </StackPanel>
 
-                    <!-- Base Direita: Equalizador, Download Chevron e Play -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,32,24">
-                        <Path Data="{StaticResource DecorEqualizer}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.3"
-                              Stretch="Uniform" Width="44" Height="36" Margin="0,0,16,0" VerticalAlignment="Center" />
-                        <Path Data="{StaticResource DecorDownload}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
-                              Stretch="Uniform" Width="32" Height="32" Margin="0,0,14,0" VerticalAlignment="Center" />
-                        <Path Data="{StaticResource DecorPlay}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.4"
-                              Stretch="Uniform" Width="26" Height="26" VerticalAlignment="Center" />
+                    <!-- Flanco Inferior Esquerdo: Seta de Download e Waveform Médio -->
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="20,0,0,105">
+                        <Path Data="{StaticResource DecorDownload}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.8"
+                              Stretch="Uniform" Width="36" Height="36" Margin="0,0,0,12" />
+                        <Path Data="{StaticResource DecorWaveform}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="160" Height="26" />
+                    </StackPanel>
+
+                    <!-- Flanco Inferior Direito: Nota Musical e Keyframe -->
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,105">
+                        <Path Data="{StaticResource DecorMusic}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.8"
+                              Stretch="Uniform" Width="48" Height="48" Margin="0,0,0,12" />
+                        <Path Data="{StaticResource DecorKeyframe}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="56" Height="26" />
+                    </StackPanel>
+
+                    <!-- Base Esquerda: Fotograma de Vídeo, Timeline de Edição e Play -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="28,0,0,20">
+                        <Path Data="{StaticResource DecorFilmStrip}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="54" Height="42" Margin="0,0,16,0" VerticalAlignment="Center" />
+                        <Path Data="{StaticResource DecorTimeline}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="180" Height="34" Margin="0,0,14,0" VerticalAlignment="Center" />
+                        <Path Data="{StaticResource DecorPlay}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="28" Height="28" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <!-- Base Direita: Equalizador de Áudio, Seta Tecnológica e Timeline -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,28,20">
+                        <Path Data="{StaticResource DecorEqualizer}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="48" Height="40" Margin="0,0,16,0" VerticalAlignment="Center" />
+                        <Path Data="{StaticResource DecorDownload}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="2.0"
+                              Stretch="Uniform" Width="38" Height="38" Margin="0,0,16,0" VerticalAlignment="Center" />
+                        <Path Data="{StaticResource DecorTimeline}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="170" Height="34" VerticalAlignment="Center" />
                     </StackPanel>
                 </Grid>
 

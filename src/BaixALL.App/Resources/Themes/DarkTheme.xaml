@@ -62,8 +62,8 @@
     <!-- Branding 'ALL' em Azul Tech Vibrante -->
     <SolidColorBrush x:Key="BrandAccentBrush" Color="#38BDF8" />
     
-    <!-- Elementos Decorativos de Fundo da Home (Tech Cyan Glow) -->
-    <SolidColorBrush x:Key="HomeDecorBrush" Color="#38BDF8" />
+    <!-- Elementos Decorativos de Fundo da Home (Cinza Técnico Visível e Destacado) -->
+    <SolidColorBrush x:Key="HomeDecorBrush" Color="#94A3B8" />
 
     <!-- Barra de Rolagem (ScrollBar) Dark Moderna -->
     <SolidColorBrush x:Key="ScrollBarTrackBrush" Color="#0B0F19" />

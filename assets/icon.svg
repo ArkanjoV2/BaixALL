@@ -4,15 +4,15 @@
       <stop offset="0%" stop-color="#101726" />
       <stop offset="100%" stop-color="#070A10" />
     </linearGradient>
-    <linearGradient id="playGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00C6FF" />
-      <stop offset="50%" stop-color="#008CF0" />
-      <stop offset="100%" stop-color="#005AC8" />
+    <linearGradient id="playGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00D2FF" />
+      <stop offset="50%" stop-color="#0094F0" />
+      <stop offset="100%" stop-color="#0064D2" />
     </linearGradient>
     <linearGradient id="dockGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#0096FF" />
-      <stop offset="50%" stop-color="#007CE6" />
-      <stop offset="100%" stop-color="#0054C2" />
+      <stop offset="0%" stop-color="#00B4FF" />
+      <stop offset="50%" stop-color="#0084E6" />
+      <stop offset="100%" stop-color="#0050C8" />
     </linearGradient>
     <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="130%">
       <feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#000000" flood-opacity="0.5" />
@@ -25,13 +25,13 @@
   <rect x="18" y="18" width="476" height="476" rx="102" ry="102"
         fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
 
-  <!-- Play Symbol Tech (Simétrico, Limpo e Forte) -->
-  <polygon points="176,140 196,124 354,218 368,230 354,242 196,336 176,320"
-           fill="url(#playGrad)" stroke="#7DD3FC" stroke-width="2.2"
+  <!-- Play Symbol Tech (Ponta 100% Reta e Simétrica) -->
+  <polygon points="176,136 192,120 368,215 368,225 192,320 176,304"
+           fill="url(#playGrad)" stroke="#7DD3FC" stroke-width="2.0"
            filter="url(#dropShadow)" stroke-linejoin="round" />
 
-  <!-- Dock / Base Bar com Entalhe Tecnológico e Degradê Rico -->
-  <polygon points="116,370 212,370 224,390 288,390 300,370 396,370 396,426 116,426"
-           fill="url(#dockGrad)" stroke="#7DD3FC" stroke-width="2.2"
+  <!-- Barra Inferior Slim com Abertura Voltada para Baixo -->
+  <polygon points="128,366 384,366 388,370 388,394 308,394 294,376 218,376 204,394 124,394 124,370"
+           fill="url(#dockGrad)" stroke="#7DD3FC" stroke-width="2.0"
            filter="url(#dropShadow)" stroke-linejoin="round" />
 </svg>
