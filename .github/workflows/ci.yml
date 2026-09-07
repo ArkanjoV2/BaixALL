@@ -45,7 +45,7 @@ jobs:
 
       - name: Preservar relatórios e diagnósticos de testes
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results-and-diagnostics
           path: tests/**/TestResults/*
@@ -62,7 +62,7 @@ jobs:
 
       - name: Preservar artefato de teste (Build de Validação - Não Oficial)
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-validation-build-win-x64
           path: ./dist-ci-test
