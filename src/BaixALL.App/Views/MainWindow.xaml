@@ -31,7 +31,7 @@
             <Border.Effect>
                 <DropShadowEffect BlurRadius="16" ShadowDepth="3" Direction="270" Color="#000000" Opacity="0.32" />
             </Border.Effect>
-            <Grid Margin="24,0">
+            <Grid Margin="16,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
@@ -40,29 +40,30 @@
 
                 <!-- Logo e Nome do Aplicativo: 'Baix' Branco + 'ALL' Azul Tech -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Width="36" Height="36" Margin="0,0,12,0"
+                    <Border Width="36" Height="36" Margin="0,0,10,0"
                             Background="#111724"
                             BorderBrush="{DynamicResource HeaderBorderBrush}"
                             BorderThickness="1"
-                            CornerRadius="8">
-                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="22" Height="22">
-                            <Path Data="{StaticResource DecorPlay}" Fill="#223048" Stretch="Uniform" Width="13" Height="13"
-                                  HorizontalAlignment="Center" VerticalAlignment="Center" Margin="2,0,0,0" />
+                            CornerRadius="0">
+                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="22" Height="22" SnapsToDevicePixels="True">
                             <Path Data="{StaticResource IconBaixAll}" Fill="{DynamicResource BrandAccentBrush}"
-                                  Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                  Width="20" Height="20" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  SnapsToDevicePixels="True" />
                         </Grid>
                     </Border>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="Baix"
-                                   FontFamily="Bahnschrift, Segoe UI Variable Display, Segoe UI"
+                                   FontFamily="{StaticResource BrandFontFamily}"
                                    FontSize="22"
                                    FontWeight="Bold"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontStyle="Italic"
+                                   Foreground="{DynamicResource HeaderTextPrimaryBrush}"
                                    VerticalAlignment="Center" />
                         <TextBlock Text="ALL"
-                                   FontFamily="Bahnschrift, Segoe UI Variable Display, Segoe UI"
+                                   FontFamily="{StaticResource BrandFontFamily}"
                                    FontSize="22"
                                    FontWeight="Bold"
+                                   FontStyle="Italic"
                                    Foreground="{DynamicResource BrandAccentBrush}"
                                    VerticalAlignment="Center" />
                     </StackPanel>
@@ -71,8 +72,10 @@
                 <!-- Abas de Navegação com Indicador de Estado Ativo e Alto Contraste -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <!-- Aba Início / Baixar -->
-                    <Button Style="{StaticResource NavHomeButtonStyle}" Content="Início"
-                            Command="{Binding SwitchTabCommand}" CommandParameter="Downloader" />
+                    <Button Style="{StaticResource NavHomeButtonStyle}"
+                            Command="{Binding SwitchTabCommand}" CommandParameter="Downloader">
+                        <TextBlock Text="Início" VerticalAlignment="Center" />
+                    </Button>
 
                     <!-- Aba Fila de Downloads -->
                     <Button Style="{StaticResource NavQueueButtonStyle}"
@@ -81,7 +84,7 @@
                             <TextBlock Text="Fila de Downloads" VerticalAlignment="Center" />
                             <Border Background="{DynamicResource AccentBrush}" Padding="6,1" Margin="8,0,0,0"
                                     VerticalAlignment="Center"
-                                    CornerRadius="10"
+                                    CornerRadius="0"
                                     Visibility="{Binding ActiveDownloadsCount, Converter={StaticResource NullToVis}}">
                                 <TextBlock Text="{Binding ActiveDownloadsCount}" Foreground="White" FontSize="11" FontWeight="Bold" />
                             </Border>
@@ -89,24 +92,30 @@
                     </Button>
 
                     <!-- Aba Histórico -->
-                    <Button Style="{StaticResource NavHistoryButtonStyle}" Content="Histórico"
-                            Command="{Binding SwitchTabCommand}" CommandParameter="History" />
+                    <Button Style="{StaticResource NavHistoryButtonStyle}"
+                            Command="{Binding SwitchTabCommand}" CommandParameter="History">
+                        <TextBlock Text="Histórico" VerticalAlignment="Center" />
+                    </Button>
 
                     <!-- Aba Ferramentas -->
-                    <Button Style="{StaticResource NavToolsButtonStyle}" Content="Ferramentas"
-                            Command="{Binding SwitchTabCommand}" CommandParameter="Dependencies" />
+                    <Button Style="{StaticResource NavToolsButtonStyle}"
+                            Command="{Binding SwitchTabCommand}" CommandParameter="Dependencies">
+                        <TextBlock Text="Ferramentas" VerticalAlignment="Center" />
+                    </Button>
 
                     <!-- Aba Configurações -->
-                    <Button Style="{StaticResource NavSettingsButtonStyle}" Content="Configurações"
-                            Command="{Binding SwitchTabCommand}" CommandParameter="Settings" />
+                    <Button Style="{StaticResource NavSettingsButtonStyle}"
+                            Command="{Binding SwitchTabCommand}" CommandParameter="Settings">
+                        <TextBlock Text="Configurações" VerticalAlignment="Center" />
+                    </Button>
                 </StackPanel>
 
                 <!-- Indicador de Status das Ferramentas no Canto Superior - CLICÁVEL -->
                 <Button Grid.Column="2" Style="{StaticResource NavButtonStyle}"
                         Command="{Binding OpenToolsCommand}"
-                        Padding="4" VerticalAlignment="Center"
+                        Padding="2" VerticalAlignment="Center"
                         ToolTip="Clique para abrir o Gerenciador de Ferramentas">
-                    <Border Padding="10,4" CornerRadius="6">
+                    <Border Padding="8,4" CornerRadius="0">
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Setter Property="Background" Value="#1A107C41" />
@@ -201,43 +210,79 @@
                     </Style>
                 </Grid.Style>
 
-                <!-- ELEMENTOS VETORIAIS DECORATIVOS NO PLANO DE FUNDO (MINIMALISTAS TECH WATERMARK) -->
+                <!-- ELEMENTOS VETORIAIS DECORATIVOS NO PLANO DE FUNDO (WATERMARK CINZA AMPLIADO EM QUANTIDADE E ESCALA) -->
                 <!-- IsHitTestVisible="False" garante 0 interferência com cliques, seleção ou rolagem -->
-                <Grid IsHitTestVisible="False" Opacity="0.06" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                    <!-- Topo Esquerdo: Waveform de Áudio e Play Minimalista -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="40,24,0,0">
-                        <Path Data="{StaticResource DecorWaveform}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.5"
-                              Stretch="Uniform" Width="140" Height="24" Margin="0,0,16,0" />
-                        <Path Data="{StaticResource DecorPlay}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.2"
-                              Stretch="Uniform" Width="20" Height="20" VerticalAlignment="Center" />
+                <Grid IsHitTestVisible="False" Opacity="0.45" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <!-- Topo Esquerdo: Waveform Amplo, Play e Marcador de Keyframe -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="28,16,0,0">
+                        <Path Data="{StaticResource DecorWaveform}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="2.0"
+                              Stretch="Uniform" Width="230" Height="34" Margin="0,0,16,0" />
+                        <Path Data="{StaticResource DecorPlay}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.8"
+                              Stretch="Uniform" Width="32" Height="32" Margin="0,0,16,0" VerticalAlignment="Center" />
+                        <Path Data="{StaticResource DecorKeyframe}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="60" Height="28" VerticalAlignment="Center" />
                     </StackPanel>
 
-                    <!-- Topo Direito: Trilha de Vídeo / Timeline e Download Chevron -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,24,40,0">
-                        <Path Data="{StaticResource DecorDownload}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.5"
-                              Stretch="Uniform" Width="22" Height="22" Margin="0,0,16,0" VerticalAlignment="Center" />
-                        <Path Data="{StaticResource DecorTimeline}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.2"
-                              Stretch="Uniform" Width="120" Height="30" />
+                    <!-- Topo Direito: Fotograma de Cinema, Download Chevron e Timeline Ampla -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,28,0">
+                        <Path Data="{StaticResource DecorFilmStrip}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="54" Height="42" Margin="0,0,16,0" VerticalAlignment="Center" />
+                        <Path Data="{StaticResource DecorDownload}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="2.0"
+                              Stretch="Uniform" Width="38" Height="38" Margin="0,0,16,0" VerticalAlignment="Center" />
+                        <Path Data="{StaticResource DecorTimeline}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="200" Height="36" />
                     </StackPanel>
 
-                    <!-- Meio Esquerdo: Nota Musical Minimalista -->
-                    <Path Data="{StaticResource DecorMusic}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.2"
-                          Stretch="Uniform" Width="32" Height="32" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="30,0,0,0" />
+                    <!-- Flanco Superior Esquerdo: Nota Musical e Equalizador -->
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,110,0,0">
+                        <Path Data="{StaticResource DecorMusic}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.8"
+                              Stretch="Uniform" Width="50" Height="50" Margin="0,0,0,14" />
+                        <Path Data="{StaticResource DecorEqualizer}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="48" Height="40" />
+                    </StackPanel>
 
-                    <!-- Meio Direito: Waveform Secundário -->
-                    <Path Data="{StaticResource DecorWaveform}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.2"
-                          Stretch="Uniform" Width="120" Height="22" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,30,0" />
+                    <!-- Flanco Superior Direito: Equalizador e Play -->
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,110,20,0">
+                        <Path Data="{StaticResource DecorEqualizer}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="48" Height="40" Margin="0,0,0,14" />
+                        <Path Data="{StaticResource DecorPlay}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.8"
+                              Stretch="Uniform" Width="32" Height="32" HorizontalAlignment="Center" />
+                    </StackPanel>
 
-                    <!-- Base Esquerda: Timeline Notches -->
-                    <Path Data="{StaticResource DecorTimeline}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.0"
-                          Stretch="Uniform" Width="110" Height="26" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="40,0,0,30" />
+                    <!-- Flanco Inferior Esquerdo: Seta de Download e Waveform Médio -->
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="20,0,0,105">
+                        <Path Data="{StaticResource DecorDownload}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.8"
+                              Stretch="Uniform" Width="36" Height="36" Margin="0,0,0,12" />
+                        <Path Data="{StaticResource DecorWaveform}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="160" Height="26" />
+                    </StackPanel>
 
-                    <!-- Base Direita: Download Chevron + Play -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,40,30">
-                        <Path Data="{StaticResource DecorPlay}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.2"
-                              Stretch="Uniform" Width="18" Height="18" Margin="0,0,12,0" VerticalAlignment="Center" />
-                        <Path Data="{StaticResource DecorDownload}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.5"
-                              Stretch="Uniform" Width="24" Height="24" VerticalAlignment="Center" />
+                    <!-- Flanco Inferior Direito: Nota Musical e Keyframe -->
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,105">
+                        <Path Data="{StaticResource DecorMusic}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.8"
+                              Stretch="Uniform" Width="48" Height="48" Margin="0,0,0,12" />
+                        <Path Data="{StaticResource DecorKeyframe}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="56" Height="26" />
+                    </StackPanel>
+
+                    <!-- Base Esquerda: Fotograma de Vídeo, Timeline de Edição e Play -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="28,0,0,20">
+                        <Path Data="{StaticResource DecorFilmStrip}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="54" Height="42" Margin="0,0,16,0" VerticalAlignment="Center" />
+                        <Path Data="{StaticResource DecorTimeline}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="180" Height="34" Margin="0,0,14,0" VerticalAlignment="Center" />
+                        <Path Data="{StaticResource DecorPlay}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="28" Height="28" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <!-- Base Direita: Equalizador de Áudio, Seta Tecnológica e Timeline -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,28,20">
+                        <Path Data="{StaticResource DecorEqualizer}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="48" Height="40" Margin="0,0,16,0" VerticalAlignment="Center" />
+                        <Path Data="{StaticResource DecorDownload}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="2.0"
+                              Stretch="Uniform" Width="38" Height="38" Margin="0,0,16,0" VerticalAlignment="Center" />
+                        <Path Data="{StaticResource DecorTimeline}" Stroke="{DynamicResource HomeDecorBrush}" StrokeThickness="1.6"
+                              Stretch="Uniform" Width="170" Height="34" VerticalAlignment="Center" />
                     </StackPanel>
                 </Grid>
 
@@ -277,14 +322,15 @@
                                     Margin="0,0,10,0"
                                     Padding="14,10" />
 
-                            <!-- Botão Analisar -->
+                            <!-- Botão Analisar (Texto Branco Garantido) -->
                             <Button Grid.Column="2"
                                     Style="{StaticResource PrimaryButtonStyle}"
-                                    Content="Analisar"
                                     Command="{Binding AnalyzeCommand}"
                                     IsEnabled="{Binding CanAnalyze}"
                                     Padding="24,10"
-                                    ToolTip="Cole o link de um vídeo do YouTube para analisar as qualidades disponíveis" />
+                                    ToolTip="Cole o link de um vídeo do YouTube para analisar as qualidades disponíveis">
+                                <TextBlock Text="Analisar" Foreground="White" FontWeight="SemiBold" />
+                            </Button>
                         </Grid>
                     </Border>
 
@@ -367,7 +413,7 @@
 
                                 <!-- Seleção de Qualidade -->
                                 <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                                    <TextBlock Text="Qualidade do Vídeo" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6" />
+                                    <TextBlock Text="Qualidade do Vídeo" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
                                     <ComboBox ItemsSource="{Binding FormatOptions}" SelectedItem="{Binding SelectedFormat, Mode=TwoWay}"
                                               IsEnabled="{Binding IsAudioOnlyMode, Converter={StaticResource InverseBool}}" />
                                     <TextBlock Text="{Binding SelectedFormat.Description}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,4,0,0" />
@@ -375,7 +421,7 @@
 
                                 <!-- Formato / Container -->
                                 <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                                    <TextBlock Text="Formato / Container" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6" />
+                                    <TextBlock Text="Formato / Container" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
                                     <ComboBox ItemsSource="{Binding ContainerOptions}" SelectedItem="{Binding SelectedContainer, Mode=TwoWay}"
                                               IsEnabled="{Binding IsAudioOnlyMode, Converter={StaticResource InverseBool}}" />
                                     <TextBlock Text="Automático preserva a qualidade sem recodificar" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,4,0,0" />
@@ -387,14 +433,14 @@
                                 <StackPanel>
                                     <CheckBox Content="Baixar somente o áudio do vídeo"
                                               IsChecked="{Binding IsAudioOnlyMode, Mode=TwoWay}"
-                                              FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
+                                              FontWeight="SemiBold" FontSize="15" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
 
                                     <Grid Visibility="{Binding IsAudioOnlyMode, Converter={StaticResource BoolToVis}}">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Formato de áudio:" VerticalAlignment="Center" Margin="0,0,12,0" FontSize="13" />
+                                        <TextBlock Text="Formato de áudio:" VerticalAlignment="Center" Margin="0,0,12,0" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
                                         <ComboBox Grid.Column="1" ItemsSource="{Binding AudioFormatOptions}" SelectedItem="{Binding SelectedAudioFormat, Mode=TwoWay}" />
                                     </Grid>
                                 </StackPanel>
@@ -402,7 +448,7 @@
 
                             <!-- Pasta de Destino -->
                             <StackPanel Margin="0,0,0,20">
-                                <TextBlock Text="Salvar em" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6" />
+                                <TextBlock Text="Salvar em" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />

@@ -1,54 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <!-- Gradiente de Fundo Squircle -->
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0E121A"/>
-      <stop offset="100%" stop-color="#080B11"/>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#101726" />
+      <stop offset="100%" stop-color="#070A10" />
     </linearGradient>
-
-    <!-- Gradiente da Borda Externa -->
-    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#2D5FA0" stop-opacity="0.65"/>
-      <stop offset="100%" stop-color="#142846" stop-opacity="0.25"/>
+    <linearGradient id="playGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00D2FF" />
+      <stop offset="50%" stop-color="#0094F0" />
+      <stop offset="100%" stop-color="#0064D2" />
     </linearGradient>
-
-    <!-- Gradiente do Triângulo Play Translúcido -->
-    <linearGradient id="playGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00A0FF" stop-opacity="0.18"/>
-      <stop offset="100%" stop-color="#0064DC" stop-opacity="0.06"/>
+    <linearGradient id="dockGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00B4FF" />
+      <stop offset="50%" stop-color="#0084E6" />
+      <stop offset="100%" stop-color="#0050C8" />
     </linearGradient>
-
-    <!-- Gradiente da Seta de Download -->
-    <linearGradient id="arrowGrad" x1="50%" y1="0%" x2="50%" y2="100%">
-      <stop offset="0%" stop-color="#00B4FF"/>
-      <stop offset="100%" stop-color="#006EEB"/>
-    </linearGradient>
-
-    <!-- Gradiente da Base / Tray -->
-    <linearGradient id="trayGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#008CF0"/>
-      <stop offset="100%" stop-color="#005AC8"/>
-    </linearGradient>
-
-    <!-- Reflexo de Vidro Superior -->
-    <linearGradient id="glassGrad" x1="50%" y1="0%" x2="50%" y2="100%">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.15"/>
-      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.0"/>
-    </linearGradient>
+    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
   </defs>
 
-  <!-- Fundo Squircle com Cantos Arredondados -->
-  <rect x="3" y="3" width="94" height="94" rx="22" ry="22" fill="url(#bgGrad)" stroke="url(#borderGrad)" stroke-width="1.8"/>
+  <!-- Squircle Base -->
+  <rect x="16" y="16" width="480" height="480" rx="104" ry="104"
+        fill="url(#bgGrad)" stroke="#1E3558" stroke-width="2.5" />
+  <rect x="18" y="18" width="476" height="476" rx="102" ry="102"
+        fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
 
-  <!-- Brilho de Vidro Superior -->
-  <rect x="7" y="5" width="86" height="26" rx="11" ry="11" fill="url(#glassGrad)"/>
+  <!-- Play Symbol Tech (Ponta 100% Reta e Simétrica) -->
+  <polygon points="176,136 192,120 368,215 368,225 192,320 176,304"
+           fill="url(#playGrad)" stroke="#7DD3FC" stroke-width="2.0"
+           filter="url(#dropShadow)" stroke-linejoin="round" />
 
-  <!-- Triângulo Play de Mídia (Fundo) -->
-  <polygon points="34,26 72,48 34,70" fill="url(#playGrad)"/>
-
-  <!-- Seta Principal de Download Tecnológica -->
-  <polygon points="41,19 59,19 59,45 75,45 50,71 25,45 41,45" fill="url(#arrowGrad)" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="0.8"/>
-
-  <!-- Dock / Tray de Mídia com Entalhe Tecnológico -->
-  <polygon points="23,76 77,76 77,83 68,83 62,80 38,80 32,83 23,83" fill="url(#trayGrad)"/>
+  <!-- Barra Inferior Slim com Abertura Voltada para Baixo -->
+  <polygon points="128,366 384,366 388,370 388,394 308,394 294,376 218,376 204,394 124,394 124,370"
+           fill="url(#dockGrad)" stroke="#7DD3FC" stroke-width="2.0"
+           filter="url(#dropShadow)" stroke-linejoin="round" />
 </svg>

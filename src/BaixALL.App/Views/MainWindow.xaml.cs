@@ -1,5 +1,7 @@
 using System;
+using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Interop;
 using BaixALL.App.ViewModels;
 using Microsoft.Win32;
 
@@ -18,8 +20,14 @@ public partial class MainWindow : Window
         _viewModel.SettingsVm.ThemeChanged += OnThemeChanged;
         ApplyTheme(_viewModel.SettingsVm.Theme);
 
+        SourceInitialized += (_, _) =>
+        {
+            ApplyTitleBarTheme(_viewModel.SettingsVm.Theme);
+        };
+
         Loaded += async (_, _) =>
         {
+            ApplyTitleBarTheme(_viewModel.SettingsVm.Theme);
             await _viewModel.InitializeStartupAsync();
         };
 
@@ -81,7 +89,65 @@ public partial class MainWindow : Window
         {
             appResources.Insert(0, newDict);
         }
+
+        ApplyTitleBarTheme(theme);
     }
+
+    private void ApplyTitleBarTheme(string theme)
+    {
+        try
+        {
+            var isDark = true;
+            if (theme.Equals("Light", StringComparison.OrdinalIgnoreCase))
+            {
+                isDark = false;
+            }
+            else if (theme.Equals("Dark", StringComparison.OrdinalIgnoreCase))
+            {
+                isDark = true;
+            }
+            else // System
+            {
+                isDark = IsSystemInDarkMode();
+            }
+
+            var helper = new WindowInteropHelper(this);
+            var hwnd = helper.Handle;
+            if (hwnd == IntPtr.Zero)
+            {
+                return;
+            }
+
+            // 1. Modo escuro imersivo no Windows 10 (19041+) e Windows 11
+            int darkMode = isDark ? 1 : 0;
+            if (DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkMode, sizeof(int)) != 0)
+            {
+                DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1, ref darkMode, sizeof(int));
+            }
+
+            // 2. Cor exata da barra superior no Windows 11 (DWMWA_CAPTION_COLOR em formato 0x00BBGGRR)
+            // Dark: #0B1E33 -> 0x00331E0B
+            // Light: Refined Blue #1C3A60 -> 0x00603A1C
+            int captionColor = isDark ? 0x00331E0B : 0x00603A1C;
+            DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, ref captionColor, sizeof(int));
+
+            // 3. Cor do texto e ícones na barra de título (Branco puro nos dois temas)
+            int textColor = 0x00FFFFFF;
+            DwmSetWindowAttribute(hwnd, DWMWA_TEXT_COLOR, ref textColor, sizeof(int));
+        }
+        catch
+        {
+            // Silencioso se executado em ambiente sem suporte a DWM ou versões antigas do Windows
+        }
+    }
+
+    [DllImport("dwmapi.dll", PreserveSig = true)]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+    private const int DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19;
+    private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+    private const int DWMWA_CAPTION_COLOR = 35;
+    private const int DWMWA_TEXT_COLOR = 36;
 
     private static bool IsSystemInDarkMode()
     {

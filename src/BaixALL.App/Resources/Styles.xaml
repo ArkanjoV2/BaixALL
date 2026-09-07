@@ -8,6 +8,8 @@
     <converters:NullToVisibilityConverter x:Key="NullToVis" />
     <converters:NullToVisibilityConverter x:Key="InverseNullToVis" Invert="True" />
     <converters:StatusToColorConverter x:Key="StatusToColor" />
+    <!-- Fonte Oficial de Branding para o Logotipo BaixALL (Chakra Petch Bold Italic) -->
+    <FontFamily x:Key="BrandFontFamily">pack://application:,,,/BaixALL;component/Resources/Fonts/#Chakra Petch, Bahnschrift, Segoe UI</FontFamily>
 
     <!-- Estilo Base para Texto / Tipografia Segoe UI Variable -->
     <Style TargetType="TextBlock">
@@ -15,10 +17,10 @@
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
     </Style>
 
-    <!-- Botão Primário (Accent) - Cantos Retos (CornerRadius="0") -->
+    <!-- Botão Primário (Accent) - Cantos Retos (CornerRadius="0") com Texto Branco Garantido -->
     <Style x:Key="PrimaryButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
-        <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+        <Setter Property="Foreground" Value="White" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="Padding" Value="16,9" />
@@ -27,6 +29,12 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
+                    <ControlTemplate.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="White" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                        </Style>
+                    </ControlTemplate.Resources>
                     <Border x:Name="border"
                             Background="{TemplateBinding Background}"
                             CornerRadius="0"
@@ -41,7 +49,8 @@
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentPressedBrush}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="border" Property="Opacity" Value="0.45" />
+                            <Setter TargetName="border" Property="Opacity" Value="0.5" />
+                            <Setter Property="Foreground" Value="White" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -82,29 +91,42 @@
         </Setter>
     </Style>
 
-    <!-- Botão de Navegação / Tab Refinado com Hover Suave e Cantos Leves -->
+    <!-- Botão de Navegação / Tab Refinado com Cantos Retos e Linhas Limpas -->
     <Style x:Key="NavButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource HeaderTextSecondaryBrush}" />
         <Setter Property="FontWeight" Value="Medium" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="Padding" Value="14,8" />
-        <Setter Property="Margin" Value="3,0" />
-        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FontSize" Value="13.5" />
+        <Setter Property="Padding" Value="8,6" />
+        <Setter Property="Margin" Value="1,0" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
+                    <ControlTemplate.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            <Setter Property="FontWeight" Value="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=FontWeight}" />
+                        </Style>
+                        <Style TargetType="AccessText">
+                            <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            <Setter Property="FontWeight" Value="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=FontWeight}" />
+                        </Style>
+                    </ControlTemplate.Resources>
                     <Border x:Name="border"
                             Background="{TemplateBinding Background}"
-                            CornerRadius="6"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="0"
                             Padding="{TemplateBinding Padding}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource NavHoverBgBrush}" />
-                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource HeaderTextPrimaryBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -112,13 +134,14 @@
         </Setter>
     </Style>
 
-    <!-- Estilos de Abas de Navegação com Indicador de Estado Ativo -->
+    <!-- Estilos de Abas de Navegação com Indicador de Estado Ativo (Cantos Retos) -->
     <Style x:Key="NavHomeButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding CurrentTab}" Value="Downloader">
-                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource HeaderTextPrimaryBrush}" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="Background" Value="{DynamicResource NavSelectedBgBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource NavSelectedBorderBrush}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -126,9 +149,10 @@
     <Style x:Key="NavQueueButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding CurrentTab}" Value="Queue">
-                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource HeaderTextPrimaryBrush}" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="Background" Value="{DynamicResource NavSelectedBgBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource NavSelectedBorderBrush}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -136,9 +160,10 @@
     <Style x:Key="NavHistoryButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding CurrentTab}" Value="History">
-                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource HeaderTextPrimaryBrush}" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="Background" Value="{DynamicResource NavSelectedBgBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource NavSelectedBorderBrush}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -146,9 +171,10 @@
     <Style x:Key="NavToolsButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding CurrentTab}" Value="Dependencies">
-                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource HeaderTextPrimaryBrush}" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="Background" Value="{DynamicResource NavSelectedBgBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource NavSelectedBorderBrush}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -156,9 +182,10 @@
     <Style x:Key="NavSettingsButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding CurrentTab}" Value="Settings">
-                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource HeaderTextPrimaryBrush}" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="Background" Value="{DynamicResource NavSelectedBgBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource NavSelectedBorderBrush}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -442,6 +469,97 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <!-- Barra de Rolagem (ScrollBar) Moderna e Tecnológica - Cantos Retos e Cores Coerentes -->
+    <Style x:Key="ModernScrollBarThumbStyle" TargetType="{x:Type Thumb}">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Thumb}">
+                    <Border x:Name="thumbBorder"
+                            Background="{DynamicResource ScrollBarThumbBrush}"
+                            CornerRadius="0" />
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="thumbBorder" Property="Background" Value="{DynamicResource ScrollBarThumbHoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsDragging" Value="True">
+                            <Setter TargetName="thumbBorder" Property="Background" Value="{DynamicResource ScrollBarThumbDraggingBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ScrollBarTrackPageButtonStyle" TargetType="{x:Type RepeatButton}">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type RepeatButton}">
+                    <Rectangle Fill="{TemplateBinding Background}" Height="{TemplateBinding Height}" Width="{TemplateBinding Width}" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type ScrollBar}">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="Background" Value="{DynamicResource ScrollBarTrackBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Vertical">
+                <Setter Property="Width" Value="8" />
+                <Setter Property="MinWidth" Value="8" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ScrollBar}">
+                            <Grid Background="{TemplateBinding Background}">
+                                <Track x:Name="PART_Track" IsDirectionReversed="True" HorizontalAlignment="Center">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Style="{StaticResource ScrollBarTrackPageButtonStyle}" Command="{x:Static ScrollBar.PageUpCommand}" />
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb Style="{StaticResource ModernScrollBarThumbStyle}" Width="8" />
+                                    </Track.Thumb>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Style="{StaticResource ScrollBarTrackPageButtonStyle}" Command="{x:Static ScrollBar.PageDownCommand}" />
+                                    </Track.IncreaseRepeatButton>
+                                </Track>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Height" Value="8" />
+                <Setter Property="MinHeight" Value="8" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ScrollBar}">
+                            <Grid Background="{TemplateBinding Background}">
+                                <Track x:Name="PART_Track" HorizontalAlignment="Center">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Style="{StaticResource ScrollBarTrackPageButtonStyle}" Command="{x:Static ScrollBar.PageLeftCommand}" />
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb Style="{StaticResource ModernScrollBarThumbStyle}" Height="8" />
+                                    </Track.Thumb>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Style="{StaticResource ScrollBarTrackPageButtonStyle}" Command="{x:Static ScrollBar.PageRightCommand}" />
+                                    </Track.IncreaseRepeatButton>
+                                </Track>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
 </ResourceDictionary>

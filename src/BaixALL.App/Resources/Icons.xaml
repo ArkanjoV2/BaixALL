@@ -2,20 +2,26 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- Ícones vetoriais modernos em Geometria XAML -->
-    <!-- Ícone Oficial BaixALL (Precision Downloader Arrow + Tray) -->
-    <Geometry x:Key="IconBaixAll">F1 M41,19 L59,19 L59,45 L75,45 L50,71 L25,45 L41,45 Z M23,76 L77,76 L77,83 L68,83 L62,80 L38,80 L32,83 L23,83 Z</Geometry>
+    <!-- Ícone Oficial BaixALL (Straight Symmetrical Play + Inverted Calibrated Dock Tray para nitidez e consistência) -->
+    <Geometry x:Key="IconBaixAll">M35,27 L38,24 L72,42 L72,44 L38,62 L35,59 Z M25,69 L75,69 L76,70 L76,79.5 L60,79.5 L57,74.5 L43,74.5 L40,79.5 L24,79.5 L24,70 Z</Geometry>
     
-    <!-- Elementos Decorativos Minimalistas de Fundo (Home Watermark) -->
-    <!-- Play Outline Minimalista -->
-    <Geometry x:Key="DecorPlay">M8,6 L38,24 L8,42 Z</Geometry>
+    <!-- Elementos Decorativos de Fundo da Home (Vídeo, Áudio, Download e Edição) -->
+    <!-- Play Outline Estilizado -->
+    <Geometry x:Key="DecorPlay">M6,4 L38,24 L6,44 Z</Geometry>
     <!-- Seta / Chevron de Download Tecnológica -->
-    <Geometry x:Key="DecorDownload">M6,8 L24,26 L42,8 M24,4 L24,24</Geometry>
-    <!-- Trilha de Mídia / Timeline de Vídeo -->
-    <Geometry x:Key="DecorTimeline">M0,0 H120 V32 H0 Z M0,6 H120 M0,26 H120 M15,0 V6 M30,0 V6 M45,0 V6 M60,0 V6 M75,0 V6 M90,0 V6 M105,0 V6 M15,26 V32 M30,26 V32 M45,26 V32 M60,26 V32 M75,26 V32 M90,26 V32 M105,26 V32</Geometry>
+    <Geometry x:Key="DecorDownload">M4,6 L24,26 L44,6 M24,2 L24,24 M10,34 H38</Geometry>
+    <!-- Trilha de Mídia / Timeline de Edição de Vídeo -->
+    <Geometry x:Key="DecorTimeline">M0,0 H160 V36 H0 Z M0,8 H160 M0,28 H160 M20,0 V8 M40,0 V8 M60,0 V8 M80,0 V8 M100,0 V8 M120,0 V8 M140,0 V8 M20,28 V36 M40,28 V36 M60,28 V36 M80,28 V36 M100,28 V36 M120,28 V36 M140,28 V36</Geometry>
     <!-- Onda Senoidal / Waveform de Áudio -->
-    <Geometry x:Key="DecorWaveform">M0,20 Q15,2 30,20 T60,20 T90,20 T120,20 T150,20 T180,20</Geometry>
-    <!-- Nota Musical Minimalista -->
-    <Geometry x:Key="DecorMusic">M22,6 L42,2 V24 A6,6 0 1,1 36,20 V10 L26,12 V28 A6,6 0 1,1 20,24 V6 Z</Geometry>
+    <Geometry x:Key="DecorWaveform">M0,24 Q20,2 40,24 T80,24 T120,24 T160,24 T200,24 T240,24</Geometry>
+    <!-- Nota Musical Dupla -->
+    <Geometry x:Key="DecorMusic">M20,8 L48,3 V28 A7,7 0 1,1 41,24 V12 L24,15 V32 A7,7 0 1,1 17,28 V8 Z</Geometry>
+    <!-- Equalizador / Sliders de Áudio -->
+    <Geometry x:Key="DecorEqualizer">M4,4 V36 M4,18 H10 M16,4 V36 M16,26 H22 M28,4 V36 M28,10 H34 M40,4 V36 M40,22 H46</Geometry>
+    <!-- Fotograma / Tira de Película de Vídeo -->
+    <Geometry x:Key="DecorFilmStrip">M0,0 H52 V40 H0 Z M10,0 V40 M42,0 V40 M0,10 H10 M0,20 H10 M0,30 H10 M42,10 H52 M42,20 H52 M42,30 H52</Geometry>
+    <!-- Marcador de Keyframe de Linha de Tempo -->
+    <Geometry x:Key="DecorKeyframe">M0,20 H64 M32,4 L46,20 L32,36 L18,20 Z</Geometry>
     
     <!-- Download -->
     <Geometry x:Key="IconDownload">M19,9h-4V3H9v6H5l7,7 7,-7z M5,18v2h14v-2H5z</Geometry>

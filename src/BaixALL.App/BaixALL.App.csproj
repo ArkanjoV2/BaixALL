@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <Resource Include="Resources\icon.ico" />
+    <Resource Include="Resources\Fonts\**\*.ttf" />
   </ItemGroup>
 
   <ItemGroup>
