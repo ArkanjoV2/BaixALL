@@ -1,6 +1,6 @@
-# BaixALL 1.0.0-rc.1 — Release Candidate 1
+# BaixALL 1.0.0 — Lançamento Oficial (Versão Estável)
 
-Temos o prazer de anunciar a **Release Candidate 1** do **BaixALL 1.0.0** para Windows x64!
+Temos o orgulho de apresentar a **versão 1.0.0 estável oficial** do **BaixALL** para Windows 10 e Windows 11 (x64)!
 
 O BaixALL é um aplicativo desktop nativo para Windows (desenvolvido em C# e .NET 10 LTS com WPF) para download de vídeos e extração de áudios do YouTube com máxima qualidade, preservação de metadados, controle de concorrência e privacidade total.
 
@@ -10,13 +10,13 @@ O BaixALL é um aplicativo desktop nativo para Windows (desenvolvido em C# e .NE
 
 | Arquivo | Descrição |
 | :--- | :--- |
-| `BaixALL-Setup-1.0.0-rc.1.exe` | Instalador oficial para Windows 10/11 (x64) com assistente de instalação |
-| `BaixALL-1.0.0-rc.1-win-x64.zip` | Pacote portátil (extrair e executar `BaixALL.exe`) |
+| `BaixALL-Setup-1.0.0.exe` | Instalador oficial para Windows 10/11 (x64) com assistente de instalação |
+| `BaixALL-1.0.0-win-x64.zip` | Pacote portátil (extrair e executar `BaixALL.exe`) |
 | `checksums.txt` | Hashes de integridade SHA-256 de todos os arquivos |
 
 ---
 
-## 🚀 Destaques desta Versão
+## 🚀 Destaques da Versão 1.0.0
 
 - **Qualidade Máxima com FFmpeg Merge:** Suporte a vídeos em até 4K 60 FPS com mesclagem transparente de fluxos separados de áudio e vídeo sem recodificação desnecessária.
 - **Modo Somente Áudio:** Extraia e converta áudios nos formatos Original, M4A, Opus e MP3 em alta qualidade.

@@ -7,6 +7,18 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ---
 
+## [1.0.0] - 2026-09-07
+
+### Versão Estável Oficial (Lançamento Oficial)
+
+Primeiro lançamento estável oficial do **BaixALL** para Windows 10 e Windows 11 (x64), após ciclo completo de testes unitários (121 testes aprovados), testes de concorrência, validação com ffprobe de merges em 4K 60fps, áudio MP3, cancelamento limpo e conformidade legal estrita (GPLv3).
+
+- Todas as funcionalidades da Release Candidate foram consolidadas e promovidas para a versão estável 1.0.0.
+- Preservação comprovada de dados do usuário e downloads na desinstalação.
+- Empacotamento profissional em modo self-contained (win-x64) sem dependências externas de .NET ou runtimes adicionais.
+
+---
+
 ## [1.0.0-rc.1] - 2026-09-07
 
 ### Release Candidate 1
