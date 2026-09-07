@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Política e Guia de Suporte
+    url: https://github.com/ArkanjoV2/BaixALL/blob/main/SUPPORT.md
+    about: Consulte instruções de ajuda, requisitos e orientações antes de abrir uma issue.
+  - name: Divulgação Responsável de Segurança (Vulnerabilidades)
+    url: https://github.com/ArkanjoV2/BaixALL/security/advisories/new
+    about: Utilize este canal privado e confidencial para relatar vulnerabilidades de segurança.

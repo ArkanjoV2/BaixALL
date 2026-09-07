@@ -1,0 +1,101 @@
+name: Relato de Bug / Problema
+description: Crie um relatório detalhado para nos ajudar a identificar e corrigir problemas no BaixALL.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por relatar um problema no BaixALL. Preencha os campos abaixo com atenção.
+        
+        > ⚠️ **Aviso de Privacidade e Segurança:**
+        > Nunca compartilhe senhas, cookies, tokens de autenticação ou informações pessoais sensíveis.
+        > Revise qualquer texto ou imagem antes de publicar.
+  - type: dropdown
+    id: version
+    attributes:
+      label: Versão do BaixALL
+      description: Qual versão do BaixALL você está utilizando? (Visível na aba Configurações > Sobre).
+      options:
+        - "1.0.0 (Instalador Setup)"
+        - "1.0.0 (Pacote Portátil ZIP)"
+        - "Outra / Compilação a partir do código-fonte"
+    validations:
+      required: true
+  - type: dropdown
+    id: os_version
+    attributes:
+      label: Versão do Windows
+      description: Sistema operacional onde o BaixALL está sendo executado.
+      options:
+        - "Windows 11 (64-bit)"
+        - "Windows 10 (64-bit)"
+        - "Outro"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição do Problema
+      description: Uma explicação clara e objetiva do que está acontecendo de forma incorreta.
+      placeholder: "Descreva o problema encontrado de forma sucinta."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: Passos para Reproduzir
+      description: Passo a passo numerado para que outra pessoa consiga reproduzir o mesmo comportamento.
+      placeholder: |
+        1. Abrir o BaixALL
+        2. Colar o link '...'
+        3. Clicar em 'Analisar'
+        4. Selecionar '...'
+        5. Clicar em 'Baixar Vídeo'
+    validations:
+      required: true
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Comportamento Esperado
+      description: O que deveria ter acontecido sob condições normais de uso.
+      placeholder: "O download deveria iniciar, progredir até 100% e salvar o arquivo na pasta de destino."
+    validations:
+      required: true
+  - type: textarea
+    id: observed_behavior
+    attributes:
+      label: Comportamento Observado
+      description: O que de fato aconteceu (mensagens de erro, travamento, comportamento inesperado).
+      placeholder: "O status mudou para Erro aos 10% com mensagem de falha."
+    validations:
+      required: true
+  - type: dropdown
+    id: specific_video
+    attributes:
+      label: O problema ocorre com um vídeo ou link específico?
+      options:
+        - "Sim, ocorre apenas com links específicos"
+        - "Não, ocorre com qualquer link testado"
+        - "Não se aplica (questão de interface, configuração ou ferramentas)"
+    validations:
+      required: true
+  - type: input
+    id: sample_url
+    attributes:
+      label: URL Pública de Exemplo (Opcional)
+      description: Se o erro ocorrer com um vídeo específico, forneça uma URL pública de exemplo. NÃO envie links privados, pagos ou com restrições de acesso.
+      placeholder: "https://www.youtube.com/watch?v=..."
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Captura de Tela (Opcional)
+      description: Arraste ou cole capturas de tela demonstrando o erro. Certifique-se de ocultar caminhos pessoais de diretórios ou nomes de usuário do Windows.
+  - type: textarea
+    id: log_snippet
+    attributes:
+      label: Trecho de Log Relevante (Opcional)
+      description: |
+        Caso relevante, cole aqui apenas o trecho do log com a mensagem de erro (localizado em `%LOCALAPPDATA%\BaixALL\logs\`).
+        ⚠️ **Remova caminhos particulares e dados sensíveis antes de colar.** Não exigimos logs completos.
+      render: text
