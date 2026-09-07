@@ -1,6 +1,6 @@
 # Licenças de Terceiros e Avisos Legais (Third-Party Notices)
 
-O **BaixALL** utiliza, interage e se integra a softwares de terceiros e bibliotecas de código aberto. Esta página documenta detalhadamente as atribuições, avisos de direitos autorais, configurações de build e conformidade com as licenças de cada componente.
+O **BaixALL** utiliza, interage e se integra a softwares de terceiros e bibliotecas de código aberto. Esta página documenta detalhadamente as atribuições, avisos de direitos autorais, configurações de compilação e conformidade legal com as licenças de cada componente.
 
 ---
 
@@ -12,24 +12,24 @@ O **BaixALL** utiliza, interage e se integra a softwares de terceiros e bibliote
 4. [Deno](#4-deno)
 5. [Bibliotecas NuGet (.NET)](#5-bibliotecas-nuget-net)
 6. [Microsoft .NET Runtime & Libraries](#6-microsoft-net-runtime--libraries)
-7. [Status de Conformidade e Pendências Pré-Publicação](#7-status-de-conformidade-e-pendências-pré-publicação)
+7. [Status de Conformidade, SmartScreen e Obrigações Legais](#7-status-de-conformidade-smartscreen-e-obrigações-legais)
 
 ---
 
 ## 1. Visão Geral da Arquitetura e Limites de Processo
 
-O **BaixALL** foi desenhado com arquitetura de processos desacoplados:
+O **BaixALL** foi concebido sob uma estrita arquitetura de processos desacoplados:
 - O executável principal (`BaixALL.exe`) é uma aplicação autônoma em C# e .NET 10.
-- As ferramentas externas (`yt-dlp.exe`, `ffmpeg.exe`, `ffprobe.exe` e `deno.exe`) **não são linkadas estática ou dinamicamente** ao código-fonte ou aos binários do BaixALL.
-- A comunicação entre o BaixALL e as ferramentas externas ocorre exclusivamente no nível do sistema operacional através de processos independentes (`System.Diagnostics.Process`), passagem de argumentos via `ProcessStartInfo.ArgumentList` e leitura assíncrona de fluxos de entrada/saída (`stdout` / `stderr`).
-- No pacote de instalação padrão do BaixALL (`BaixALL-Setup-1.0.0.exe`), os binários de terceiros não são embutidos; eles são baixados pelo usuário através do `DependencyManager` a partir de seus repositórios oficiais. Caso um pacote redistribuível completo futuro venha a incluir os binários pré-baixados, as obrigações da Seção 3 e Seção 6 da GPLv3 são plenamente satisfeitas pelas informações e ofertas de código-fonte aqui documentadas.
+- As ferramentas externas (`yt-dlp.exe`, `ffmpeg.exe`, `ffprobe.exe` e `deno.exe`) **não são linkadas estática ou dinamicamente** ao código-fonte ou aos binários do BaixALL (não há bibliotecas nativas C/C++ compartilhadas, DLLs de terceiros embutidas no processo gerenciado ou P/Invoke direto para bibliotecas das ferramentas).
+- Toda interação com ferramentas externas ocorre exclusivamente no nível de sistema operacional através da criação de processos independentes via `System.Diagnostics.Process`, passagem de parâmetros rigorosamente estruturada por `ProcessStartInfo.ArgumentList` e leitura assíncrona dos fluxos de dados padrão (`stdout` / `stderr`).
+- Nos artefatos padrão de distribuição do BaixALL (`BaixALL-Setup-1.0.0.exe` e `BaixALL-1.0.0-win-x64.zip`), **os binários de terceiros não vêm pré-empacotados**. O BaixALL realiza o download sob demanda das ferramentas oficiais diretamente a partir de seus repositórios no GitHub no primeiro uso ou quando solicitado pelo usuário.
 
 ---
 
 ## 2. yt-dlp
 
-- **Projeto:** [yt-dlp/yt-dlp](https://github.com/yt-dlp/yt-dlp)
-- **Função:** Linha de comando para extração de metadados em JSON estruturado e download de fluxos de áudio e vídeo do YouTube.
+- **Projeto Upstream:** [yt-dlp/yt-dlp](https://github.com/yt-dlp/yt-dlp)
+- **Função:** Linha de comando para extração de metadados em formato JSON estruturado e download dos fluxos de áudio e vídeo.
 - **Licença:** The Unlicense (Dedicação ao Domínio Público)
 
 ```text
@@ -65,7 +65,7 @@ For more information, please refer to <http://unlicense.org/>
 
 - **Projeto Upstream:** [FFmpeg](https://ffmpeg.org/)
 - **Fornecedor dos Builds:** [yt-dlp/FFmpeg-Builds](https://github.com/yt-dlp/FFmpeg-Builds)
-- **Pacote Utilizado:** `ffmpeg-master-latest-win64-gpl.zip` (contendo `ffmpeg.exe` e `ffprobe.exe`)
+- **Pacote Referenciado:** `ffmpeg-master-latest-win64-gpl.zip` (contendo `ffmpeg.exe` e `ffprobe.exe`)
 - **Versão:** `ffmpeg version N-126435-gf93cd72dde-20260906 Copyright (c) 2000-2026 the FFmpeg developers`
 - **Compilador:** GCC 15.2.0 (crosstool-NG 1.28.0.23_185f348) para `x86_64-w64-mingw32`
 - **Configuração de Build Oficial:**
@@ -91,15 +91,15 @@ For more information, please refer to <http://unlicense.org/>
 
 ### 📦 Disponibilização de Código-Fonte Correspondente (GPLv3 - Seção 6)
 
-Em cumprimento aos termos da Seção 6 da GPLv3 ("Conveying Non-Source Forms"), informa-se expressamente que:
+Em cumprimento aos termos da Seção 6 da GPLv3 ("Conveying Non-Source Forms"), declara-se expressamente que:
 1. O código-fonte original completo do FFmpeg na versão exata utilizada está disponível em:
    - Repositório oficial: <https://github.com/FFmpeg/FFmpeg>
    - Commit correspondente: `gf93cd72dde` (<https://github.com/FFmpeg/FFmpeg/commit/f93cd72dde>)
    - Portal de download oficial: <https://ffmpeg.org/download.html>
-2. O código-fonte completo dos scripts de build, receitas de compilação, patches e automações utilizadas para gerar este binário win64 específico está publicamente disponível em:
+2. O código-fonte completo dos scripts de compilação, receitas de build e patches utilizados para gerar este binário win64 específico está publicamente disponível em:
    - Repositório de builds: <https://github.com/yt-dlp/FFmpeg-Builds>
    - Scripts de configuração e dependências: <https://github.com/yt-dlp/FFmpeg-Builds/tree/master/scripts.d>
-3. Qualquer usuário ou terceiro tem o direito irrestrito de obter, inspecionar, modificar e recompilar o código-fonte do FFmpeg e das ferramentas associadas de acordo com os termos da GPLv3.
+3. Qualquer usuário tem o direito irrestrito de obter, inspecionar, modificar e recompilar o código-fonte do FFmpeg e das ferramentas associadas de acordo com os termos da GPLv3.
 
 ```text
                     GNU GENERAL PUBLIC LICENSE
@@ -116,8 +116,8 @@ Em cumprimento aos termos da Seção 6 da GPLv3 ("Conveying Non-Source Forms"), 
 
 ## 4. Deno
 
-- **Projeto:** [denoland/deno](https://github.com/denoland/deno)
-- **Função:** Runtime JavaScript/TypeScript de alto desempenho e seguro, invocado opcionalmente pelo yt-dlp para resolução de desafios de assinatura em streams do YouTube.
+- **Projeto Upstream:** [denoland/deno](https://github.com/denoland/deno)
+- **Função:** Runtime JavaScript/TypeScript de alto desempenho, invocado pelo yt-dlp para resolução de desafios de assinatura em streams do YouTube.
 - **Licença:** MIT License
 - **Copyright:** Copyright (c) 2018-2026 the Deno authors.
 - **Código-fonte:** <https://github.com/denoland/deno>
@@ -172,15 +172,21 @@ Todas as dependências NuGet utilizadas no BaixALL são de código aberto sob li
 
 ---
 
-## 7. Status de Conformidade e Pendências Pré-Publicação
+## 7. Status de Conformidade, SmartScreen e Obrigações Legais
 
-1. **Separação de Processos:** Plenamente atendida. Não há vinculação estática ou dinâmica (`.dll`/C-bindings) entre o código do BaixALL e as ferramentas externas.
-2. **Atribuições e Textos de Licença:** Textos integrais de licença e avisos de direitos autorais documentados formalmente neste arquivo.
-3. **Oferta de Código-Fonte:** Links permanentes fornecidos para os repositórios oficiais e commits exatos dos componentes.
-4. **Esclarecimento Legal sobre Conformidade GPLv3:** A inclusão do texto da licença e dos avisos de direitos autorais nesta documentação é uma exigência formal necessária, porém não é suficiente, por si só, para comprovar conformidade legal plena em todos os cenários de distribuição. A conformidade efetiva com a GPLv3 (Seção 6) exige também:
-   - A disponibilização contínua e acessível do código-fonte correspondente exato das ferramentas compiladas;
-   - A preservação estrita da fronteira de processos (comunicação CLI isolada via `Process.Start`);
-   - Caso uma versão empacotada futura inclua os binários compilados do FFmpeg pré-instalados no instalador, o distribuidor deverá disponibilizar ativamente o código-fonte correspondente e as instruções completas de compilação diretamente ao destinatário.
-5. **Pendências Identificadas para Distribuição Pública Ampla:**
-   - Obtenção opcional de certificado de assinatura de código Authenticode emitido por autoridade certificadora comercial para estabelecer reputação no Windows SmartScreen ao longo do tempo.
-   - Manutenção periódica dos links de download e verificação de novas versões das ferramentas através da aba Ferramentas.
+### 7.1 Separação Arquitetural e Limite de Processos
+- **Status:** **Plenamente atendido.** O BaixALL não vincula, compila ou linka nenhuma biblioteca externa ao seu processo principal.
+- As ferramentas de linha de comando operam como subprocessos independentes invocados por linha de comando.
+
+### 7.2 Esclarecimento Rigoroso sobre Conformidade com a GPLv3
+- A inclusão do texto da licença GPLv3 e a indicação de links nesta documentação representam obrigações formais necessárias, **porém não comprovam, por si sós, conformidade total** com as regras de licenciamento.
+- **Modelo de Distribuição Padrão (Download sob Demanda):** Nos pacotes oficiais `BaixALL-Setup-1.0.0.exe` e `BaixALL-1.0.0-win-x64.zip`, os binários do FFmpeg **não são redistribuídos**. O usuário os obtém diretamente do repositório upstream oficial ao usar o BaixALL.
+- **Regra Bloqueante para Distribuições Offline Futuras:** Caso venha a ser produzido um pacote de distribuição *offline* contendo os binários compilados do FFmpeg pré-embutidos, será **obrigatoriamente bloqueante para publicação** a inclusão direta do código-fonte correspondente ou de uma oferta formal por escrito (Seção 6b da GPLv3), acompanhada dos scripts e instruções exatas de build para reprodução dos binários.
+
+### 7.3 Esclarecimento sobre Windows SmartScreen e Assinatura Digital
+- **Avisos de Reputação:** Aplicativos novos distribuídos na internet podem exibir o alerta do Windows Defender SmartScreen (*"O Windows protegeu o seu computador"*).
+- **Certificados Digitais (Authenticode):** É incorreto afirmar que certificados comerciais (mesmo do tipo EV ou OV) eliminam imediatamente qualquer aviso do SmartScreen em softwares novos. No ecossistema moderno do Windows, a reputação do SmartScreen é construída de maneira progressiva com base no volume estatístico de downloads benignos e telemetria acumulada ao longo do tempo.
+- **Políticas de Integridade:**
+  - O BaixALL **nunca desabilita** o Windows Defender, o SmartScreen ou quaisquer mecanismos de segurança do sistema operacional.
+  - O projeto **não utiliza certificados fictícios ou autoassinados**, pois estes não possuem cadeia de confiança pública e não possuem validade para distribuição externa.
+  - A aquisição de uma assinatura digital Authenticode formal poderá ser tratada futuramente pelo mantenedor caso decida contratar esse serviço.
