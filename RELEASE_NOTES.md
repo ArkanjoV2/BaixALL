@@ -1,30 +1,25 @@
-# BaixALL 1.0.0 — Lançamento Oficial (Versão Estável)
+# BaixALL 1.0.0-rc.2 — Release Candidate 2
 
-Temos o orgulho de apresentar a **versão 1.0.0 estável oficial** do **BaixALL** para Windows 10 e Windows 11 (x64)!
-
-O BaixALL é um aplicativo desktop nativo para Windows (desenvolvido em C# e .NET 10 LTS com WPF) para download de vídeos e extração de áudios do YouTube com máxima qualidade, preservação de metadados, controle de concorrência e privacidade total.
+A **Release Candidate 2** do **BaixALL** traz uma correção pontual e crítica para a inicialização da aplicação em instalações limpas do Windows, além de blindagem completa no sistema de logs.
 
 ---
 
-## 📦 Artefatos de Distribuição
+## 📦 Artefatos de Distribuição (RC2)
 
 | Arquivo | Descrição |
 | :--- | :--- |
-| `BaixALL-Setup-1.0.0.exe` | Instalador oficial para Windows 10/11 (x64) com assistente de instalação |
-| `BaixALL-1.0.0-win-x64.zip` | Pacote portátil (extrair e executar `BaixALL.exe`) |
+| `BaixALL-Setup-1.0.0-rc.2.exe` | Instalador oficial para Windows 10/11 (x64) com assistente de instalação |
+| `BaixALL-1.0.0-rc.2-win-x64.zip` | Pacote portátil (extrair e executar `BaixALL.exe`) |
 | `checksums.txt` | Hashes de integridade SHA-256 de todos os arquivos |
 
 ---
 
-## 🚀 Destaques da Versão 1.0.0
+## 🛠️ Correções Realizadas na RC2
 
-- **Qualidade Máxima com FFmpeg Merge:** Suporte a vídeos em até 4K 60 FPS com mesclagem transparente de fluxos separados de áudio e vídeo sem recodificação desnecessária.
-- **Modo Somente Áudio:** Extraia e converta áudios nos formatos Original, M4A, Opus e MP3 em alta qualidade.
-- **Fila Inteligente de Downloads:** Gerenciamento com limite de concorrência (1, 2 ou 3 downloads ativos simultâneos) e despacho automático para itens aguardando.
-- **Cancelamento Individual Seguro:** Cancele downloads ativos sem interromper os demais e com limpeza imediata de arquivos temporários.
-- **DependencyManager Autônomo:** Instalação e atualização com 1 clique das ferramentas essenciais (`yt-dlp`, `FFmpeg`, `ffprobe`, `Deno`) diretamente dos canais oficiais do GitHub.
-- **Histórico Persistente:** Histórico local com ações diretas para reproduzir o arquivo ou abri-lo no Explorador de Arquivos.
-- **Self-Contained:** Não exige instalação do .NET Runtime, Visual Studio, Python ou Node.js.
+- **Carregamento Seguro de Recursos BAML (`MainWindow`):** Corrigida a declaração do ícone da janela para Pack URI canônico (`pack://application:,,,/Resources/icon.ico`) e embutido o arquivo `Resources/icon.ico` como recurso compilado (`<Resource>`) da aplicação. Isso resolve a exceção `XamlParseException` / `IOException` (`Não é possível localizar o recurso 'resources/icon.ico'`) que impedia a abertura da janela em máquinas sem o ambiente de desenvolvimento.
+- **Rastreamento Abrangente de Exceções (`LoggerService`):** O formatador de erros agora percorre recursivamente toda a cadeia de exceções internas (`InnerException`), registrando tipo, mensagem, HResult, origem e stack trace de cada nível, além do `ToString()` integral.
+- **Mensagens Amigáveis ao Usuário:** Mensagens de erro fatal agora informam o caminho amigável da pasta de logs (`%LOCALAPPDATA%\BaixALL\logs`) sem poluir a interface visual com stack traces.
+- **Teste de Regressão Específico:** Adicionada validação automatizada para garantir que `MainWindow` pode ser instanciada sem dependência de caminhos em disco.
 
 ---
 

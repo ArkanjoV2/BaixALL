@@ -5,10 +5,10 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <AssemblyName>BaixALL</AssemblyName>
     <RootNamespace>BaixALL.App</RootNamespace>
-    <Version>1.0.0</Version>
+    <Version>1.0.0-rc.2</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
-    <InformationalVersion>1.0.0</InformationalVersion>
+    <InformationalVersion>1.0.0-rc.2</InformationalVersion>
     <Product>BaixALL</Product>
     <Company>BaixALL</Company>
     <Authors>BaixALL Team</Authors>
@@ -21,6 +21,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\icon.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />

@@ -30,8 +30,9 @@ public partial class App : Application
         DispatcherUnhandledException += (s, args) =>
         {
             _logger.Error("Exceção não tratada na UI Thread (Dispatcher).", args.Exception);
+            var logPath = _logger?.GetLogFolderPath() ?? Infrastructure.AppConstants.LogsFolder;
             MessageBox.Show(
-                $"Ocorreu um erro inesperado: {args.Exception.Message}\nConsulte os logs para mais detalhes.",
+                $"Ocorreu um erro inesperado: {args.Exception.Message}\n\nPara detalhes técnicos, consulte os arquivos de log em:\n{logPath}",
                 "BaixALL - Aviso",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
@@ -70,8 +71,9 @@ public partial class App : Application
         catch (Exception ex)
         {
             _logger.Error("Falha crítica ao inicializar aplicação.", ex);
+            var logPath = _logger?.GetLogFolderPath() ?? Infrastructure.AppConstants.LogsFolder;
             MessageBox.Show(
-                $"Não foi possível iniciar o aplicativo:\n{ex.Message}",
+                $"Não foi possível iniciar o BaixALL.\n\nDetalhes: {ex.Message}\n\nPara mais informações, consulte os arquivos de log em:\n{logPath}",
                 "BaixALL - Erro Fatal",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);

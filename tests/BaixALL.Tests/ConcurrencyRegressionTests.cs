@@ -694,7 +694,7 @@ public class ConcurrencyRegressionTests
             mockYtDlp.Release("VideoC", fileC);
 
             var timeout = DateTime.Now.AddSeconds(5);
-            while (DateTime.Now < timeout && (!itemA.IsFailed || !itemB.IsCompleted || !itemC.IsCompleted))
+            while (DateTime.Now < timeout && (!itemA.IsFailed || !itemB.IsCompleted || !itemC.IsCompleted || downloadService.ActiveDownloadsCount > 0))
             {
                 await Task.Delay(20);
             }

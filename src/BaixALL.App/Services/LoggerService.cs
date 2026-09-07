@@ -33,8 +33,33 @@ public class LoggerService : ILoggerService
 
     public void Error(string message, Exception? exception = null)
     {
-        var full = exception != null ? $"{message} | Exceção: {exception.GetType().Name}: {exception.Message}\n{exception.StackTrace}" : message;
-        Log("ERROR", full);
+        if (exception == null)
+        {
+            Log("ERROR", message);
+            return;
+        }
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine($"{message} | Detalhes da Exceção:");
+
+        int level = 0;
+        var current = exception;
+        while (current != null)
+        {
+            sb.AppendLine($"  [Nível {level}] {current.GetType().FullName}: {current.Message}");
+            sb.AppendLine($"    HResult: 0x{current.HResult:X8} | Origem: {current.Source}");
+            if (!string.IsNullOrWhiteSpace(current.StackTrace))
+            {
+                sb.AppendLine($"    StackTrace: {current.StackTrace.Trim()}");
+            }
+            current = current.InnerException;
+            level++;
+        }
+
+        sb.AppendLine("  --- Rastreamento Completo (ToString) ---");
+        sb.Append(exception.ToString());
+
+        Log("ERROR", sb.ToString());
     }
 
     public void Debug(string message)

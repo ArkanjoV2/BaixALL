@@ -55,8 +55,8 @@ public partial class MainWindow : Window
         }
 
         var themeUri = isDark
-            ? new Uri("Resources/Themes/DarkTheme.xaml", UriKind.Relative)
-            : new Uri("Resources/Themes/LightTheme.xaml", UriKind.Relative);
+            ? new Uri("pack://application:,,,/BaixALL;component/Resources/Themes/DarkTheme.xaml", UriKind.Absolute)
+            : new Uri("pack://application:,,,/BaixALL;component/Resources/Themes/LightTheme.xaml", UriKind.Absolute);
 
         var newDict = new ResourceDictionary { Source = themeUri };
 
