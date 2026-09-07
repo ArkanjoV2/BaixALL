@@ -1,10 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using BaixALL.App.Models;
 using BaixALL.App.ViewModels;
 
@@ -18,12 +18,34 @@ public class DownloadService : IDownloadService
     private readonly IDispatcherService _dispatcher;
     private readonly ILoggerService? _logger;
 
-    private SemaphoreSlim _concurrencySemaphore;
+    private readonly object _syncLock = new();
+    private readonly List<DownloadItemViewModel> _pendingQueue = new();
+    private int _activeCount;
     private int _maxConcurrent;
 
     public ObservableCollection<DownloadItemViewModel> QueueItems { get; } = new();
 
-    public bool HasActiveDownloads => QueueItems.Any(x => x.IsActive);
+    public int ActiveDownloadsCount
+    {
+        get
+        {
+            lock (_syncLock)
+            {
+                return _activeCount;
+            }
+        }
+    }
+
+    public bool HasActiveDownloads
+    {
+        get
+        {
+            lock (_syncLock)
+            {
+                return _activeCount > 0 || _pendingQueue.Any(x => x.IsActive) || QueueItems.Any(x => x.IsActive);
+            }
+        }
+    }
 
     public DownloadService(
         IYtDlpService ytDlpService,
@@ -39,17 +61,18 @@ public class DownloadService : IDownloadService
         _logger = logger;
 
         _maxConcurrent = Math.Clamp(_settingsService.Settings.MaxConcurrentDownloads, 1, 3);
-        _concurrencySemaphore = new SemaphoreSlim(_maxConcurrent, _maxConcurrent);
     }
 
     public void UpdateConcurrencyLimit(int maxConcurrent)
     {
         var clamped = Math.Clamp(maxConcurrent, 1, 3);
-        if (clamped == _maxConcurrent) return;
-
-        _maxConcurrent = clamped;
-        _concurrencySemaphore = new SemaphoreSlim(_maxConcurrent, _maxConcurrent);
-        _logger?.Info($"Limite de concorrência alterado para: {_maxConcurrent}");
+        lock (_syncLock)
+        {
+            if (clamped == _maxConcurrent) return;
+            _maxConcurrent = clamped;
+        }
+        _logger?.Info($"Limite de concorrência alterado para: {clamped}");
+        TryStartNextDownloads();
     }
 
     public DownloadItemViewModel EnqueueDownload(DownloadRequest request, string thumbnailUrl)
@@ -68,7 +91,9 @@ public class DownloadService : IDownloadService
             ThumbnailUrl = thumbnailUrl,
             Quality = qualityLabel,
             Format = formatLabel,
-            Request = request
+            Request = request,
+            Status = DownloadStatus.Queued,
+            StatusMessage = "Aguardando vaga na fila..."
         };
 
         item.CancelRequested += (_, _) => CancelDownload(item.Id);
@@ -77,23 +102,47 @@ public class DownloadService : IDownloadService
         _dispatcher.Invoke(() => QueueItems.Insert(0, item));
         _logger?.Info($"Download enfileirado: '{request.VideoTitle}'");
 
-        // Dispara processamento em segundo plano
-        _ = Task.Run(() => ProcessDownloadItemAsync(item));
+        lock (_syncLock)
+        {
+            _pendingQueue.Add(item);
+        }
+
+        TryStartNextDownloads();
 
         return item;
     }
 
     public void CancelDownload(Guid id)
     {
-        var item = QueueItems.FirstOrDefault(x => x.Id == id);
-        if (item != null && item.IsActive)
+        DownloadItemViewModel? item = null;
+        bool wasWaitingInQueue = false;
+
+        lock (_syncLock)
         {
-            try
+            item = QueueItems.FirstOrDefault(x => x.Id == id);
+            if (item == null || !item.IsActive) return;
+
+            if (_pendingQueue.Contains(item))
             {
-                item.CancellationTokenSource.Cancel();
+                _pendingQueue.Remove(item);
+                wasWaitingInQueue = true;
             }
-            catch { }
-            _logger?.Info($"Cancelamento solicitado para: '{item.Title}'");
+        }
+
+        try
+        {
+            item.CancellationTokenSource.Cancel();
+        }
+        catch { }
+
+        if (wasWaitingInQueue)
+        {
+            _dispatcher.Invoke(() => item.MarkCanceled());
+            _logger?.Info($"Download que estava aguardando na fila foi cancelado: '{item.Title}'");
+        }
+        else
+        {
+            _logger?.Info($"Cancelamento solicitado para download ativo: '{item.Title}'");
         }
     }
 
@@ -105,6 +154,10 @@ public class DownloadService : IDownloadService
             if (item.IsActive)
             {
                 CancelDownload(id);
+            }
+            lock (_syncLock)
+            {
+                _pendingQueue.Remove(item);
             }
             _dispatcher.Invoke(() => QueueItems.Remove(item));
         }
@@ -124,30 +177,60 @@ public class DownloadService : IDownloadService
 
     public void CancelAllDownloads()
     {
-        var activeItems = QueueItems.Where(x => x.IsActive).ToList();
-        foreach (var item in activeItems)
+        List<DownloadItemViewModel> toCancel;
+        lock (_syncLock)
+        {
+            toCancel = QueueItems.Where(x => x.IsActive).ToList();
+            _pendingQueue.Clear();
+        }
+
+        foreach (var item in toCancel)
         {
             try
             {
                 item.CancellationTokenSource.Cancel();
+                if (item.Status == DownloadStatus.Queued)
+                {
+                    _dispatcher.Invoke(() => item.MarkCanceled());
+                }
             }
             catch { }
         }
-        _logger?.Info($"Cancelamento solicitado para {activeItems.Count} download(s) ativo(s).");
+        _logger?.Info($"Cancelamento solicitado para {toCancel.Count} download(s).");
+    }
+
+    private void TryStartNextDownloads()
+    {
+        while (true)
+        {
+            DownloadItemViewModel? nextItem = null;
+            lock (_syncLock)
+            {
+                // Limpa itens cancelados que estejam aguardando
+                _pendingQueue.RemoveAll(x => !x.IsActive || x.CancellationTokenSource.IsCancellationRequested);
+
+                if (_activeCount >= _maxConcurrent)
+                {
+                    return;
+                }
+
+                nextItem = _pendingQueue.FirstOrDefault(x => x.Status == DownloadStatus.Queued && !x.CancellationTokenSource.IsCancellationRequested);
+                if (nextItem == null)
+                {
+                    return;
+                }
+
+                _pendingQueue.Remove(nextItem);
+                _activeCount++;
+            }
+
+            var itemToRun = nextItem;
+            _ = Task.Run(() => ProcessDownloadItemAsync(itemToRun));
+        }
     }
 
     private async Task ProcessDownloadItemAsync(DownloadItemViewModel item)
     {
-        try
-        {
-            await _concurrencySemaphore.WaitAsync(item.CancellationTokenSource.Token).ConfigureAwait(false);
-        }
-        catch (OperationCanceledException)
-        {
-            _dispatcher.Invoke(() => item.MarkCanceled());
-            return;
-        }
-
         try
         {
             if (item.CancellationTokenSource.IsCancellationRequested)
@@ -155,6 +238,12 @@ public class DownloadService : IDownloadService
                 _dispatcher.Invoke(() => item.MarkCanceled());
                 return;
             }
+
+            _dispatcher.Invoke(() =>
+            {
+                item.Status = DownloadStatus.Preparing;
+                item.StatusMessage = "Iniciando download...";
+            });
 
             var progress = new Progress<DownloadProgressReport>(report =>
             {
@@ -212,18 +301,28 @@ public class DownloadService : IDownloadService
         }
         catch (Exception ex)
         {
+            if (item.CancellationTokenSource.IsCancellationRequested)
+            {
+                _dispatcher.Invoke(() => item.MarkCanceled());
+                return;
+            }
+
             _logger?.Error($"Erro durante download de '{item.Title}'.", ex);
             string friendlyMessage = ex switch
             {
                 FileNotFoundException => "O arquivo resultante não foi localizado após o download.",
-                OperationCanceledException => "Download cancelado pelo usuário.",
                 _ => "O download não pôde ser concluído."
             };
             _dispatcher.Invoke(() => item.MarkError(friendlyMessage));
         }
         finally
         {
-            _concurrencySemaphore.Release();
+            lock (_syncLock)
+            {
+                _activeCount--;
+                if (_activeCount < 0) _activeCount = 0;
+            }
+            TryStartNextDownloads();
         }
     }
 }

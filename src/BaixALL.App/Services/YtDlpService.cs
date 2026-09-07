@@ -95,25 +95,12 @@ public class YtDlpService : IYtDlpService
 
         FileHelper.EnsureDirectoryExists(request.DestinationFolder);
 
-        // Define a extensão esperada
-        string expectedExtension;
-        if (request.IsAudioOnly)
-        {
-            expectedExtension = request.AudioFormat.Extension;
-        }
-        else
-        {
-            expectedExtension = request.Container.Id == "auto" ? "mp4" : request.Container.Extension;
-        }
+        // Cria diretório temporário exclusivo e isolado para este job
+        var jobId = Guid.NewGuid().ToString("N");
+        var jobTempDir = Path.Combine(Path.GetTempPath(), "BaixALL_Jobs", jobId);
+        Directory.CreateDirectory(jobTempDir);
 
-        // Gera nome único de arquivo
-        var finalFilePath = FileHelper.GetUniqueFilePath(
-            request.DestinationFolder,
-            request.VideoTitle,
-            expectedExtension);
-
-        var baseFileName = Path.GetFileNameWithoutExtension(finalFilePath);
-        var outputTemplate = Path.Combine(request.DestinationFolder, $"{baseFileName}.%(ext)s");
+        var outputTemplate = Path.Combine(jobTempDir, "stream.%(ext)s");
 
         var arguments = new List<string>
         {
@@ -182,7 +169,7 @@ public class YtDlpService : IYtDlpService
 
         var env = BuildProcessEnvironment();
 
-        _logger?.Info($"Iniciando download de '{request.VideoTitle}' para '{finalFilePath}'");
+        _logger?.Info($"Iniciando download de '{request.VideoTitle}' no job '{jobId}'");
 
         progress.Report(new DownloadProgressReport
         {
@@ -202,7 +189,7 @@ public class YtDlpService : IYtDlpService
             var result = await ProcessRunner.RunAsync(
                 ytDlpPath,
                 arguments,
-                workingDirectory: request.DestinationFolder,
+                workingDirectory: jobTempDir,
                 environmentVariables: env,
                 onOutputLine: line =>
                 {
@@ -216,14 +203,44 @@ public class YtDlpService : IYtDlpService
 
             if (!result.IsSuccess)
             {
+                if (ct.IsCancellationRequested)
+                {
+                    throw new OperationCanceledException(ct);
+                }
                 var friendlyError = ParseYtDlpError(result.StandardError);
                 _logger?.Error($"Falha no download. Erro: {result.StandardError}");
                 throw new InvalidOperationException(friendlyError);
             }
 
-            // Localiza o arquivo final resultante
-            var actualOutputFile = FindActualOutputFile(request.DestinationFolder, baseFileName);
-            var completedPath = actualOutputFile ?? finalFilePath;
+            // Localiza o arquivo final resultante dentro do diretório temporário do job
+            var generatedFiles = Directory.GetFiles(jobTempDir)
+                .Where(f => !f.EndsWith(".part", StringComparison.OrdinalIgnoreCase) &&
+                            !f.EndsWith(".ytdl", StringComparison.OrdinalIgnoreCase) &&
+                            !f.EndsWith(".temp", StringComparison.OrdinalIgnoreCase) &&
+                            !f.EndsWith(".tmp", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            var producedFile = generatedFiles.FirstOrDefault();
+            if (producedFile == null || !File.Exists(producedFile))
+            {
+                throw new FileNotFoundException("O arquivo resultante não foi localizado no diretório de processamento.", jobTempDir);
+            }
+
+            var actualExtension = Path.GetExtension(producedFile).TrimStart('.');
+            if (string.IsNullOrWhiteSpace(actualExtension))
+            {
+                actualExtension = request.IsAudioOnly
+                    ? request.AudioFormat.Extension
+                    : (request.Container.Id == "auto" ? "mp4" : request.Container.Extension);
+            }
+
+            // Garante nome de arquivo único e sem colisões na pasta de destino final
+            var finalDestinationPath = FileHelper.GetUniqueFilePath(
+                request.DestinationFolder,
+                request.VideoTitle,
+                actualExtension);
+
+            File.Move(producedFile, finalDestinationPath, overwrite: true);
 
             progress.Report(new DownloadProgressReport
             {
@@ -232,13 +249,12 @@ public class YtDlpService : IYtDlpService
                 Percentage = 100
             });
 
-            _logger?.Info($"Download concluído com sucesso: {completedPath}");
-            return completedPath;
+            _logger?.Info($"Download concluído com sucesso: {finalDestinationPath}");
+            return finalDestinationPath;
         }
         catch (OperationCanceledException)
         {
             _logger?.Warning($"Download de '{request.VideoTitle}' cancelado pelo usuário.");
-            CleanupPartialFiles(request.DestinationFolder, baseFileName);
             progress.Report(new DownloadProgressReport
             {
                 Status = DownloadStatus.Canceled,
@@ -249,7 +265,6 @@ public class YtDlpService : IYtDlpService
         }
         catch (Exception ex)
         {
-            CleanupPartialFiles(request.DestinationFolder, baseFileName);
             progress.Report(new DownloadProgressReport
             {
                 Status = DownloadStatus.Error,
@@ -257,6 +272,17 @@ public class YtDlpService : IYtDlpService
                 Percentage = 0
             });
             throw;
+        }
+        finally
+        {
+            try
+            {
+                if (Directory.Exists(jobTempDir))
+                {
+                    Directory.Delete(jobTempDir, recursive: true);
+                }
+            }
+            catch { }
         }
     }
 

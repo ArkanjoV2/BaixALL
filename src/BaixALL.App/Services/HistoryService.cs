@@ -105,7 +105,9 @@ public class HistoryService : IHistoryService
                 WriteIndented = true
             });
 
-            File.WriteAllText(_historyFilePath, json);
+            var tempFile = _historyFilePath + $".{Guid.NewGuid():N}.tmp";
+            File.WriteAllText(tempFile, json);
+            File.Move(tempFile, _historyFilePath, overwrite: true);
         }
         catch (Exception ex)
         {

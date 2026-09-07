@@ -19,6 +19,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly IUpdateService _updateService;
     private readonly IDownloadService _downloadService;
     private readonly ILoggerService? _logger;
+    private bool _isInitializing = true;
 
     [ObservableProperty]
     private string _downloadFolder = string.Empty;
@@ -65,7 +66,9 @@ public partial class SettingsViewModel : ObservableObject
         _downloadService = downloadService;
         _logger = logger;
 
+        _isInitializing = true;
         LoadFromSettings();
+        _isInitializing = false;
     }
 
     public void LoadFromSettings()
@@ -77,6 +80,24 @@ public partial class SettingsViewModel : ObservableObject
         AutoCheckUpdates = s.AutoCheckUpdates;
         AutoPasteClipboard = s.AutoPasteClipboard;
         Dependencies = _dependencyManager.GetDependencies();
+    }
+
+    partial void OnMaxConcurrentDownloadsChanged(int value)
+    {
+        if (_isInitializing) return;
+        Save();
+    }
+
+    partial void OnThemeChanged(string value)
+    {
+        if (_isInitializing) return;
+        Save();
+    }
+
+    partial void OnAutoPasteClipboardChanged(bool value)
+    {
+        if (_isInitializing) return;
+        Save();
     }
 
     [RelayCommand]
@@ -96,7 +117,7 @@ public partial class SettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Save()
+    public void Save()
     {
         var s = _settingsService.Settings;
         s.DownloadFolder = DownloadFolder;
@@ -108,7 +129,7 @@ public partial class SettingsViewModel : ObservableObject
         _settingsService.SaveSettings();
         _downloadService.UpdateConcurrencyLimit(MaxConcurrentDownloads);
         ThemeChanged?.Invoke(Theme);
-        StatusMessage = "Configurações salvas.";
+        StatusMessage = "Configurações salvas com sucesso.";
     }
 
     [RelayCommand]
