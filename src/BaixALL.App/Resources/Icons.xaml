@@ -2,8 +2,20 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- Ícones vetoriais modernos em Geometria XAML -->
-    <!-- Ícone BaixALL (Download + Play de Vídeo) -->
-    <Geometry x:Key="IconBaixAll">M19,9h-4V3H9v6H5l7,7 7,-7z M5,18v2h14v-2H5z</Geometry>
+    <!-- Ícone Oficial BaixALL (Precision Downloader Arrow + Tray) -->
+    <Geometry x:Key="IconBaixAll">F1 M41,19 L59,19 L59,45 L75,45 L50,71 L25,45 L41,45 Z M23,76 L77,76 L77,83 L68,83 L62,80 L38,80 L32,83 L23,83 Z</Geometry>
+    
+    <!-- Elementos Decorativos Minimalistas de Fundo (Home Watermark) -->
+    <!-- Play Outline Minimalista -->
+    <Geometry x:Key="DecorPlay">M8,6 L38,24 L8,42 Z</Geometry>
+    <!-- Seta / Chevron de Download Tecnológica -->
+    <Geometry x:Key="DecorDownload">M6,8 L24,26 L42,8 M24,4 L24,24</Geometry>
+    <!-- Trilha de Mídia / Timeline de Vídeo -->
+    <Geometry x:Key="DecorTimeline">M0,0 H120 V32 H0 Z M0,6 H120 M0,26 H120 M15,0 V6 M30,0 V6 M45,0 V6 M60,0 V6 M75,0 V6 M90,0 V6 M105,0 V6 M15,26 V32 M30,26 V32 M45,26 V32 M60,26 V32 M75,26 V32 M90,26 V32 M105,26 V32</Geometry>
+    <!-- Onda Senoidal / Waveform de Áudio -->
+    <Geometry x:Key="DecorWaveform">M0,20 Q15,2 30,20 T60,20 T90,20 T120,20 T150,20 T180,20</Geometry>
+    <!-- Nota Musical Minimalista -->
+    <Geometry x:Key="DecorMusic">M22,6 L42,2 V24 A6,6 0 1,1 36,20 V10 L26,12 V28 A6,6 0 1,1 20,24 V6 Z</Geometry>
     
     <!-- Download -->
     <Geometry x:Key="IconDownload">M19,9h-4V3H9v6H5l7,7 7,-7z M5,18v2h14v-2H5z</Geometry>

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <!-- Gradiente de Fundo Squircle -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0E121A"/>
+      <stop offset="100%" stop-color="#080B11"/>
+    </linearGradient>
+
+    <!-- Gradiente da Borda Externa -->
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D5FA0" stop-opacity="0.65"/>
+      <stop offset="100%" stop-color="#142846" stop-opacity="0.25"/>
+    </linearGradient>
+
+    <!-- Gradiente do Triângulo Play Translúcido -->
+    <linearGradient id="playGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00A0FF" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#0064DC" stop-opacity="0.06"/>
+    </linearGradient>
+
+    <!-- Gradiente da Seta de Download -->
+    <linearGradient id="arrowGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#00B4FF"/>
+      <stop offset="100%" stop-color="#006EEB"/>
+    </linearGradient>
+
+    <!-- Gradiente da Base / Tray -->
+    <linearGradient id="trayGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#008CF0"/>
+      <stop offset="100%" stop-color="#005AC8"/>
+    </linearGradient>
+
+    <!-- Reflexo de Vidro Superior -->
+    <linearGradient id="glassGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Fundo Squircle com Cantos Arredondados -->
+  <rect x="3" y="3" width="94" height="94" rx="22" ry="22" fill="url(#bgGrad)" stroke="url(#borderGrad)" stroke-width="1.8"/>
+
+  <!-- Brilho de Vidro Superior -->
+  <rect x="7" y="5" width="86" height="26" rx="11" ry="11" fill="url(#glassGrad)"/>
+
+  <!-- Triângulo Play de Mídia (Fundo) -->
+  <polygon points="34,26 72,48 34,70" fill="url(#playGrad)"/>
+
+  <!-- Seta Principal de Download Tecnológica -->
+  <polygon points="41,19 59,19 59,45 75,45 50,71 25,45 41,45" fill="url(#arrowGrad)" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="0.8"/>
+
+  <!-- Dock / Tray de Mídia com Entalhe Tecnológico -->
+  <polygon points="23,76 77,76 77,83 68,83 62,80 38,80 32,83 23,83" fill="url(#trayGrad)"/>
+</svg>

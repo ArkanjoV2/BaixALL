@@ -82,13 +82,14 @@
         </Setter>
     </Style>
 
-    <!-- Botão de Navegação / Tab - Cantos Retos -->
+    <!-- Botão de Navegação / Tab Refinado com Hover Suave e Cantos Leves -->
     <Style x:Key="NavButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
-        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="FontWeight" Value="Medium" />
         <Setter Property="FontSize" Value="14" />
-        <Setter Property="Padding" Value="16,10" />
+        <Setter Property="Padding" Value="14,8" />
+        <Setter Property="Margin" Value="3,0" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Template">
@@ -96,19 +97,70 @@
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="border"
                             Background="{TemplateBinding Background}"
-                            CornerRadius="0"
+                            CornerRadius="6"
                             Padding="{TemplateBinding Padding}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource NavHoverBgBrush}" />
                             <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <!-- Estilos de Abas de Navegação com Indicador de Estado Ativo -->
+    <Style x:Key="NavHomeButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding CurrentTab}" Value="Downloader">
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Background" Value="{DynamicResource NavSelectedBgBrush}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="NavQueueButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding CurrentTab}" Value="Queue">
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Background" Value="{DynamicResource NavSelectedBgBrush}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="NavHistoryButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding CurrentTab}" Value="History">
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Background" Value="{DynamicResource NavSelectedBgBrush}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="NavToolsButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding CurrentTab}" Value="Dependencies">
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Background" Value="{DynamicResource NavSelectedBgBrush}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="NavSettingsButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding CurrentTab}" Value="Settings">
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Background" Value="{DynamicResource NavSelectedBgBrush}" />
+            </DataTrigger>
+        </Style.Triggers>
     </Style>
 
     <!-- EXCLUSIVO: Campo de URL do YouTube - O ÚNICO com cantos arredondados (CornerRadius="8") -->

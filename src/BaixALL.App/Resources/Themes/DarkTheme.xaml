@@ -43,6 +43,23 @@
     <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}" />
     <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}" />
     
-    <SolidColorBrush x:Key="HeaderBgBrush" Color="#161616" />
-    <SolidColorBrush x:Key="NavSelectedBgBrush" Color="#303030" />
+    <!-- Header Degradê Refinado: escuro profundo quase preto para azul muito sutil -->
+    <LinearGradientBrush x:Key="HeaderGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#0F131C" Offset="0.0" />
+        <GradientStop Color="#131B29" Offset="0.65" />
+        <GradientStop Color="#182438" Offset="1.0" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="HeaderBgBrush" Color="#111622" />
+    <SolidColorBrush x:Key="HeaderBorderBrush" Color="#222C3E" />
+    
+    <!-- Navegação e Destaques Visuais -->
+    <SolidColorBrush x:Key="NavHoverBgBrush" Color="#1E283A" />
+    <SolidColorBrush x:Key="NavSelectedBgBrush" Color="#1C273C" />
+    <SolidColorBrush x:Key="NavSelectedBorderBrush" Color="{StaticResource AccentColor}" />
+    
+    <!-- Branding 'ALL' em Azul Tech Vibrante -->
+    <SolidColorBrush x:Key="BrandAccentBrush" Color="#38BDF8" />
+    
+    <!-- Elementos Decorativos de Fundo da Home (Baixa Opacidade) -->
+    <SolidColorBrush x:Key="HomeDecorBrush" Color="#4A5568" />
 </ResourceDictionary>
