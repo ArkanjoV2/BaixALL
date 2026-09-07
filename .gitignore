@@ -23,4 +23,18 @@ TestResults/
 *.coverage
 *.coveragexml
 
+## Distribution Artifacts
 dist/
+
+## Sensitive and Environment Files
+.env
+.env.*
+*.log
+history.json
+*.cookie
+*.cookies
+
+## Temporary and Dumps
+*.tmp
+*.bak
+*.dmp
