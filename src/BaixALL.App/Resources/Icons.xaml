@@ -2,8 +2,8 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- Ícones vetoriais modernos em Geometria XAML -->
-    <!-- Ícone Oficial BaixALL (Straight Symmetrical Play + Inverted Slim Dock Tray) -->
-    <Geometry x:Key="IconBaixAll">M35,27 L38,24 L72,42 L72,44 L38,62 L35,59 Z M25,72 L75,72 L76,73 L76,77 L60,77 L57,74 L43,74 L40,77 L24,77 L24,73 Z</Geometry>
+    <!-- Ícone Oficial BaixALL (Straight Symmetrical Play + Inverted Calibrated Dock Tray para nitidez e consistência) -->
+    <Geometry x:Key="IconBaixAll">M35,27 L38,24 L72,42 L72,44 L38,62 L35,59 Z M25,69 L75,69 L76,70 L76,79.5 L60,79.5 L57,74.5 L43,74.5 L40,79.5 L24,79.5 L24,70 Z</Geometry>
     
     <!-- Elementos Decorativos de Fundo da Home (Vídeo, Áudio, Download e Edição) -->
     <!-- Play Outline Estilizado -->

@@ -45,9 +45,10 @@
                             BorderBrush="{DynamicResource HeaderBorderBrush}"
                             BorderThickness="1"
                             CornerRadius="0">
-                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="22" Height="22">
+                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="22" Height="22" SnapsToDevicePixels="True">
                             <Path Data="{StaticResource IconBaixAll}" Fill="{DynamicResource BrandAccentBrush}"
-                                  Width="20" Height="20" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                  Width="20" Height="20" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  SnapsToDevicePixels="True" />
                         </Grid>
                     </Border>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
