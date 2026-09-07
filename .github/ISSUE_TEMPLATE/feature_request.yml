@@ -1,0 +1,47 @@
+name: Sugestão de Funcionalidade
+description: Sugira uma nova ideia ou melhoria para o BaixALL.
+title: "[Sugestão]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado pelo seu interesse em contribuir com sugestões para o BaixALL!
+        
+        > 💡 **Nota Importante:**
+        > Todas as sugestões são lidas e avaliadas pela equipe do projeto. Contudo, a implementação depende de viabilidade técnica, prioridades de estabilidade e alinhamento com a proposta de simplicidade do BaixALL. O envio de uma sugestão não garante a sua inclusão no aplicativo.
+  - type: textarea
+    id: feature_description
+    attributes:
+      label: Descrição da Funcionalidade
+      description: Explique de forma clara qual funcionalidade ou melhoria você gostaria de ver no BaixALL.
+      placeholder: "Descreva a ideia com clareza e objetividade."
+    validations:
+      required: true
+  - type: textarea
+    id: problem_solved
+    attributes:
+      label: Qual problema ou necessidade esta funcionalidade resolveria?
+      description: Explique o contexto ou a dificuldade atual que motivou essa sugestão.
+      placeholder: "Atualmente é difícil realizar tal ação porque..."
+    validations:
+      required: true
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Como você imagina o funcionamento?
+      description: Como essa funcionalidade deveria se comportar na interface ou nos bastidores?
+      placeholder: "Descreva botões, telas, fluxos de uso ou opções na aba de configurações."
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives_considered
+    attributes:
+      label: Alternativas Consideradas
+      description: Você considerou alguma alternativa ou solução de contorno para atingir o mesmo objetivo?
+      placeholder: "Descreva soluções alternativas já testadas ou cogitadas."
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Informações Adicionais (Opcional)
+      description: Adicione qualquer outro detalhe, links de referência ou esboços visuais da ideia.
