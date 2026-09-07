@@ -51,15 +51,17 @@
     </LinearGradientBrush>
     <SolidColorBrush x:Key="HeaderBgBrush" Color="#111622" />
     <SolidColorBrush x:Key="HeaderBorderBrush" Color="#222C3E" />
+    <SolidColorBrush x:Key="HeaderTextPrimaryBrush" Color="#F8FAFC" />
+    <SolidColorBrush x:Key="HeaderTextSecondaryBrush" Color="#94A3B8" />
     
     <!-- Navegação e Destaques Visuais -->
     <SolidColorBrush x:Key="NavHoverBgBrush" Color="#1E283A" />
     <SolidColorBrush x:Key="NavSelectedBgBrush" Color="#1C273C" />
-    <SolidColorBrush x:Key="NavSelectedBorderBrush" Color="{StaticResource AccentColor}" />
+    <SolidColorBrush x:Key="NavSelectedBorderBrush" Color="#38BDF8" />
     
     <!-- Branding 'ALL' em Azul Tech Vibrante -->
     <SolidColorBrush x:Key="BrandAccentBrush" Color="#38BDF8" />
     
     <!-- Elementos Decorativos de Fundo da Home (Baixa Opacidade) -->
-    <SolidColorBrush x:Key="HomeDecorBrush" Color="#4A5568" />
+    <SolidColorBrush x:Key="HomeDecorBrush" Color="#64748B" />
 </ResourceDictionary>

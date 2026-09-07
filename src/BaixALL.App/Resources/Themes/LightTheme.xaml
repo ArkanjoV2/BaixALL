@@ -43,22 +43,24 @@
     <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}" />
     <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}" />
     
-    <!-- Header Degradê Claro Refinado -->
+    <!-- Header Degradê Mais Azul Sofisticado (Identidade Tech) -->
     <LinearGradientBrush x:Key="HeaderGradientBrush" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#FFFFFF" Offset="0.0" />
-        <GradientStop Color="#F4F8FC" Offset="0.65" />
-        <GradientStop Color="#E8F1FC" Offset="1.0" />
+        <GradientStop Color="#0B2239" Offset="0.0" />
+        <GradientStop Color="#103254" Offset="0.5" />
+        <GradientStop Color="#164372" Offset="1.0" />
     </LinearGradientBrush>
-    <SolidColorBrush x:Key="HeaderBgBrush" Color="#FFFFFF" />
-    <SolidColorBrush x:Key="HeaderBorderBrush" Color="#D0DFEE" />
+    <SolidColorBrush x:Key="HeaderBgBrush" Color="#0B2239" />
+    <SolidColorBrush x:Key="HeaderBorderBrush" Color="#1E4D7E" />
+    <SolidColorBrush x:Key="HeaderTextPrimaryBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="HeaderTextSecondaryBrush" Color="#94A3B8" />
     
-    <!-- Navegação e Destaques Visuais -->
-    <SolidColorBrush x:Key="NavHoverBgBrush" Color="#E5EFF9" />
-    <SolidColorBrush x:Key="NavSelectedBgBrush" Color="#DAE9F7" />
-    <SolidColorBrush x:Key="NavSelectedBorderBrush" Color="{StaticResource AccentColor}" />
+    <!-- Navegação e Destaques Visuais no Header Azul -->
+    <SolidColorBrush x:Key="NavHoverBgBrush" Color="#1E3E66" />
+    <SolidColorBrush x:Key="NavSelectedBgBrush" Color="#193B62" />
+    <SolidColorBrush x:Key="NavSelectedBorderBrush" Color="#38BDF8" />
     
-    <!-- Branding 'ALL' em Azul Tech -->
-    <SolidColorBrush x:Key="BrandAccentBrush" Color="#0284C7" />
+    <!-- Branding 'ALL' em Azul Ciano Elétrico -->
+    <SolidColorBrush x:Key="BrandAccentBrush" Color="#38BDF8" />
     
     <!-- Elementos Decorativos de Fundo da Home (Baixa Opacidade) -->
     <SolidColorBrush x:Key="HomeDecorBrush" Color="#94A3B8" />

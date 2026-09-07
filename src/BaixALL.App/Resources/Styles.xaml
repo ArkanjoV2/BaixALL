@@ -8,6 +8,8 @@
     <converters:NullToVisibilityConverter x:Key="NullToVis" />
     <converters:NullToVisibilityConverter x:Key="InverseNullToVis" Invert="True" />
     <converters:StatusToColorConverter x:Key="StatusToColor" />
+    <!-- Fonte Oficial de Branding para o Logotipo BaixALL -->
+    <FontFamily x:Key="BrandFontFamily">pack://application:,,,/BaixALL;component/Resources/Fonts/#Outfit, Bahnschrift, Segoe UI</FontFamily>
 
     <!-- Estilo Base para Texto / Tipografia Segoe UI Variable -->
     <Style TargetType="TextBlock">
@@ -18,7 +20,7 @@
     <!-- Botão Primário (Accent) - Cantos Retos (CornerRadius="0") -->
     <Style x:Key="PrimaryButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
-        <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+        <Setter Property="Foreground" Value="White" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="Padding" Value="16,9" />
@@ -41,7 +43,8 @@
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentPressedBrush}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="border" Property="Opacity" Value="0.45" />
+                            <Setter TargetName="border" Property="Opacity" Value="0.5" />
+                            <Setter Property="Foreground" Value="White" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -82,29 +85,32 @@
         </Setter>
     </Style>
 
-    <!-- Botão de Navegação / Tab Refinado com Hover Suave e Cantos Leves -->
+    <!-- Botão de Navegação / Tab Refinado com Cantos Retos e Linhas Limpas -->
     <Style x:Key="NavButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource HeaderTextSecondaryBrush}" />
         <Setter Property="FontWeight" Value="Medium" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="Padding" Value="14,8" />
-        <Setter Property="Margin" Value="3,0" />
-        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FontSize" Value="13.5" />
+        <Setter Property="Padding" Value="8,6" />
+        <Setter Property="Margin" Value="1,0" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="border"
                             Background="{TemplateBinding Background}"
-                            CornerRadius="6"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="0"
                             Padding="{TemplateBinding Padding}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource NavHoverBgBrush}" />
-                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource HeaderTextPrimaryBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -112,13 +118,14 @@
         </Setter>
     </Style>
 
-    <!-- Estilos de Abas de Navegação com Indicador de Estado Ativo -->
+    <!-- Estilos de Abas de Navegação com Indicador de Estado Ativo (Cantos Retos) -->
     <Style x:Key="NavHomeButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding CurrentTab}" Value="Downloader">
-                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource HeaderTextPrimaryBrush}" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="Background" Value="{DynamicResource NavSelectedBgBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource NavSelectedBorderBrush}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -126,9 +133,10 @@
     <Style x:Key="NavQueueButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding CurrentTab}" Value="Queue">
-                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource HeaderTextPrimaryBrush}" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="Background" Value="{DynamicResource NavSelectedBgBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource NavSelectedBorderBrush}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -136,9 +144,10 @@
     <Style x:Key="NavHistoryButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding CurrentTab}" Value="History">
-                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource HeaderTextPrimaryBrush}" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="Background" Value="{DynamicResource NavSelectedBgBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource NavSelectedBorderBrush}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -146,9 +155,10 @@
     <Style x:Key="NavToolsButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding CurrentTab}" Value="Dependencies">
-                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource HeaderTextPrimaryBrush}" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="Background" Value="{DynamicResource NavSelectedBgBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource NavSelectedBorderBrush}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -156,9 +166,10 @@
     <Style x:Key="NavSettingsButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding CurrentTab}" Value="Settings">
-                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource HeaderTextPrimaryBrush}" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="Background" Value="{DynamicResource NavSelectedBgBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource NavSelectedBorderBrush}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>

@@ -2,8 +2,8 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- Ícones vetoriais modernos em Geometria XAML -->
-    <!-- Ícone Oficial BaixALL (Precision Downloader Arrow + Tray) -->
-    <Geometry x:Key="IconBaixAll">F1 M41,19 L59,19 L59,45 L75,45 L50,71 L25,45 L41,45 Z M23,76 L77,76 L77,83 L68,83 L62,80 L38,80 L32,83 L23,83 Z</Geometry>
+    <!-- Ícone Oficial BaixALL (Modern Play + Media Dock Tray) -->
+    <Geometry x:Key="IconBaixAll">M38,26 L42,23 L70,44 L72,46 L70,48 L42,69 L38,66 Z M24,75 L76,75 L76,84 L60,84 L57,80 L43,80 L40,84 L24,84 Z</Geometry>
     
     <!-- Elementos Decorativos Minimalistas de Fundo (Home Watermark) -->
     <!-- Play Outline Minimalista -->
