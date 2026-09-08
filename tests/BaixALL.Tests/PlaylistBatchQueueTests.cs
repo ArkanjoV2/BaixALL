@@ -440,7 +440,7 @@ public class PlaylistBatchQueueTests
     public async Task MainViewModel_ActiveBatches_TracksQueueBatchesReactively()
     {
         var depMgr = new MockDependencyManager();
-        var ytDlp = new MockYtDlpService();
+        var ytDlp = new MockYtDlpService { DownloadBlocker = new TaskCompletionSource<bool>() };
         var fmtSvc = new FormatSelectionService();
         var ytSvc = new YoutubeService(ytDlp, fmtSvc);
         var settingsSvc = new MockSettingsService();
