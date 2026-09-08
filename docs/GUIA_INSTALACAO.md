@@ -1,6 +1,6 @@
 # Guia de Instalação e Uso do BaixALL
 
-Este guia foi elaborado para orientar usuários no download, verificação, instalação e operação do **BaixALL** no Windows 10 e Windows 11 com segurança e transparência.
+Este guia foi elaborado para orientar usuários no download, verificação, instalação e operação do **BaixALL 1.2.0** no Windows 10 e Windows 11 com segurança e transparência.
 
 ---
 
@@ -12,8 +12,10 @@ Este guia foi elaborado para orientar usuários no download, verificação, inst
 5. [Executar o Instalador ou Usar a Versão Portátil](#5-executar-o-instalador-ou-usar-a-versão-portátil)
 6. [Primeira Execução e Instalação das Ferramentas](#6-primeira-execução-e-instalação-das-ferramentas)
 7. [Como Realizar o Primeiro Download](#7-como-realizar-o-primeiro-download)
-8. [Onde os Arquivos São Salvos e Como Alterar](#8-onde-os-arquivos-são-salvos-e-como-alterar)
-9. [Como Desinstalar com Preservação dos seus Arquivos](#9-como-desinstalar-com-preservação-dos-seus-arquivos)
+8. [Como Baixar Playlists e Coleções em Lote](#8-como-baixar-playlists-e-coleções-em-lote)
+9. [Onde os Arquivos São Salvos e Como Alterar](#9-onde-os-arquivos-são-salvos-e-como-alterar)
+10. [Fechamento do Aplicativo e Gerenciamento da Fila](#10-fechamento-do-aplicativo-e-gerenciamento-da-fila)
+11. [Como Desinstalar com Preservação dos seus Arquivos](#11-como-desinstalar-com-preservação-dos-seus-arquivos)
 
 ---
 
@@ -34,11 +36,11 @@ Este guia foi elaborado para orientar usuários no download, verificação, inst
 Obtenha sempre os arquivos a partir da página oficial de lançamentos no GitHub:
 
 - **Instalador Oficial (Recomendado):**  
-  [Baixar BaixALL-Setup-1.1.0.exe](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.1.0/BaixALL-Setup-1.1.0.exe)  
+  [Baixar BaixALL-Setup-1.2.0.exe](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.2.0/BaixALL-Setup-1.2.0.exe)  
   *Assistente de instalação completo que cria atalhos no Menu Iniciar e na Área de Trabalho e registra desinstalador seguro.*
 
 - **Pacote Portátil (.ZIP):**  
-  [Baixar BaixALL-1.1.0-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.1.0/BaixALL-1.1.0-win-x64.zip)  
+  [Baixar BaixALL-1.2.0-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.2.0/BaixALL-1.2.0-win-x64.zip)  
   *Não requer instalação no sistema. Basta descompactar o arquivo `.zip` e executar diretamente o arquivo `BaixALL.exe`.*
 
 ---
@@ -47,15 +49,15 @@ Obtenha sempre os arquivos a partir da página oficial de lançamentos no GitHub
 
 Antes de abrir qualquer executável baixado da internet, é uma boa prática de segurança verificar sua integridade.
 
-1. Baixe o arquivo oficial de hashes: [checksums-1.1.0.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.1.0/checksums-1.1.0.txt).
+1. Baixe o arquivo oficial de hashes: [checksums-1.2.0.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.2.0/checksums-1.2.0.txt).
 2. Abra o **PowerShell** na pasta onde o arquivo foi baixado e execute:
    ```powershell
-   Get-FileHash BaixALL-Setup-1.1.0.exe -Algorithm SHA256
+   Get-FileHash BaixALL-Setup-1.2.0.exe -Algorithm SHA256
    ```
-3. Compare o valor retornado com o hash oficial da versão 1.1.0:
+3. Compare o valor retornado com o hash oficial da versão 1.2.0:
    ```text
-   4d10b03d58c2489e99755e9a1191bff31be08a9483ef7a58d04b3d460dee4df6  BaixALL-Setup-1.1.0.exe
-   ebb8b8afa1a77a39b6672f848527445cca68885b49e9cace59bb6dc4e4a4a566  BaixALL-1.1.0-win-x64.zip
+   f3eb80a7cefa97cb02a683a1784453749b5ff050701f0047fb9e46e6bb7749c1  BaixALL-Setup-1.2.0.exe
+   cc99f827815b2b7d45af85cef324cee2e1f15a0c9abb38134beb9469a6bebb3d  BaixALL-1.2.0-win-x64.zip
    ```
 4. Se o hash calculado for idêntico, o arquivo está íntegro e não sofreu alterações durante a transferência.
 
@@ -72,8 +74,8 @@ Ao executar um executável novo ou pouco comum no seu sistema, o **Windows Defen
 - **Importante sobre assinaturas digitais:** Mesmo aplicativos assinados por certificados comerciais passam por períodos de construção gradual de reputação no ecossistema Windows.
 
 ### Recomendações de segurança:
-1. **Confirme a procedência:** Certifique-se de que o arquivo foi obtido exclusivamente a partir do repositório oficial: `https://github.com/ArkanjoV2/BaixALL/releases`.
-2. **Confira o hash SHA-256:** Valide o arquivo contra o `checksums-1.1.0.txt` oficial.
+1. **Confirme a procedência:** Certifique-se de que o arquivo foi obtido exclusivamente a partir do repositório oficial: `https://github.com/ArkanjoV2/BaixALL/releases/tag/v1.2.0`.
+2. **Confira o hash SHA-256:** Valide o arquivo contra o `checksums-1.2.0.txt` oficial.
 3. **Não execute o arquivo se tiver dúvidas:** Caso não tenha certeza da origem do arquivo, não confirme a execução até verificar sua autenticidade.
 4. **Nunca desabilite proteções:** Não desative o Windows Defender, o SmartScreen ou o antivírus do seu sistema operacional.
 5. Se você conferiu a origem oficial e o hash SHA-256 e deseja prosseguir com a execução do instalador oficial, clique no link **"Mais informações"** na janela do alerta e avalie as informações apresentadas antes de decidir pela execução.
@@ -82,14 +84,14 @@ Ao executar um executável novo ou pouco comum no seu sistema, o **Windows Defen
 
 ## 5. Executar o Instalador ou Usar a Versão Portátil
 
-### Com o Instalador (`BaixALL-Setup-1.1.0.exe`):
+### Com o Instalador (`BaixALL-Setup-1.2.0.exe`):
 1. Dê um duplo clique no arquivo baixado.
 2. O assistente de instalação abrirá em Português do Brasil.
 3. Escolha se deseja atalhos na Área de Trabalho e no Menu Iniciar.
 4. O programa é instalado no perfil do usuário em `%LOCALAPPDATA%\Programs\BaixALL`, dispensando privilégios administrativos.
 5. Ao finalizar, clique em Concluir para abrir o aplicativo.
 
-### Com a Versão Portátil (`BaixALL-1.1.0-win-x64.zip`):
+### Com a Versão Portátil (`BaixALL-1.2.0-win-x64.zip`):
 1. Clique com o botão direito no arquivo `.zip` e selecione **"Extrair Tudo..."**.
 2. Abra a pasta resultante e dê um duplo clique no arquivo `BaixALL.exe`.
 
@@ -123,7 +125,24 @@ O BaixALL utiliza quatro ferramentas auxiliares de código aberto para análise 
 
 ---
 
-## 8. Onde os Arquivos São Salvos e Como Alterar
+## 8. Como Baixar Playlists e Coleções em Lote
+
+A partir da versão 1.2.0, o BaixALL suporta o download de playlists públicas do YouTube:
+
+1. **Colar o Link da Playlist:**  
+   Copie a URL da playlist (`youtube.com/playlist?list=...`) ou um link híbrido (`watch?v=...&list=...`) e cole no campo de entrada da tela inicial.
+2. **Tratamento de URLs Híbridas:**  
+   Se o link contiver tanto o identificador de vídeo quanto de playlist, uma janela de confirmação perguntará se você prefere baixar apenas o vídeo individual ou carregar a playlist completa.
+3. **Seleção de Vídeos:**  
+   Na tela da playlist, utilize os botões **"Selecionar Todos"**, **"Desmarcar Todos"** ou **"Inverter Seleção"**, ou marque manualmente as caixas de cada vídeo desejado.
+4. **Configurações do Lote:**  
+   Escolha a resolução padrão (ou marque **Somente Áudio** para converter todos em MP3/M4A) e selecione se deseja organizar os arquivos em uma **subpasta automática** com o nome da playlist.
+5. **Acompanhamento e Concorrência:**  
+   Ao clicar em **"Adicionar à Fila"**, os itens entram na fila geral do BaixALL. O lote respeita a concorrência configurada (1, 2 ou 3 downloads simultâneos) e exibe um painel superior com progresso agregado de conclusão por itens (`X de Y vídeos concluídos (Z% por itens)`).
+
+---
+
+## 9. Onde os Arquivos São Salvos e Como Alterar
 
 - **Pasta Padrão:** Por padrão, todos os arquivos concluídos são salvos na pasta de **Downloads** do seu perfil de usuário do Windows:  
   `C:\Users\<SeuUsuario>\Downloads`
@@ -134,7 +153,20 @@ O BaixALL utiliza quatro ferramentas auxiliares de código aberto para análise 
 
 ---
 
-## 9. Como Desinstalar com Preservação dos seus Arquivos
+## 10. Fechamento do Aplicativo e Gerenciamento da Fila
+
+O BaixALL conta com mecanismos preventivos para assegurar o encerramento seguro dos processos:
+
+- **Confirmação ao Fechar:**  
+  Se houver downloads em andamento ou itens aguardando na fila, ao tentar fechar a janela o aplicativo exibirá um diálogo de confirmação informando que os downloads ativos serão cancelados e que os itens pendentes não serão retomados automaticamente.
+- **Limpeza de Arquivos Temporários:**  
+  Ao cancelar um download ou fechar a aplicação, os processos filhos ativos são encerrados e os arquivos temporários residuais (`.part`, `.ytdl`, pastas temporárias de trabalho) são removidos do disco.
+- **Limitação de Persistência:**  
+  Na versão 1.2.0, downloads incompletos e lotes não concluídos não persistem no disco para retomada automática após o encerramento do aplicativo. Itens pendentes deverão ser reenfileirados manualmente caso a aplicação seja fechada antes do término. Arquivos já finalizados com sucesso, o histórico local e as configurações do usuário permanecem totalmente preservados.
+
+---
+
+## 11. Como Desinstalar com Preservação dos seus Arquivos
 
 O BaixALL respeita integralmente os arquivos de mídia baixados pelo usuário:
 
