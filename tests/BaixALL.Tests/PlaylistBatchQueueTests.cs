@@ -413,10 +413,20 @@ public class PlaylistBatchQueueTests
         Assert.Equal(1, batchVm.FailedCount);
         Assert.Equal(0, batchVm.CanceledCount);
         Assert.Equal(40.0, batchVm.ItemsProgressPercentage);
-        Assert.Equal("2 de 5 vídeos concluídos (40%)", batchVm.ProgressSummaryText);
+        Assert.Equal("2 de 5 vídeos concluídos (40% por itens)", batchVm.ProgressSummaryText);
         Assert.True(batchVm.IsActive);
         Assert.True(batchVm.HasFailures);
         Assert.False(batchVm.HasCanceled);
+
+        // Verifica que o progresso não fica preso quando há download ativo com porcentagem parcial
+        items[2].ProgressPercentage = 50.0;
+        batchVm.UpdateCounts(items);
+        // 2 concluidos (200) + 1 ativo a 50% (50) = 250 / 5 = 50%
+        Assert.Equal(50.0, batchVm.ItemsProgressPercentage);
+        Assert.Equal("2 de 5 vídeos concluídos (50% por itens)", batchVm.ProgressSummaryText);
+
+        // Verifica que a soma de todos os estados bate exatamente com o total
+        Assert.Equal(batchVm.TotalItems, batchVm.CompletedCount + batchVm.ActiveCount + batchVm.QueuedCount + batchVm.FailedCount + batchVm.CanceledCount);
 
         // Testa disparo do comando de cancelamento
         Guid? requestedBatchId = null;

@@ -653,7 +653,8 @@ public partial class MainViewModel : ObservableObject
             e.PropertyName == nameof(DownloadItemViewModel.IsActive) ||
             e.PropertyName == nameof(DownloadItemViewModel.IsCompleted) ||
             e.PropertyName == nameof(DownloadItemViewModel.IsFailed) ||
-            e.PropertyName == nameof(DownloadItemViewModel.IsCanceled))
+            e.PropertyName == nameof(DownloadItemViewModel.IsCanceled) ||
+            e.PropertyName == nameof(DownloadItemViewModel.ProgressPercentage))
         {
             UpdateBatchProgress();
         }
