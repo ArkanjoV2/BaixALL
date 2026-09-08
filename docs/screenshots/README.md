@@ -4,17 +4,17 @@ Esta pasta armazena as capturas de tela reais da interface do BaixALL utilizadas
 
 ---
 
-## 📸 Capturas Oficiais (v1.0.0)
+## 📸 Capturas Oficiais (v1.1.0)
 
 Todas as imagens são capturas reais da janela do aplicativo executado em ambiente Windows 11 x64, sem molduras fictícias, sem geração por inteligência artificial e sem simulações gráficas:
 
 | Arquivo | Resolução | Tamanho | Finalidade / Descrição |
 | :--- | :---: | :---: | :--- |
-| **`01-home-analise.png`** | 1916 × 1010 | ~144 KB | **Tela Inicial (Downloader):** Exibe a análise de um vídeo público com miniatura em alta resolução, metadados (título, canal, duração, FPS), seletores e botão de download. |
-| **`02-selecao-qualidade.png`** | 1915 × 1013 | ~145 KB | **Seleção de Qualidade:** Menu suspenso de resoluções aberto, exibindo opções disponíveis (1080p, 720p, 480p, 360p, 240p, 144p e somente áudio). |
-| **`03-fila-download.png`** | 1916 × 1004 | ~58 KB | **Fila de Downloads:** Download ativo em andamento com barra de progresso, percentual (26%), tamanho transferido, taxa de transferência (11.8 MB/s) e botão Cancelar. |
-| **`04-historico.png`** | 1917 × 1006 | ~99 KB | **Histórico de Downloads:** Mídias baixadas concluídas com formato, data/hora e botões de ação para abrir o arquivo ou exibir a pasta no Explorer. |
-| **`05-ferramentas.png`** | 1917 × 1004 | ~139 KB | **Ferramentas do Sistema:** Status operacional de `yt-dlp`, `FFmpeg`, `ffprobe` e `Deno`, indicando status "Pronto" e versões detectadas. |
+| **`01-home-analise.png`** | 1264 × 761 | ~128 KB | **Tela Inicial (Downloader):** Exibe a análise de um vídeo público com miniatura em alta resolução, metadados (título, canal, duração, FPS), seletores e botão de download com a nova identidade visual. |
+| **`02-selecao-qualidade.png`** | 1264 × 761 | ~133 KB | **Seleção de Qualidade:** Menu suspenso de resoluções aberto, exibindo opções disponíveis (1080p, 720p, 480p, 360p, 240p, 144p e somente áudio). |
+| **`03-fila-download.png`** | 1264 × 761 | ~77 KB | **Fila de Downloads:** Download ativo em andamento com barra de progresso, percentual (45%), tamanho transferido, taxa de transferência (8.4 MB/s) e botão Cancelar. |
+| **`04-historico.png`** | 1264 × 761 | ~80 KB | **Histórico de Downloads:** Mídias baixadas concluídas com formato, data/hora e botões de ação para abrir o arquivo ou exibir a pasta no Explorer. |
+| **`05-ferramentas.png`** | 1264 × 761 | ~91 KB | **Ferramentas do Sistema:** Status operacional de `yt-dlp`, `FFmpeg`, `ffprobe` e `Deno`, indicando status "Pronto" e versões detectadas. |
 
 ---
 
