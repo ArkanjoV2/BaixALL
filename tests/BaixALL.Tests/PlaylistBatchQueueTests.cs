@@ -300,4 +300,69 @@ public class PlaylistBatchQueueTests
         Assert.True(item2.CancellationTokenSource.IsCancellationRequested);
         Assert.False(item3.CancellationTokenSource.IsCancellationRequested);
     }
+
+    [Fact]
+    public void DownloadService_CancelSingleItemInBatch_DoesNotAffectOtherBatchItems()
+    {
+        var depMgr = new MockDependencyManager();
+        var ytDlp = new MockYtDlpService();
+        var settingsSvc = new MockSettingsService();
+        var histSvc = new HistoryService(historyFilePath: Path.Combine(Path.GetTempPath(), $"hist_{Guid.NewGuid():N}.json"));
+        var dlSvc = new DownloadService(ytDlp, histSvc, settingsSvc, new DummyDispatcherService());
+
+        var batchId = Guid.NewGuid();
+
+        var item1 = dlSvc.EnqueueDownload(new DownloadRequest
+        {
+            VideoTitle = "Batch 1",
+            DestinationFolder = Path.GetTempPath(),
+            BatchId = batchId,
+            BatchIndex = 1,
+            BatchTotal = 3
+        }, "thumb1");
+
+        var item2 = dlSvc.EnqueueDownload(new DownloadRequest
+        {
+            VideoTitle = "Batch 2",
+            DestinationFolder = Path.GetTempPath(),
+            BatchId = batchId,
+            BatchIndex = 2,
+            BatchTotal = 3
+        }, "thumb2");
+
+        var item3 = dlSvc.EnqueueDownload(new DownloadRequest
+        {
+            VideoTitle = "Batch 3",
+            DestinationFolder = Path.GetTempPath(),
+            BatchId = batchId,
+            BatchIndex = 3,
+            BatchTotal = 3
+        }, "thumb3");
+
+        // Cancelar apenas o item 2
+        dlSvc.CancelDownload(item2.Id);
+
+        Assert.False(item1.CancellationTokenSource.IsCancellationRequested);
+        Assert.True(item2.CancellationTokenSource.IsCancellationRequested);
+        Assert.False(item3.CancellationTokenSource.IsCancellationRequested);
+    }
+
+    [Fact]
+    public void FormatSelectionService_BatchFormatOptions_HasTransparentFallbacks()
+    {
+        var service = new FormatSelectionService();
+        var options = service.BuildBatchFormatOptions();
+
+        Assert.NotEmpty(options);
+        var best = options.First(o => o.IsBestQuality);
+        Assert.Equal("bestvideo+bestaudio/best", best.FormatSelector);
+
+        var hd1080 = options.FirstOrDefault(o => o.Height == 1080);
+        Assert.NotNull(hd1080);
+        Assert.Contains("bestvideo[height<=1080]", hd1080.FormatSelector);
+
+        var audioOnly = options.FirstOrDefault(o => o.IsAudioOnly);
+        Assert.NotNull(audioOnly);
+        Assert.Equal("bestaudio/best", audioOnly.FormatSelector);
+    }
 }
