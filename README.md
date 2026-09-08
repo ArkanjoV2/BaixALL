@@ -70,7 +70,17 @@ Interface nativa do BaixALL focada em clareza, produtividade e feedback em tempo
 | **Histórico Local de Downloads** | **Gerenciamento de Ferramentas** |
 | [![Histórico de Downloads](docs/screenshots/04-historico.png)](docs/screenshots/04-historico.png)<br><sub>Registro local das conclusões com atalhos para abrir mídia ou pasta</sub> | [![Gerenciador de Ferramentas](docs/screenshots/05-ferramentas.png)](docs/screenshots/05-ferramentas.png)<br><sub>Status operacional e versão de yt-dlp, FFmpeg, ffprobe e Deno</sub> |
 
-> 📸 *Todas as capturas acima foram obtidas diretamente da versão oficial 1.1.0 em ambiente Windows. Detalhes técnicos e diretrizes de atualização estão documentados em [docs/screenshots/README.md](docs/screenshots/README.md).*
+<br>
+
+### Playlists do YouTube e Downloads em Lote (Novidade v1.2.0)
+
+| Seleção Granular de Playlists | Painel de Lote na Fila de Downloads |
+| :---: | :---: |
+| [![Seleção Granular de Playlists](docs/screenshots/06-playlist-selecao.png)](docs/screenshots/06-playlist-selecao.png)<br><sub>Listagem sequencial com seleção em massa, configuração de resolução e subpasta</sub> | [![Painel de Lote na Fila de Downloads](docs/screenshots/07-fila-lote.png)](docs/screenshots/07-fila-lote.png)<br><sub>Progresso agregado de itens, velocidade consolidada e contadores em tempo real</sub> |
+| **Detecção Inteligente de URLs Híbridas** | |
+| [![Detecção Inteligente de URLs Híbridas](docs/screenshots/08-url-hibrida.png)](docs/screenshots/08-url-hibrida.png)<br><sub>Identificação preventiva entre vídeo avulso e coleção de playlist</sub> | |
+
+> 📸 *Todas as capturas acima foram obtidas diretamente de execuções oficiais em ambiente Windows 11 x64. Detalhes técnicos e diretrizes de atualização estão documentados em [docs/screenshots/README.md](docs/screenshots/README.md).*
 
 ---
 

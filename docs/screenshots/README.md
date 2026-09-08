@@ -4,7 +4,7 @@ Esta pasta armazena as capturas de tela reais da interface do BaixALL utilizadas
 
 ---
 
-## 📸 Capturas Oficiais (v1.1.0)
+## 📸 Capturas Oficiais (v1.1.0 e v1.2.0)
 
 Todas as imagens são capturas reais da janela do aplicativo executado em ambiente Windows 11 x64, sem molduras fictícias, sem geração por inteligência artificial e sem simulações gráficas:
 
@@ -15,6 +15,9 @@ Todas as imagens são capturas reais da janela do aplicativo executado em ambien
 | **`03-fila-download.png`** | 1264 × 761 | ~77 KB | **Fila de Downloads:** Download ativo em andamento com barra de progresso, percentual (45%), tamanho transferido, taxa de transferência (8.4 MB/s) e botão Cancelar. |
 | **`04-historico.png`** | 1264 × 761 | ~80 KB | **Histórico de Downloads:** Mídias baixadas concluídas com formato, data/hora e botões de ação para abrir o arquivo ou exibir a pasta no Explorer. |
 | **`05-ferramentas.png`** | 1264 × 761 | ~91 KB | **Ferramentas do Sistema:** Status operacional de `yt-dlp`, `FFmpeg`, `ffprobe` e `Deno`, indicando status "Pronto" e versões detectadas. |
+| **`06-playlist-selecao.png`** | 1024 × 720 | ~152 KB | **Seleção de Playlist:** Interface granular de seleção de vídeos de playlist com botões em massa, opções de qualidade, áudio e subpasta. |
+| **`07-fila-lote.png`** | 1024 × 720 | ~83 KB | **Fila e Card de Lote:** Acompanhamento agregado de download em lote com barra de progresso consolidada por itens, taxa de transferência e contadores em tempo real. |
+| **`08-url-hibrida.png`** | 1024 × 720 | ~126 KB | **Detecção de URL Híbrida:** Diálogo preventivo oferecendo escolha ao usuário entre baixar vídeo avulso ou carregar a playlist inteira. |
 
 ---
 
