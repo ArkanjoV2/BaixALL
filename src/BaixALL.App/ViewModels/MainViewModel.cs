@@ -117,10 +117,13 @@ public partial class MainViewModel : ObservableObject
     public bool ShowSetupPrompt => !DependenciesReady;
 
     public ObservableCollection<DownloadItemViewModel> QueueItems => _downloadService.QueueItems;
+    public ObservableCollection<BatchProgressViewModel> ActiveBatches { get; } = new();
 
     public int ActiveDownloadsCount => QueueItems.Count(x => x.IsActive);
 
     public bool HasActiveDownloads => _downloadService.HasActiveDownloads;
+
+    private System.Threading.CancellationTokenSource? _analysisCts;
 
     public void CancelAllDownloads() => _downloadService.CancelAllDownloads();
 
@@ -179,9 +182,30 @@ public partial class MainViewModel : ObservableObject
             AudioFormatOptions.Add(a);
         SelectedAudioFormat = AudioFormatOptions.FirstOrDefault();
 
-        _downloadService.QueueItems.CollectionChanged += (_, _) =>
+        foreach (var item in _downloadService.QueueItems)
+        {
+            item.PropertyChanged += OnQueueItemPropertyChanged;
+        }
+        UpdateBatchProgress();
+
+        _downloadService.QueueItems.CollectionChanged += (s, e) =>
         {
             OnPropertyChanged(nameof(ActiveDownloadsCount));
+            if (e.NewItems != null)
+            {
+                foreach (DownloadItemViewModel item in e.NewItems)
+                {
+                    item.PropertyChanged += OnQueueItemPropertyChanged;
+                }
+            }
+            if (e.OldItems != null)
+            {
+                foreach (DownloadItemViewModel item in e.OldItems)
+                {
+                    item.PropertyChanged -= OnQueueItemPropertyChanged;
+                }
+            }
+            UpdateBatchProgress();
         };
     }
 
@@ -264,9 +288,14 @@ public partial class MainViewModel : ObservableObject
         CanRetryAnalysis = false;
         ClearNotification();
 
+        _analysisCts?.Cancel();
+        _analysisCts?.Dispose();
+        _analysisCts = new System.Threading.CancellationTokenSource();
+        var ct = _analysisCts.Token;
+
         try
         {
-            var info = await _youtubeService.AnalyzeVideoAsync(UrlInput);
+            var info = await _youtubeService.AnalyzeVideoAsync(UrlInput, ct);
             VideoInfo = info;
 
             // Preenche opções de formato
@@ -281,6 +310,11 @@ public partial class MainViewModel : ObservableObject
             HasVideoInfo = true;
 
             ShowNotification($"Vídeo encontrado: {info.Title}", "Success");
+        }
+        catch (OperationCanceledException)
+        {
+            ShowNotification("Análise cancelada pelo usuário.", "Info");
+            HasVideoInfo = false;
         }
         catch (Exception ex)
         {
@@ -299,6 +333,22 @@ public partial class MainViewModel : ObservableObject
         finally
         {
             IsAnalyzing = false;
+            _analysisCts?.Dispose();
+            _analysisCts = null;
+        }
+    }
+
+    [RelayCommand]
+    public void CancelAnalysis()
+    {
+        if (IsAnalyzing && _analysisCts != null)
+        {
+            try
+            {
+                _analysisCts.Cancel();
+                ShowNotification("Cancelando análise...", "Info");
+            }
+            catch { }
         }
     }
 
@@ -310,9 +360,14 @@ public partial class MainViewModel : ObservableObject
         CanRetryAnalysis = false;
         ClearNotification();
 
+        _analysisCts?.Cancel();
+        _analysisCts?.Dispose();
+        _analysisCts = new System.Threading.CancellationTokenSource();
+        var ct = _analysisCts.Token;
+
         try
         {
-            var info = await _youtubeService.AnalyzePlaylistAsync(url);
+            var info = await _youtubeService.AnalyzePlaylistAsync(url, ct);
             PlaylistInfo = info;
 
             BatchFormatOptions.Clear();
@@ -335,6 +390,11 @@ public partial class MainViewModel : ObservableObject
 
             ShowNotification($"Playlist encontrada: {info.Title} ({info.TotalVideosCount} vídeos)", "Success");
         }
+        catch (OperationCanceledException)
+        {
+            ShowNotification("Análise da playlist cancelada pelo usuário.", "Info");
+            HasPlaylistInfo = false;
+        }
         catch (Exception ex)
         {
             _logger?.Error($"Erro ao analisar playlist '{url}': {ex.GetType().FullName}: {ex.Message}", ex);
@@ -352,6 +412,8 @@ public partial class MainViewModel : ObservableObject
         finally
         {
             IsAnalyzing = false;
+            _analysisCts?.Dispose();
+            _analysisCts = null;
         }
     }
 
@@ -431,6 +493,29 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
+        // Deduplicação interna na seleção de itens da playlist (por URL)
+        var distinctSelected = selected
+            .GroupBy(x => x.VideoUrl, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.First())
+            .ToList();
+
+        // Evita adicionar vídeos que já estão ativamente baixando ou na fila
+        var activeUrls = new System.Collections.Generic.HashSet<string>(
+            _downloadService.QueueItems
+                .Where(x => x.IsActive)
+                .Select(x => x.Request.VideoUrl),
+            StringComparer.OrdinalIgnoreCase);
+
+        var itemsToEnqueue = distinctSelected.Where(x => !activeUrls.Contains(x.VideoUrl)).ToList();
+        int skippedDuplicates = distinctSelected.Count - itemsToEnqueue.Count;
+
+        if (itemsToEnqueue.Count == 0)
+        {
+            ShowNotification("Todos os vídeos selecionados já estão ativos ou aguardando na fila.", "Warning");
+            CurrentTab = "Queue";
+            return;
+        }
+
         var baseFolder = string.IsNullOrWhiteSpace(DestinationFolder)
             ? AppConstants.DefaultDownloadFolder
             : DestinationFolder;
@@ -443,11 +528,11 @@ public partial class MainViewModel : ObservableObject
 
         var isAudioOnly = IsBatchAudioOnlyMode || SelectedBatchFormat.IsAudioOnly;
         var batchId = Guid.NewGuid();
-        int total = selected.Count;
+        int total = itemsToEnqueue.Count;
 
-        for (int i = 0; i < selected.Count; i++)
+        for (int i = 0; i < itemsToEnqueue.Count; i++)
         {
-            var item = selected[i];
+            var item = itemsToEnqueue[i];
             var request = new DownloadRequest
             {
                 VideoUrl = item.VideoUrl,
@@ -466,7 +551,11 @@ public partial class MainViewModel : ObservableObject
             _downloadService.EnqueueDownload(request, item.ThumbnailUrl);
         }
 
-        ShowNotification($"Lote adicionado à fila: {total} vídeo(s) da playlist '{PlaylistInfo.Title}'", "Success");
+        var notifMsg = skippedDuplicates > 0
+            ? $"Lote adicionado: {total} vídeo(s) da playlist '{PlaylistInfo.Title}' ({skippedDuplicates} duplicado(s) já na fila ignorados)."
+            : $"Lote adicionado à fila: {total} vídeo(s) da playlist '{PlaylistInfo.Title}'";
+
+        ShowNotification(notifMsg, "Success");
         CurrentTab = "Queue";
     }
 
@@ -501,6 +590,14 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
+        // Verifica duplicata na fila ativa
+        if (_downloadService.QueueItems.Any(x => x.IsActive && string.Equals(x.Request.VideoUrl, VideoInfo.OriginalUrl, StringComparison.OrdinalIgnoreCase)))
+        {
+            ShowNotification("Este vídeo já está ativo ou na fila de downloads.", "Warning");
+            CurrentTab = "Queue";
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(DestinationFolder))
         {
             DestinationFolder = AppConstants.DefaultDownloadFolder;
@@ -525,6 +622,67 @@ public partial class MainViewModel : ObservableObject
 
         ShowNotification($"Download adicionado à fila: '{VideoInfo.Title}'", "Success");
         CurrentTab = "Queue";
+    }
+
+    [RelayCommand]
+    public void CancelBatch(Guid batchId)
+    {
+        _downloadService.CancelBatch(batchId);
+        var batch = ActiveBatches.FirstOrDefault(b => b.BatchId == batchId);
+        var title = batch?.BatchTitle ?? "Lote";
+        ShowNotification($"Download do lote '{title}' cancelado.", "Info");
+        UpdateBatchProgress();
+    }
+
+    private void OnQueueItemPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(DownloadItemViewModel.Status) ||
+            e.PropertyName == nameof(DownloadItemViewModel.IsActive) ||
+            e.PropertyName == nameof(DownloadItemViewModel.IsCompleted) ||
+            e.PropertyName == nameof(DownloadItemViewModel.IsFailed) ||
+            e.PropertyName == nameof(DownloadItemViewModel.IsCanceled))
+        {
+            UpdateBatchProgress();
+        }
+    }
+
+    public void UpdateBatchProgress()
+    {
+        var batchGroups = QueueItems
+            .Where(x => x.IsBatchItem && x.BatchId.HasValue)
+            .GroupBy(x => x.BatchId!.Value)
+            .ToList();
+
+        var activeBatchIds = batchGroups.Select(g => g.Key).ToHashSet();
+
+        for (int i = ActiveBatches.Count - 1; i >= 0; i--)
+        {
+            if (!activeBatchIds.Contains(ActiveBatches[i].BatchId))
+            {
+                ActiveBatches.RemoveAt(i);
+            }
+        }
+
+        foreach (var group in batchGroups)
+        {
+            var batchId = group.Key;
+            var firstItem = group.First();
+            var batchVm = ActiveBatches.FirstOrDefault(b => b.BatchId == batchId);
+
+            if (batchVm == null)
+            {
+                batchVm = new BatchProgressViewModel
+                {
+                    BatchId = batchId,
+                    BatchTitle = firstItem.BatchTitle ?? "Lote de Vídeos",
+                    TotalItems = firstItem.BatchTotal.GetValueOrDefault(group.Count())
+                };
+                batchVm.CancelRequested += (_, id) => CancelBatch(id);
+                ActiveBatches.Add(batchVm);
+            }
+
+            batchVm.UpdateCounts(group);
+        }
     }
 
     [RelayCommand]

@@ -40,16 +40,30 @@ public class PlaylistBatchQueueTests
 
     private class MockYtDlpService : IYtDlpService
     {
-        public Task<string> DownloadAsync(DownloadRequest request, IProgress<DownloadProgressReport> progress, CancellationToken ct = default)
+        public TaskCompletionSource<bool>? DownloadBlocker { get; set; }
+
+        public async Task<string> DownloadAsync(DownloadRequest request, IProgress<DownloadProgressReport> progress, CancellationToken ct = default)
         {
-            return Task.FromResult(Path.Combine(request.DestinationFolder, $"{request.VideoTitle}.mp4"));
+            if (DownloadBlocker != null)
+            {
+                await DownloadBlocker.Task.WaitAsync(ct);
+            }
+            var filePath = Path.Combine(request.DestinationFolder, $"{request.VideoTitle}.mp4");
+            try
+            {
+                Directory.CreateDirectory(request.DestinationFolder);
+                if (!File.Exists(filePath))
+                    File.WriteAllText(filePath, "dummy content");
+            }
+            catch { }
+            return filePath;
         }
 
         public Task<JsonDocument> GetMetadataJsonAsync(string url, CancellationToken ct = default)
         {
             var json = """
             {
-                "id": "vid123",
+                "id": "dQw4w9WgXcQ",
                 "title": "Video de Teste",
                 "uploader": "Canal Teste",
                 "duration": 180,
@@ -71,9 +85,9 @@ public class PlaylistBatchQueueTests
                 "title": "Playlist do Curso",
                 "uploader": "Professor X",
                 "entries": [
-                    { "id": "v1", "title": "Aula 01", "duration": 120, "uploader": "Professor X", "url": "https://www.youtube.com/watch?v=v1" },
-                    { "id": "v2", "title": "Aula 02", "duration": 240, "uploader": "Professor X", "url": "https://www.youtube.com/watch?v=v2" },
-                    { "id": "v3", "title": "[Private video]", "duration": 0, "uploader": "Professor X", "url": "https://www.youtube.com/watch?v=v3" }
+                    { "id": "12345678901", "title": "Aula 01", "duration": 120, "uploader": "Professor X", "url": "https://www.youtube.com/watch?v=12345678901" },
+                    { "id": "12345678902", "title": "Aula 02", "duration": 240, "uploader": "Professor X", "url": "https://www.youtube.com/watch?v=12345678902" },
+                    { "id": "12345678903", "title": "[Private video]", "duration": 0, "uploader": "Professor X", "url": "https://www.youtube.com/watch?v=12345678903" }
                 ]
             }
             """;
@@ -255,7 +269,7 @@ public class PlaylistBatchQueueTests
     public void DownloadService_CancelBatch_CancelsOnlyBatchItems()
     {
         var depMgr = new MockDependencyManager();
-        var ytDlp = new MockYtDlpService();
+        var ytDlp = new MockYtDlpService { DownloadBlocker = new TaskCompletionSource<bool>() };
         var settingsSvc = new MockSettingsService();
         var histSvc = new HistoryService(historyFilePath: Path.Combine(Path.GetTempPath(), $"hist_{Guid.NewGuid():N}.json"));
         var dlSvc = new DownloadService(ytDlp, histSvc, settingsSvc, new DummyDispatcherService());
@@ -299,13 +313,15 @@ public class PlaylistBatchQueueTests
         Assert.True(item1.CancellationTokenSource.IsCancellationRequested);
         Assert.True(item2.CancellationTokenSource.IsCancellationRequested);
         Assert.False(item3.CancellationTokenSource.IsCancellationRequested);
+
+        ytDlp.DownloadBlocker.SetResult(true);
     }
 
     [Fact]
     public void DownloadService_CancelSingleItemInBatch_DoesNotAffectOtherBatchItems()
     {
         var depMgr = new MockDependencyManager();
-        var ytDlp = new MockYtDlpService();
+        var ytDlp = new MockYtDlpService { DownloadBlocker = new TaskCompletionSource<bool>() };
         var settingsSvc = new MockSettingsService();
         var histSvc = new HistoryService(historyFilePath: Path.Combine(Path.GetTempPath(), $"hist_{Guid.NewGuid():N}.json"));
         var dlSvc = new DownloadService(ytDlp, histSvc, settingsSvc, new DummyDispatcherService());
@@ -345,6 +361,8 @@ public class PlaylistBatchQueueTests
         Assert.False(item1.CancellationTokenSource.IsCancellationRequested);
         Assert.True(item2.CancellationTokenSource.IsCancellationRequested);
         Assert.False(item3.CancellationTokenSource.IsCancellationRequested);
+
+        ytDlp.DownloadBlocker.SetResult(true);
     }
 
     [Fact]
@@ -364,5 +382,233 @@ public class PlaylistBatchQueueTests
         var audioOnly = options.FirstOrDefault(o => o.IsAudioOnly);
         Assert.NotNull(audioOnly);
         Assert.Equal("bestaudio/best", audioOnly.FormatSelector);
+    }
+
+    [Fact]
+    public void BatchProgressViewModel_CalculationsAndHonestProgress_ShouldBeAccurate()
+    {
+        var batchId = Guid.NewGuid();
+        var batchVm = new BatchProgressViewModel
+        {
+            BatchId = batchId,
+            BatchTitle = "Playlist Honesta",
+            TotalItems = 5
+        };
+
+        var items = new List<DownloadItemViewModel>
+        {
+            new() { Status = DownloadStatus.Completed, IsActive = false, IsCompleted = true },
+            new() { Status = DownloadStatus.Completed, IsActive = false, IsCompleted = true },
+            new() { Status = DownloadStatus.DownloadingVideo, IsActive = true, IsCompleted = false },
+            new() { Status = DownloadStatus.Queued, IsActive = true, IsCompleted = false },
+            new() { Status = DownloadStatus.Error, IsActive = false, IsFailed = true }
+        };
+
+        batchVm.UpdateCounts(items);
+
+        Assert.Equal(2, batchVm.CompletedCount);
+        Assert.Equal(1, batchVm.ActiveCount);
+        Assert.Equal(1, batchVm.QueuedCount);
+        Assert.Equal(1, batchVm.FailedCount);
+        Assert.Equal(0, batchVm.CanceledCount);
+        Assert.Equal(40.0, batchVm.ItemsProgressPercentage);
+        Assert.Equal("2 de 5 vídeos concluídos (40%)", batchVm.ProgressSummaryText);
+        Assert.True(batchVm.IsActive);
+        Assert.True(batchVm.HasFailures);
+        Assert.False(batchVm.HasCanceled);
+
+        // Testa disparo do comando de cancelamento
+        Guid? requestedBatchId = null;
+        batchVm.CancelRequested += (_, id) => requestedBatchId = id;
+        batchVm.CancelCommand.Execute(null);
+
+        Assert.Equal(batchId, requestedBatchId);
+    }
+
+    [Fact]
+    public async Task MainViewModel_ActiveBatches_TracksQueueBatchesReactively()
+    {
+        var depMgr = new MockDependencyManager();
+        var ytDlp = new MockYtDlpService();
+        var fmtSvc = new FormatSelectionService();
+        var ytSvc = new YoutubeService(ytDlp, fmtSvc);
+        var settingsSvc = new MockSettingsService();
+        var histSvc = new HistoryService(historyFilePath: Path.Combine(Path.GetTempPath(), $"hist_{Guid.NewGuid():N}.json"));
+        var dlSvc = new DownloadService(ytDlp, histSvc, settingsSvc, new DummyDispatcherService());
+        var updateSvc = new MockUpdateService();
+
+        var vm = new MainViewModel(
+            ytSvc,
+            fmtSvc,
+            dlSvc,
+            settingsSvc,
+            depMgr,
+            updateSvc,
+            histSvc,
+            new DummyDispatcherService());
+
+        vm.DependenciesReady = true;
+        vm.UrlInput = "https://www.youtube.com/playlist?list=PLtest123";
+
+        await vm.AnalyzeAsync();
+        Assert.True(vm.HasPlaylistInfo);
+
+        // Enfileira
+        vm.EnqueueSelectedPlaylistItemsCommand.Execute(null);
+
+        // Deve existir 1 batch ativo em ActiveBatches
+        Assert.Single(vm.ActiveBatches);
+        var batchVm = vm.ActiveBatches[0];
+        Assert.Equal("Playlist do Curso", batchVm.BatchTitle);
+        Assert.Equal(2, batchVm.TotalItems);
+        Assert.Equal(2, dlSvc.QueueItems.Count);
+
+        // Cancela o lote pelo ViewModel
+        vm.CancelBatchCommand.Execute(batchVm.BatchId);
+        Assert.All(dlSvc.QueueItems, item => Assert.True(item.CancellationTokenSource.IsCancellationRequested));
+    }
+
+    [Fact]
+    public async Task MainViewModel_Deduplication_SkipsDuplicateUrlsInPlaylistAndQueue()
+    {
+        var depMgr = new MockDependencyManager();
+        var ytDlp = new MockYtDlpService();
+        var fmtSvc = new FormatSelectionService();
+        var ytSvc = new YoutubeService(ytDlp, fmtSvc);
+        var settingsSvc = new MockSettingsService();
+        var histSvc = new HistoryService(historyFilePath: Path.Combine(Path.GetTempPath(), $"hist_{Guid.NewGuid():N}.json"));
+        var dlSvc = new DownloadService(ytDlp, histSvc, settingsSvc, new DummyDispatcherService());
+        var updateSvc = new MockUpdateService();
+
+        var vm = new MainViewModel(
+            ytSvc,
+            fmtSvc,
+            dlSvc,
+            settingsSvc,
+            depMgr,
+            updateSvc,
+            histSvc,
+            new DummyDispatcherService());
+
+        vm.DependenciesReady = true;
+        vm.UrlInput = "https://www.youtube.com/playlist?list=PLtest123";
+
+        // Bloqueia a conclusão imediata para que os itens permaneçam em estado ativo na fila
+        ytDlp.DownloadBlocker = new TaskCompletionSource<bool>();
+
+        await vm.AnalyzeAsync();
+        Assert.True(vm.HasPlaylistInfo);
+
+        // Enfileira primeira vez (2 itens)
+        vm.EnqueueSelectedPlaylistItemsCommand.Execute(null);
+        Assert.Equal(2, dlSvc.QueueItems.Count);
+
+        // Tenta enfileirar novamente os mesmos vídeos enquanto estão ativos na fila
+        vm.EnqueueSelectedPlaylistItemsCommand.Execute(null);
+
+        // Fila deve permanecer com 2 itens (não duplicou vídeos ativos)
+        Assert.Equal(2, dlSvc.QueueItems.Count);
+        Assert.True(vm.HasStatusNotification);
+        Assert.Contains("já estão ativos", vm.StatusNotification);
+
+        // Libera blocker
+        ytDlp.DownloadBlocker.SetResult(true);
+    }
+
+    [Fact]
+    public async Task MainViewModel_StartDownload_PreventsDuplicateActiveDownload()
+    {
+        var depMgr = new MockDependencyManager();
+        var ytDlp = new MockYtDlpService();
+        var fmtSvc = new FormatSelectionService();
+        var ytSvc = new YoutubeService(ytDlp, fmtSvc);
+        var settingsSvc = new MockSettingsService();
+        var histSvc = new HistoryService(historyFilePath: Path.Combine(Path.GetTempPath(), $"hist_{Guid.NewGuid():N}.json"));
+        var dlSvc = new DownloadService(ytDlp, histSvc, settingsSvc, new DummyDispatcherService());
+        var updateSvc = new MockUpdateService();
+
+        var vm = new MainViewModel(
+            ytSvc,
+            fmtSvc,
+            dlSvc,
+            settingsSvc,
+            depMgr,
+            updateSvc,
+            histSvc,
+            new DummyDispatcherService());
+
+        vm.DependenciesReady = true;
+        vm.UrlInput = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+
+        // Bloqueia o download para manter o item com IsActive = true
+        ytDlp.DownloadBlocker = new TaskCompletionSource<bool>();
+
+        await vm.AnalyzeAsync();
+        Assert.True(vm.HasVideoInfo);
+
+        // Inicia download
+        vm.StartDownloadCommand.Execute(null);
+        Assert.Single(dlSvc.QueueItems);
+
+        // Tenta iniciar novamente o mesmo vídeo
+        vm.StartDownloadCommand.Execute(null);
+        Assert.Single(dlSvc.QueueItems);
+        Assert.Contains("já está ativo", vm.StatusNotification);
+
+        ytDlp.DownloadBlocker.SetResult(true);
+    }
+
+    [Fact]
+    public async Task MainViewModel_CancelAnalysis_CancelsOngoingMetadataFetch()
+    {
+        var depMgr = new MockDependencyManager();
+        var settingsSvc = new MockSettingsService();
+        var histSvc = new HistoryService(historyFilePath: Path.Combine(Path.GetTempPath(), $"hist_{Guid.NewGuid():N}.json"));
+        var dlSvc = new DownloadService(new MockYtDlpService(), histSvc, settingsSvc, new DummyDispatcherService());
+        var updateSvc = new MockUpdateService();
+        var fmtSvc = new FormatSelectionService();
+
+        // YoutubeService com delay longo que reage a cancelamento
+        var slowYtSvc = new SlowCancellableYoutubeService();
+
+        var vm = new MainViewModel(
+            slowYtSvc,
+            fmtSvc,
+            dlSvc,
+            settingsSvc,
+            depMgr,
+            updateSvc,
+            histSvc,
+            new DummyDispatcherService());
+
+        vm.DependenciesReady = true;
+        vm.UrlInput = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+
+        var analyzeTask = vm.AnalyzeAsync();
+        Assert.True(vm.IsAnalyzing);
+
+        // Dispara o cancelamento
+        vm.CancelAnalysisCommand.Execute(null);
+
+        await analyzeTask;
+
+        Assert.False(vm.IsAnalyzing);
+        Assert.False(vm.HasVideoInfo);
+        Assert.Equal("Análise cancelada pelo usuário.", vm.StatusNotification);
+    }
+
+    private class SlowCancellableYoutubeService : IYoutubeService
+    {
+        public async Task<VideoInfo> AnalyzeVideoAsync(string url, CancellationToken ct = default)
+        {
+            await Task.Delay(5000, ct);
+            return new VideoInfo { Title = "Never finishes" };
+        }
+
+        public async Task<PlaylistInfo> AnalyzePlaylistAsync(string url, CancellationToken ct = default)
+        {
+            await Task.Delay(5000, ct);
+            return new PlaylistInfo { Title = "Never finishes" };
+        }
     }
 }

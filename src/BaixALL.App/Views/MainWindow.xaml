@@ -359,7 +359,9 @@
                         <StackPanel HorizontalAlignment="Center">
                             <ProgressBar IsIndeterminate="True" Height="4" Width="300" Margin="0,0,0,12" />
                             <TextBlock Text="Analisando metadados e formatos disponíveis no YouTube..."
-                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14" HorizontalAlignment="Center" />
+                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14" HorizontalAlignment="Center" Margin="0,0,0,12" />
+                            <Button Style="{StaticResource SecondaryButtonStyle}" Content="Cancelar Análise"
+                                    Command="{Binding CancelAnalysisCommand}" HorizontalAlignment="Center" Padding="16,6" />
                         </StackPanel>
                     </Border>
 
@@ -792,7 +794,76 @@
 
                 <!-- Lista de Itens da Fila -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding QueueItems}">
+                    <StackPanel>
+                        <!-- PAINEL DE PROGRESSO AGREGADO DE LOTES EM ANDAMENTO -->
+                        <ItemsControl ItemsSource="{Binding ActiveBatches}" Margin="0,0,0,16">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource CardBorderStyle}" Margin="0,0,0,12" Padding="18"
+                                            BorderBrush="{DynamicResource BrandAccentBrush}" BorderThickness="1.5">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <!-- Linha 1: Título do Lote e Ações -->
+                                            <Grid Grid.Row="0" Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel Grid.Column="0">
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                        <Border Background="{DynamicResource AccentBrush}" Padding="8,2" Margin="0,0,8,0">
+                                                            <TextBlock Text="DOWNLOAD EM LOTE" FontSize="11" FontWeight="Bold" Foreground="White" />
+                                                        </Border>
+                                                        <TextBlock Text="{Binding BatchTitle}" FontSize="16" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                                                    </StackPanel>
+                                                    <TextBlock Text="{Binding ProgressSummaryText}" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                </StackPanel>
+
+                                                <Button Grid.Column="1" Style="{StaticResource SecondaryButtonStyle}" Content="Cancelar Lote"
+                                                        Command="{Binding CancelCommand}"
+                                                        Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}"
+                                                        VerticalAlignment="Center" Padding="14,6" />
+                                            </Grid>
+
+                                            <!-- Linha 2: Barra de Progresso Agregado Honesta por Itens -->
+                                            <ProgressBar Grid.Row="1" Value="{Binding ItemsProgressPercentage, Mode=OneWay}"
+                                                         Maximum="100" Height="8" Margin="0,0,0,10"
+                                                         Foreground="{DynamicResource AccentBrush}" />
+
+                                            <!-- Linha 3: Contadores Detalhados -->
+                                            <WrapPanel Grid.Row="2">
+                                                <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3" Margin="0,0,8,4">
+                                                    <TextBlock Text="{Binding CompletedCount, StringFormat='Concluídos: {0}'}" FontSize="12" Foreground="{DynamicResource SuccessBrush}" FontWeight="SemiBold" />
+                                                </Border>
+                                                <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3" Margin="0,0,8,4">
+                                                    <TextBlock Text="{Binding ActiveCount, StringFormat='Baixando: {0}'}" FontSize="12" Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" />
+                                                </Border>
+                                                <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3" Margin="0,0,8,4">
+                                                    <TextBlock Text="{Binding QueuedCount, StringFormat='Aguardando: {0}'}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                </Border>
+                                                <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3" Margin="0,0,8,4"
+                                                        Visibility="{Binding HasFailures, Converter={StaticResource BoolToVis}}">
+                                                    <TextBlock Text="{Binding FailedCount, StringFormat='Falhas: {0}'}" FontSize="12" Foreground="{DynamicResource DangerBrush}" FontWeight="SemiBold" />
+                                                </Border>
+                                                <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3" Margin="0,0,8,4"
+                                                        Visibility="{Binding HasCanceled, Converter={StaticResource BoolToVis}}">
+                                                    <TextBlock Text="{Binding CanceledCount, StringFormat='Cancelados: {0}'}" FontSize="12" Foreground="{DynamicResource WarningBrush}" />
+                                                </Border>
+                                            </WrapPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Itens Individuais da Fila -->
+                        <ItemsControl ItemsSource="{Binding QueueItems}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Style="{StaticResource CardBorderStyle}" Margin="0,0,0,16" Padding="18">
@@ -908,6 +979,7 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+                    </StackPanel>
                 </ScrollViewer>
             </Grid>
 
