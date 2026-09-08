@@ -5,22 +5,22 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/ArkanjoV2/BaixALL/releases/latest"><img src="https://img.shields.io/badge/Vers%C3%A3o-1.0.0_Est%C3%A1vel-blue.svg" alt="Versão Atual"></a>
+  <a href="https://github.com/ArkanjoV2/BaixALL/releases/latest"><img src="https://img.shields.io/badge/Vers%C3%A3o-1.1.0_Est%C3%A1vel-blue.svg" alt="Versão Atual"></a>
   <a href="https://github.com/ArkanjoV2/BaixALL/blob/main/LICENSE"><img src="https://img.shields.io/badge/Licen%C3%A7a-MIT-green.svg" alt="Licença"></a>
   <img src="https://img.shields.io/badge/Plataforma-Windows_10_%2F_11_(x64)-blue" alt="Plataforma">
   <img src="https://img.shields.io/badge/Tecnologia-.NET_10_%7C_WPF-purple" alt="Tecnologia">
 </p>
 
 <p align="center">
-  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.0.0/BaixALL-Setup-1.0.0.exe">
+  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.1.0/BaixALL-Setup-1.1.0.exe">
     <img src="https://img.shields.io/badge/Baixar_Instalador_Oficial_(Setup.exe)-2ea44f?style=for-the-badge&logo=windows&logoColor=white" alt="Baixar Instalador Oficial">
   </a>
   <br>
-  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.0.0/BaixALL-1.0.0-win-x64.zip">
+  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.1.0/BaixALL-1.1.0-win-x64.zip">
     <em>Ou baixe a Versão Portátil (.ZIP)</em>
   </a>
   &nbsp;•&nbsp;
-  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.0.0/checksums.txt">
+  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.1.0/checksums-1.1.0.txt">
     <em>Verificar Hashes SHA-256</em>
   </a>
 </p>
@@ -69,7 +69,7 @@ Interface nativa do BaixALL focada em clareza, produtividade e feedback em tempo
 | **Histórico Local de Downloads** | **Gerenciamento de Ferramentas** |
 | [![Histórico de Downloads](docs/screenshots/04-historico.png)](docs/screenshots/04-historico.png)<br><sub>Registro local das conclusões com atalhos para abrir mídia ou pasta</sub> | [![Gerenciador de Ferramentas](docs/screenshots/05-ferramentas.png)](docs/screenshots/05-ferramentas.png)<br><sub>Status operacional e versão de yt-dlp, FFmpeg, ffprobe e Deno</sub> |
 
-> 📸 *Todas as capturas acima foram obtidas diretamente da versão oficial 1.0.0 em ambiente Windows. Detalhes técnicos e diretrizes de atualização estão documentados em [docs/screenshots/README.md](docs/screenshots/README.md).*
+> 📸 *Todas as capturas acima foram obtidas diretamente da versão oficial 1.1.0 em ambiente Windows. Detalhes técnicos e diretrizes de atualização estão documentados em [docs/screenshots/README.md](docs/screenshots/README.md).*
 
 ---
 
@@ -105,20 +105,20 @@ Interface nativa do BaixALL focada em clareza, produtividade e feedback em tempo
 Para instruções completas passo a passo, consulte o [Guia de Instalação](docs/GUIA_INSTALACAO.md).
 
 ### Opção 1: Instalador Oficial (Recomendado)
-1. Baixe o instalador oficial: [BaixALL-Setup-1.0.0.exe](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.0.0/BaixALL-Setup-1.0.0.exe).
+1. Baixe o instalador oficial: [BaixALL-Setup-1.1.0.exe](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.1.0/BaixALL-Setup-1.1.0.exe).
 2. Execute o assistente de instalação e selecione se deseja criar atalhos na Área de Trabalho e no Menu Iniciar.
 3. A instalação é realizada na pasta do usuário (`%LOCALAPPDATA%\Programs\BaixALL`) sem exigir privilégios de administrador.
 
 ### Opção 2: Pacote Portátil
-1. Baixe o arquivo compactado: [BaixALL-1.0.0-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.0.0/BaixALL-1.0.0-win-x64.zip).
+1. Baixe o arquivo compactado: [BaixALL-1.1.0-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.1.0/BaixALL-1.1.0-win-x64.zip).
 2. Extraia o conteúdo para a pasta de sua preferência.
 3. Execute diretamente o arquivo `BaixALL.exe`.
 
 > 🛡️ **Orientações de Segurança sobre o Windows SmartScreen:**  
 > Ao executar o instalador ou executável em novas máquinas, o Windows Defender SmartScreen pode exibir um alerta de reputação (*"O Windows protegeu o seu computador"*). Isso ocorre porque programas recém-lançados ainda não acumularam histórico estatístico suficiente nos servidores da Microsoft.
-> - **Recomendação de segurança:** Sempre confirme que você baixou o arquivo da [Release oficial](https://github.com/ArkanjoV2/BaixALL/releases/tag/v1.0.0) e compare o hash SHA-256 com o arquivo [checksums.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.0.0/checksums.txt).
+> - **Recomendação de segurança:** Sempre confirme que você baixou o arquivo da [Release oficial](https://github.com/ArkanjoV2/BaixALL/releases/tag/v1.1.0) e compare o hash SHA-256 com o arquivo [checksums-1.1.0.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.1.0/checksums-1.1.0.txt).
 > - **Não execute o arquivo se tiver dúvidas sobre sua autenticidade ou integridade.**
-> - O BaixALL não desabilita defesas do Windows e não utiliza certificados fictícios. Consulte a explicação detalhada no [Guia de Instalação](docs/GUIA_INSTALACAO.md#3-avisos-de-reputação-do-windows-smartscreen).
+> - O BaixALL não desabilita defesas do Windows e não utiliza certificados fictícios. Consulte a explicação detalhada no [Guia de Instalação](docs/GUIA_INSTALACAO.md#4-avisos-de-reputação-do-windows-defender-smartscreen).
 
 ---
 

@@ -64,9 +64,9 @@ Ao executar o instalador ou aplicativo pela primeira vez, o Windows Defender Sma
 
 | Arquivo | Descrição | Tamanho | SHA-256 |
 | :--- | :--- | :--- | :--- |
-| `BaixALL-Setup-1.1.0.exe` | Instalador assistido para Windows x64 (Inno Setup) | *(preenchido pós-build)* | *(preenchido pós-build)* |
-| `BaixALL-1.1.0-win-x64.zip` | Pacote portátil descompactável (execução direta) | *(preenchido pós-build)* | *(preenchido pós-build)* |
-| `checksums-1.1.0.txt` | Hashes de integridade criptográfica SHA-256 | *(preenchido pós-build)* | *(ver arquivo)* |
+| `BaixALL-Setup-1.1.0.exe` | Instalador assistido para Windows x64 (Inno Setup) | 45.858.737 bytes (~43,7 MB) | `4d10b03d58c2489e99755e9a1191bff31be08a9483ef7a58d04b3d460dee4df6` |
+| `BaixALL-1.1.0-win-x64.zip` | Pacote portátil descompactável (execução direta) | 65.463.068 bytes (~62,4 MB) | `ebb8b8afa1a77a39b6672f848527445cca68885b49e9cace59bb6dc4e4a4a566` |
+| `checksums-1.1.0.txt` | Hashes de integridade criptográfica SHA-256 | 185 bytes | `6c262f1f6d1c532488def3ae172b7066ef5721a70ffd425c880545884c01987b` |
 
 ---
 

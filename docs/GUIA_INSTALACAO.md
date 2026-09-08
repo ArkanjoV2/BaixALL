@@ -34,11 +34,11 @@ Este guia foi elaborado para orientar usuários no download, verificação, inst
 Obtenha sempre os arquivos a partir da página oficial de lançamentos no GitHub:
 
 - **Instalador Oficial (Recomendado):**  
-  [Baixar BaixALL-Setup-1.0.0.exe](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.0.0/BaixALL-Setup-1.0.0.exe)  
+  [Baixar BaixALL-Setup-1.1.0.exe](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.1.0/BaixALL-Setup-1.1.0.exe)  
   *Assistente de instalação completo que cria atalhos no Menu Iniciar e na Área de Trabalho e registra desinstalador seguro.*
 
 - **Pacote Portátil (.ZIP):**  
-  [Baixar BaixALL-1.0.0-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.0.0/BaixALL-1.0.0-win-x64.zip)  
+  [Baixar BaixALL-1.1.0-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.1.0/BaixALL-1.1.0-win-x64.zip)  
   *Não requer instalação no sistema. Basta descompactar o arquivo `.zip` e executar diretamente o arquivo `BaixALL.exe`.*
 
 ---
@@ -47,15 +47,15 @@ Obtenha sempre os arquivos a partir da página oficial de lançamentos no GitHub
 
 Antes de abrir qualquer executável baixado da internet, é uma boa prática de segurança verificar sua integridade.
 
-1. Baixe o arquivo oficial de hashes: [checksums.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.0.0/checksums.txt).
+1. Baixe o arquivo oficial de hashes: [checksums-1.1.0.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.1.0/checksums-1.1.0.txt).
 2. Abra o **PowerShell** na pasta onde o arquivo foi baixado e execute:
    ```powershell
-   Get-FileHash BaixALL-Setup-1.0.0.exe -Algorithm SHA256
+   Get-FileHash BaixALL-Setup-1.1.0.exe -Algorithm SHA256
    ```
-3. Compare o valor retornado com o hash oficial da versão 1.0.0:
+3. Compare o valor retornado com o hash oficial da versão 1.1.0:
    ```text
-   aa8936531dc763cad319b29f5dcc7e317a7c97b5e7e7f72e761e0e4867179979  BaixALL-Setup-1.0.0.exe
-   7e7c63be4d72b15e75361d3b6a06ddce2d88b34c55158207a9260b02888ff0dd  BaixALL-1.0.0-win-x64.zip
+   4d10b03d58c2489e99755e9a1191bff31be08a9483ef7a58d04b3d460dee4df6  BaixALL-Setup-1.1.0.exe
+   ebb8b8afa1a77a39b6672f848527445cca68885b49e9cace59bb6dc4e4a4a566  BaixALL-1.1.0-win-x64.zip
    ```
 4. Se o hash calculado for idêntico, o arquivo está íntegro e não sofreu alterações durante a transferência.
 
@@ -73,7 +73,7 @@ Ao executar um executável novo ou pouco comum no seu sistema, o **Windows Defen
 
 ### Recomendações de segurança:
 1. **Confirme a procedência:** Certifique-se de que o arquivo foi obtido exclusivamente a partir do repositório oficial: `https://github.com/ArkanjoV2/BaixALL/releases`.
-2. **Confira o hash SHA-256:** Valide o arquivo contra o `checksums.txt` oficial.
+2. **Confira o hash SHA-256:** Valide o arquivo contra o `checksums-1.1.0.txt` oficial.
 3. **Não execute o arquivo se tiver dúvidas:** Caso não tenha certeza da origem do arquivo, não confirme a execução até verificar sua autenticidade.
 4. **Nunca desabilite proteções:** Não desative o Windows Defender, o SmartScreen ou o antivírus do seu sistema operacional.
 5. Se você conferiu a origem oficial e o hash SHA-256 e deseja prosseguir com a execução do instalador oficial, clique no link **"Mais informações"** na janela do alerta e avalie as informações apresentadas antes de decidir pela execução.
@@ -82,14 +82,14 @@ Ao executar um executável novo ou pouco comum no seu sistema, o **Windows Defen
 
 ## 5. Executar o Instalador ou Usar a Versão Portátil
 
-### Com o Instalador (`BaixALL-Setup-1.0.0.exe`):
+### Com o Instalador (`BaixALL-Setup-1.1.0.exe`):
 1. Dê um duplo clique no arquivo baixado.
 2. O assistente de instalação abrirá em Português do Brasil.
 3. Escolha se deseja atalhos na Área de Trabalho e no Menu Iniciar.
 4. O programa é instalado no perfil do usuário em `%LOCALAPPDATA%\Programs\BaixALL`, dispensando privilégios administrativos.
 5. Ao finalizar, clique em Concluir para abrir o aplicativo.
 
-### Com a Versão Portátil (`BaixALL-1.0.0-win-x64.zip`):
+### Com a Versão Portátil (`BaixALL-1.1.0-win-x64.zip`):
 1. Clique com o botão direito no arquivo `.zip` e selecione **"Extrair Tudo..."**.
 2. Abra a pasta resultante e dê um duplo clique no arquivo `BaixALL.exe`.
 
