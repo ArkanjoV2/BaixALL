@@ -15,4 +15,5 @@ public interface IDownloadService
     void ClearCompleted();
     void UpdateConcurrencyLimit(int maxConcurrent);
     void CancelAllDownloads();
+    void CancelBatch(Guid batchId);
 }

@@ -199,6 +199,30 @@ public class DownloadService : IDownloadService
         _logger?.Info($"Cancelamento solicitado para {toCancel.Count} download(s).");
     }
 
+    public void CancelBatch(Guid batchId)
+    {
+        List<DownloadItemViewModel> toCancel;
+        lock (_syncLock)
+        {
+            toCancel = QueueItems.Where(x => x.BatchId == batchId && x.IsActive).ToList();
+            _pendingQueue.RemoveAll(x => x.BatchId == batchId);
+        }
+
+        foreach (var item in toCancel)
+        {
+            try
+            {
+                item.CancellationTokenSource.Cancel();
+                if (item.Status == DownloadStatus.Queued)
+                {
+                    _dispatcher.Invoke(() => item.MarkCanceled());
+                }
+            }
+            catch { }
+        }
+        _logger?.Info($"Cancelamento solicitado para lote {batchId} ({toCancel.Count} itens).");
+    }
+
     private void TryStartNextDownloads()
     {
         while (true)

@@ -17,6 +17,7 @@ public class YtDlpService : IYtDlpService
 {
     private readonly IDependencyManager _dependencyManager;
     private readonly ILoggerService? _logger;
+    private static readonly object _fileMoveLock = new();
 
     public const string ProgressTemplate = "baixall_prog:[%(progress.downloaded_bytes)s/%(progress.total_bytes_estimate)s|%(progress.speed)s|%(progress.eta)s|%(progress._percent_str)s|%(progress.status)s]";
 
@@ -79,6 +80,61 @@ public class YtDlpService : IYtDlpService
         {
             _logger?.Error("Falha ao interpretar JSON retornado pelo yt-dlp.", ex);
             throw new InvalidOperationException("Não foi possível interpretar a resposta estruturada do YouTube.", ex);
+        }
+    }
+
+    public async Task<JsonDocument> GetPlaylistMetadataJsonAsync(string playlistUrl, CancellationToken ct = default)
+    {
+        var ytDlpPath = _dependencyManager.GetYtDlpPath();
+        if (!File.Exists(ytDlpPath))
+        {
+            throw new FileNotFoundException("O executável do yt-dlp não está instalado. Verifique as ferramentas.", ytDlpPath);
+        }
+
+        var arguments = new List<string>
+        {
+            "-J",
+            "--flat-playlist",
+            "--skip-download",
+            "--no-warnings",
+            "--no-check-certificates"
+        };
+
+        var ffmpegDir = Path.GetDirectoryName(_dependencyManager.GetFFmpegPath());
+        if (!string.IsNullOrEmpty(ffmpegDir) && Directory.Exists(ffmpegDir))
+        {
+            arguments.Add("--ffmpeg-location");
+            arguments.Add(ffmpegDir);
+        }
+
+        arguments.Add(playlistUrl);
+
+        var env = BuildProcessEnvironment();
+
+        _logger?.Info($"Obtendo metadados estruturados da playlist: {playlistUrl}");
+
+        var result = await ProcessRunner.RunAsync(
+            ytDlpPath,
+            arguments,
+            environmentVariables: env,
+            cancellationToken: ct).ConfigureAwait(false);
+
+        if (!result.IsSuccess)
+        {
+            var friendlyError = ParseYtDlpError(result.StandardError);
+            _logger?.Error($"Falha ao analisar playlist. Saída: {result.StandardError}");
+            throw new InvalidOperationException(friendlyError);
+        }
+
+        try
+        {
+            var json = JsonDocument.Parse(result.StandardOutput);
+            return json;
+        }
+        catch (JsonException ex)
+        {
+            _logger?.Error("Falha ao interpretar JSON da playlist retornado pelo yt-dlp.", ex);
+            throw new InvalidOperationException("Não foi possível interpretar os dados da playlist do YouTube.", ex);
         }
     }
 
@@ -234,13 +290,17 @@ public class YtDlpService : IYtDlpService
                     : (request.Container.Id == "auto" ? "mp4" : request.Container.Extension);
             }
 
-            // Garante nome de arquivo único e sem colisões na pasta de destino final
-            var finalDestinationPath = FileHelper.GetUniqueFilePath(
-                request.DestinationFolder,
-                request.VideoTitle,
-                actualExtension);
+            // Garante nome de arquivo único e atômico, eliminando race conditions entre downloads concorrentes
+            string finalDestinationPath;
+            lock (_fileMoveLock)
+            {
+                finalDestinationPath = FileHelper.GetUniqueFilePath(
+                    request.DestinationFolder,
+                    request.VideoTitle,
+                    actualExtension);
 
-            File.Move(producedFile, finalDestinationPath, overwrite: true);
+                File.Move(producedFile, finalDestinationPath, overwrite: false);
+            }
 
             progress.Report(new DownloadProgressReport
             {

@@ -7,4 +7,5 @@ namespace BaixALL.App.Services;
 public interface IYoutubeService
 {
     Task<VideoInfo> AnalyzeVideoAsync(string url, CancellationToken ct = default);
+    Task<PlaylistInfo> AnalyzePlaylistAsync(string url, CancellationToken ct = default);
 }

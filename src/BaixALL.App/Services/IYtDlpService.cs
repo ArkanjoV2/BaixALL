@@ -9,6 +9,7 @@ namespace BaixALL.App.Services;
 public interface IYtDlpService
 {
     Task<JsonDocument> GetMetadataJsonAsync(string url, CancellationToken ct = default);
+    Task<JsonDocument> GetPlaylistMetadataJsonAsync(string playlistUrl, CancellationToken ct = default);
     Task<string> DownloadAsync(
         DownloadRequest request,
         IProgress<DownloadProgressReport> progress,

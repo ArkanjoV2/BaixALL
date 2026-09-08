@@ -1,0 +1,83 @@
+{
+  "_type": "playlist",
+  "id": "PLrAXtmErZgOdP_8GzKtS_gO_Yj8d_6bV9",
+  "title": "Curso de C# e .NET 10 Completo",
+  "uploader": "DevTech Brasil",
+  "uploader_id": "devtechbrasil",
+  "channel": "DevTech Brasil",
+  "playlist_count": 5,
+  "thumbnails": [
+    {
+      "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg"
+    }
+  ],
+  "entries": [
+    {
+      "_type": "url",
+      "id": "dQw4w9WgXcQ",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "title": "01 - Introdução ao .NET 10",
+      "duration": 322.0,
+      "uploader": "DevTech Brasil",
+      "channel": "DevTech Brasil",
+      "thumbnails": [
+        {
+          "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg"
+        }
+      ],
+      "playlist_index": 1
+    },
+    {
+      "_type": "url",
+      "id": "gy4T-vS-Ats",
+      "url": "https://www.youtube.com/watch?v=gy4T-vS-Ats",
+      "title": "02 - Injeção de Dependência e Arquitetura Limpa",
+      "duration": 754.0,
+      "uploader": "DevTech Brasil",
+      "channel": "DevTech Brasil",
+      "thumbnails": [
+        {
+          "url": "https://i.ytimg.com/vi/gy4T-vS-Ats/hqdefault.jpg"
+        }
+      ],
+      "playlist_index": 2
+    },
+    {
+      "_type": "url",
+      "id": "liveStream12",
+      "url": "https://www.youtube.com/watch?v=liveStream12",
+      "title": "03 - Live Coding: Tirando Dúvidas ao Vivo",
+      "duration": null,
+      "uploader": "DevTech Brasil",
+      "channel": "DevTech Brasil",
+      "thumbnails": [
+        {
+          "url": "https://i.ytimg.com/vi/liveStream12/hqdefault.jpg"
+        }
+      ],
+      "playlist_index": 3
+    },
+    {
+      "_type": "url",
+      "id": "priv1234567",
+      "url": "https://www.youtube.com/watch?v=priv1234567",
+      "title": "[Private video]",
+      "duration": null,
+      "uploader": null,
+      "channel": null,
+      "thumbnails": [],
+      "playlist_index": 4
+    },
+    {
+      "_type": "url",
+      "id": "del12345678",
+      "url": "https://www.youtube.com/watch?v=del12345678",
+      "title": "[Deleted video]",
+      "duration": null,
+      "uploader": null,
+      "channel": null,
+      "thumbnails": [],
+      "playlist_index": 5
+    }
+  ]
+}

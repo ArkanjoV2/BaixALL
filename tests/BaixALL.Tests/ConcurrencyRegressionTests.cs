@@ -111,6 +111,11 @@ public class ConcurrencyRegressionTests
         {
             return Task.FromResult(JsonDocument.Parse("{}"));
         }
+
+        public Task<JsonDocument> GetPlaylistMetadataJsonAsync(string playlistUrl, CancellationToken ct = default)
+        {
+            return Task.FromResult(JsonDocument.Parse("{}"));
+        }
     }
 
     [Fact]
@@ -652,6 +657,7 @@ public class ConcurrencyRegressionTests
         public DownloadItemViewModel EnqueueDownload(DownloadRequest request, string thumbnailUrl) => new();
         public void RemoveDownload(Guid id) { }
         public void UpdateConcurrencyLimit(int maxConcurrent) { }
+        public void CancelBatch(Guid batchId) { }
     }
     [Fact]
     public async Task DownloadFailure_DoesNotInterruptOtherDownloadsNorLeakSlots()
@@ -747,6 +753,72 @@ public class ConcurrencyRegressionTests
 
             Assert.True(itemA.IsCompleted);
             Assert.True(dispatcher.InvokeCount > beforeFinish, "Conclusão e progresso devem invocar Dispatcher.");
+        }
+        finally
+        {
+            if (Directory.Exists(tempFolder)) Directory.Delete(tempFolder, true);
+        }
+    }
+
+    [Fact]
+    public async Task MixedBatchAndSingleDownloads_StrictlyRespectsMaxConcurrencyLimit()
+    {
+        var tempFolder = Path.Combine(Path.GetTempPath(), $"baixall_mixed_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(tempFolder);
+
+        try
+        {
+            var historyService = new HistoryService(historyFilePath: Path.Combine(tempFolder, "hist.json"));
+            var dispatcher = new TestDispatcherService();
+            var settingsService = new SettingsService();
+            settingsService.Settings.MaxConcurrentDownloads = 2;
+
+            var mockYtDlp = new ControlledYtDlpService();
+            var downloadService = new DownloadService(mockYtDlp, historyService, settingsService, dispatcher);
+
+            var batchId = Guid.NewGuid();
+
+            var single1 = downloadService.EnqueueDownload(new DownloadRequest { VideoTitle = "Single1", DestinationFolder = tempFolder }, "");
+            var batch1 = downloadService.EnqueueDownload(new DownloadRequest { VideoTitle = "Batch1", DestinationFolder = tempFolder, BatchId = batchId, BatchIndex = 1, BatchTotal = 3 }, "");
+            var batch2 = downloadService.EnqueueDownload(new DownloadRequest { VideoTitle = "Batch2", DestinationFolder = tempFolder, BatchId = batchId, BatchIndex = 2, BatchTotal = 3 }, "");
+            var batch3 = downloadService.EnqueueDownload(new DownloadRequest { VideoTitle = "Batch3", DestinationFolder = tempFolder, BatchId = batchId, BatchIndex = 3, BatchTotal = 3 }, "");
+
+            Assert.True(await mockYtDlp.WaitForStartAsync("Single1"));
+            Assert.True(await mockYtDlp.WaitForStartAsync("Batch1"));
+            Assert.True(mockYtDlp.MaxActiveObserved <= 2);
+
+            var fileS1 = Path.Combine(tempFolder, "Single1.mp4");
+            var fileB1 = Path.Combine(tempFolder, "Batch1.mp4");
+            var fileB2 = Path.Combine(tempFolder, "Batch2.mp4");
+            var fileB3 = Path.Combine(tempFolder, "Batch3.mp4");
+            await File.WriteAllTextAsync(fileS1, "S1");
+            await File.WriteAllTextAsync(fileB1, "B1");
+            await File.WriteAllTextAsync(fileB2, "B2");
+            await File.WriteAllTextAsync(fileB3, "B3");
+
+            mockYtDlp.Release("Single1", fileS1);
+            Assert.True(await mockYtDlp.WaitForStartAsync("Batch2"));
+            Assert.True(mockYtDlp.MaxActiveObserved <= 2);
+
+            mockYtDlp.Release("Batch1", fileB1);
+            Assert.True(await mockYtDlp.WaitForStartAsync("Batch3"));
+            Assert.True(mockYtDlp.MaxActiveObserved <= 2);
+
+            mockYtDlp.Release("Batch2", fileB2);
+            mockYtDlp.Release("Batch3", fileB3);
+
+            var timeout = DateTime.Now.AddSeconds(5);
+            while (DateTime.Now < timeout && (!single1.IsCompleted || !batch1.IsCompleted || !batch2.IsCompleted || !batch3.IsCompleted))
+            {
+                await Task.Delay(20);
+            }
+
+            Assert.True(single1.IsCompleted);
+            Assert.True(batch1.IsCompleted);
+            Assert.True(batch2.IsCompleted);
+            Assert.True(batch3.IsCompleted);
+            Assert.Equal(2, mockYtDlp.MaxActiveObserved);
+            Assert.Equal(0, downloadService.ActiveDownloadsCount);
         }
         finally
         {

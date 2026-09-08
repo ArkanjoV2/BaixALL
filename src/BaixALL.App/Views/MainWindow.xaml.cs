@@ -31,10 +31,25 @@ public partial class MainWindow : Window
             await _viewModel.InitializeStartupAsync();
         };
 
-        Closing += (_, _) =>
+        Closing += (sender, e) =>
         {
             if (_viewModel.HasActiveDownloads)
             {
+                var result = MessageBox.Show(
+                    "Existem downloads em andamento ou itens aguardando na fila.\n\n" +
+                    "Se você fechar o BaixALL agora, os downloads ativos serão cancelados e os itens pendentes NÃO serão retomados automaticamente na próxima inicialização.\n\n" +
+                    "Os arquivos já concluídos, o histórico e as configurações permanecerão salvos.\n\n" +
+                    "Deseja realmente cancelar e fechar?",
+                    "Downloads em Andamento - BaixALL",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (result != MessageBoxResult.Yes)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+
                 _viewModel.CancelAllDownloads();
             }
         };

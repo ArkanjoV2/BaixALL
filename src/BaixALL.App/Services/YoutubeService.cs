@@ -43,4 +43,26 @@ public class YoutubeService : IYoutubeService
         _logger?.Info($"Vídeo analisado com sucesso: '{videoInfo.Title}' ({videoInfo.MaxResolution} - {videoInfo.FormattedDuration})");
         return videoInfo;
     }
+
+    public async Task<PlaylistInfo> AnalyzePlaylistAsync(string url, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            throw new ArgumentException("Por favor, informe a URL da playlist.", nameof(url));
+        }
+
+        if (!UrlValidator.IsPlaylistUrl(url))
+        {
+            throw new ArgumentException("A URL informada não contém uma playlist válida do YouTube.", nameof(url));
+        }
+
+        var normalizedUrl = UrlValidator.NormalizePlaylistUrl(url);
+        _logger?.Info($"Iniciando análise rápida de playlist para: {normalizedUrl}");
+
+        using var jsonDoc = await _ytDlpService.GetPlaylistMetadataJsonAsync(normalizedUrl, ct).ConfigureAwait(false);
+        var playlistInfo = _formatSelectionService.ParsePlaylistInfo(jsonDoc, normalizedUrl);
+
+        _logger?.Info($"Playlist analisada com sucesso: '{playlistInfo.Title}' ({playlistInfo.TotalVideosCount} vídeos identificados)");
+        return playlistInfo;
+    }
 }

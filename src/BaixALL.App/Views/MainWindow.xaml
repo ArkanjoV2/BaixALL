@@ -359,7 +359,9 @@
                         <StackPanel HorizontalAlignment="Center">
                             <ProgressBar IsIndeterminate="True" Height="4" Width="300" Margin="0,0,0,12" />
                             <TextBlock Text="Analisando metadados e formatos disponíveis no YouTube..."
-                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14" HorizontalAlignment="Center" />
+                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14" HorizontalAlignment="Center" Margin="0,0,0,12" />
+                            <Button Style="{StaticResource SecondaryButtonStyle}" Content="Cancelar Análise"
+                                    Command="{Binding CancelAnalysisCommand}" HorizontalAlignment="Center" Padding="16,6" />
                         </StackPanel>
                     </Border>
 
@@ -367,6 +369,25 @@
                     <Border Style="{StaticResource CardBorderStyle}" Margin="0,0,0,24"
                             Visibility="{Binding HasVideoInfo, Converter={StaticResource BoolToVis}}">
                         <StackPanel>
+                            <!-- AVISO DE URL HÍBRIDA: VÍDEO PERTENCENTE A UMA PLAYLIST -->
+                            <Border Background="#160078D4" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1"
+                                    Padding="14,10" Margin="0,0,0,16"
+                                    Visibility="{Binding IsHybridUrlDetected, Converter={StaticResource BoolToVis}}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                        <TextBlock Text="💡 Este vídeo faz parte de uma playlist do YouTube" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <TextBlock Text="Você pode baixar apenas este vídeo ou carregar todos os vídeos da playlist para download em lote."
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Style="{StaticResource PrimaryButtonStyle}" Content="Carregar Playlist Completa"
+                                            Command="{Binding LoadFullPlaylistFromHybridCommand}" VerticalAlignment="Center" Padding="14,8" FontSize="13" />
+                                </Grid>
+                            </Border>
+
                             <!-- Informações do Vídeo (Thumbnail + Detalhes) -->
                             <Grid Margin="0,0,0,20">
                                 <Grid.ColumnDefinitions>
@@ -474,9 +495,209 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- CARD DE METADADOS DA PLAYLIST ANALISADA -->
+                    <Border Style="{StaticResource CardBorderStyle}" Margin="0,0,0,24" Padding="20"
+                            Visibility="{Binding HasPlaylistInfo, Converter={StaticResource BoolToVis}}">
+                        <StackPanel>
+                            <!-- Cabeçalho da Playlist (Thumbnail + Metadados) -->
+                            <Grid Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="220" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Thumbnail / Ícone da Playlist -->
+                                <Border Grid.Column="0" Background="#11000000" Height="125" Width="220" Margin="0,0,20,0" VerticalAlignment="Top">
+                                    <Grid>
+                                        <Image Source="{Binding PlaylistInfo.ThumbnailUrl}" Stretch="UniformToFill" />
+                                        <!-- Badge inferior com quantidade de vídeos -->
+                                        <Border Background="#CC000000" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,8,8" Padding="8,3">
+                                            <TextBlock Text="{Binding PlaylistInfo.TotalVideosCount, StringFormat='{}{0} vídeos'}" Foreground="White" FontSize="11" FontWeight="Bold" />
+                                        </Border>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Metadados -->
+                                <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <Border Background="{DynamicResource AccentBrush}" Padding="8,3" Margin="0,0,8,0">
+                                            <TextBlock Text="PLAYLIST DO YOUTUBE" FontWeight="Bold" FontSize="11" Foreground="White" />
+                                        </Border>
+                                        <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3">
+                                            <TextBlock Text="{Binding PlaylistInfo.FormattedTotalDuration, StringFormat='Duração est.: ~{0}'}" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        </Border>
+                                    </StackPanel>
+
+                                    <TextBlock Text="{Binding PlaylistInfo.Title}" FontSize="18" FontWeight="Bold" Margin="0,0,0,6" TextWrapping="Wrap" />
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                        <TextBlock Text="{Binding PlaylistInfo.Channel, StringFormat='Canal: {0}'}" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" Margin="0,0,16,0" />
+                                        <TextBlock Text="{Binding PlaylistInfo.TotalVideosCount, StringFormat='Total: {0} vídeos'}" Foreground="{DynamicResource TextMutedBrush}" FontSize="13" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Barra de Ações em Lote e Seleção -->
+                            <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="12" Margin="0,0,0,12" BorderBrush="{DynamicResource SurfaceBorderBrush}" BorderThickness="1">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Button Style="{StaticResource SecondaryButtonStyle}" Content="Selecionar Todos"
+                                                Command="{Binding SelectAllPlaylistItemsCommand}" Padding="10,5" Margin="0,0,8,0" FontSize="12" />
+                                        <Button Style="{StaticResource SecondaryButtonStyle}" Content="Desmarcar Todos"
+                                                Command="{Binding DeselectAllPlaylistItemsCommand}" Padding="10,5" Margin="0,0,8,0" FontSize="12" />
+                                        <Button Style="{StaticResource SecondaryButtonStyle}" Content="Inverter Seleção"
+                                                Command="{Binding InvertPlaylistSelectionCommand}" Padding="10,5" FontSize="12" />
+                                    </StackPanel>
+
+                                    <Border Grid.Column="1" Background="{DynamicResource AccentBrush}" Padding="10,5" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding PlaylistInfo.SelectionSummary}" FontWeight="Bold" Foreground="White" FontSize="12" />
+                                    </Border>
+                                </Grid>
+                            </Border>
+
+                            <!-- Lista Rolável e Virtualizada de Vídeos da Playlist -->
+                            <Border BorderBrush="{DynamicResource SurfaceBorderBrush}" BorderThickness="1" Margin="0,0,0,18" MaxHeight="280">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                    <ItemsControl ItemsSource="{Binding PlaylistItems}" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <VirtualizingStackPanel />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{DynamicResource SurfaceBorderBrush}" BorderThickness="0,0,0,1" Padding="10,8">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="50" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <!-- Checkbox de Seleção -->
+                                                        <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                                  IsEnabled="{Binding IsAvailable}" VerticalAlignment="Center" Margin="0,0,10,0" />
+
+                                                        <!-- Índice -->
+                                                        <TextBlock Grid.Column="1" Text="{Binding FormattedIndex}" FontFamily="Consolas"
+                                                                   Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" FontSize="12" />
+
+                                                        <!-- Título e Canal -->
+                                                        <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,10,0">
+                                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13"
+                                                                       TextTrimming="CharacterEllipsis" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Text="{Binding Channel}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,8,0" />
+                                                                <TextBlock Text="{Binding AvailabilityNotice}" Foreground="{DynamicResource WarningBrush}" FontSize="11"
+                                                                           Visibility="{Binding IsAvailable, Converter={StaticResource InverseBoolToVis}}" />
+                                                            </StackPanel>
+                                                        </StackPanel>
+
+                                                        <!-- Duração -->
+                                                        <TextBlock Grid.Column="3" Text="{Binding FormattedDuration}" FontFamily="Consolas"
+                                                                   Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" FontSize="12" />
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </Border>
+
+                            <!-- Configurações de Download em Lote -->
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Qualidade Padrão do Lote -->
+                                <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                    <TextBlock Text="Qualidade do Lote" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
+                                    <ComboBox ItemsSource="{Binding BatchFormatOptions}" SelectedItem="{Binding SelectedBatchFormat, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsBatchAudioOnlyMode, Converter={StaticResource InverseBool}}" />
+                                    <TextBlock Text="{Binding SelectedBatchFormat.Description}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,4,0,0" />
+                                </StackPanel>
+
+                                <!-- Formato / Container -->
+                                <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                                    <TextBlock Text="Formato / Container" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
+                                    <ComboBox ItemsSource="{Binding ContainerOptions}" SelectedItem="{Binding SelectedContainer, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsBatchAudioOnlyMode, Converter={StaticResource InverseBool}}" />
+                                    <TextBlock Text="Automático preserva a qualidade sem perda de compatibilidade" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,4,0,0" />
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Opções Avançadas de Lote: Somente Áudio e Subpasta -->
+                            <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="14" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <CheckBox Content="Baixar somente o áudio de todos os vídeos da playlist"
+                                              IsChecked="{Binding IsBatchAudioOnlyMode, Mode=TwoWay}"
+                                              FontWeight="SemiBold" FontSize="15" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
+
+                                    <Grid Visibility="{Binding IsBatchAudioOnlyMode, Converter={StaticResource BoolToVis}}" Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Formato de áudio:" VerticalAlignment="Center" Margin="0,0,12,0" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <ComboBox Grid.Column="1" ItemsSource="{Binding AudioFormatOptions}" SelectedItem="{Binding SelectedAudioFormat, Mode=TwoWay}" />
+                                    </Grid>
+
+                                    <CheckBox Content="Criar subpasta com o nome da playlist para organizar os arquivos"
+                                              IsChecked="{Binding CreatePlaylistSubfolder, Mode=TwoWay}"
+                                              FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Pasta de Destino -->
+                            <StackPanel Margin="0,0,0,20">
+                                <TextBlock Text="Salvar Lote em" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Text="{Binding DestinationFolder, Mode=TwoWay}" IsReadOnly="True" VerticalContentAlignment="Center" />
+                                    <Button Grid.Column="1" Style="{StaticResource SecondaryButtonStyle}" Content="Escolher pasta"
+                                            Command="{Binding ChooseFolderCommand}" Margin="10,0,0,0" />
+                                </Grid>
+                            </StackPanel>
+
+                            <!-- BOTÕES DE AÇÃO: LIMPAR E BAIXAR LOTE -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Button Grid.Column="0" Style="{StaticResource SecondaryButtonStyle}"
+                                        Content="← Limpar / Outra URL"
+                                        Command="{Binding ClearPlaylistCommand}"
+                                        Padding="16,12" FontSize="14" Margin="0,0,12,0" />
+
+                                <Button Grid.Column="1" Style="{StaticResource PrimaryButtonStyle}"
+                                        Command="{Binding EnqueueSelectedPlaylistItemsCommand}"
+                                        Padding="0,14" FontSize="16" FontWeight="Bold">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Path Data="{StaticResource IconDownload}" Fill="{DynamicResource AccentTextBrush}"
+                                              Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Adicionar Vídeos Selecionados à Fila" Foreground="{DynamicResource AccentTextBrush}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
                     <!-- ÁREA DE DOWNLOADS NA HOME (QUANDO NÃO HÁ VÍDEO EM ANÁLISE) -->
                     <Border Style="{StaticResource CardBorderStyle}" Margin="0,8,0,24" Padding="20"
-                            Visibility="{Binding HasVideoInfo, Converter={StaticResource InverseBoolToVis}}">
+                            Visibility="{Binding HasNoActiveContent, Converter={StaticResource BoolToVis}}">
                         <StackPanel>
                             <Grid Margin="0,0,0,12">
                                 <Grid.ColumnDefinitions>
@@ -573,7 +794,80 @@
 
                 <!-- Lista de Itens da Fila -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding QueueItems}">
+                    <StackPanel>
+                        <!-- PAINEL DE PROGRESSO AGREGADO DE LOTES EM ANDAMENTO -->
+                        <ItemsControl ItemsSource="{Binding ActiveBatches}" Margin="0,0,0,16">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource CardBorderStyle}" Margin="0,0,0,12" Padding="18"
+                                            BorderBrush="{DynamicResource BrandAccentBrush}" BorderThickness="1.5">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <!-- Linha 1: Título do Lote e Ações -->
+                                            <Grid Grid.Row="0" Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel Grid.Column="0">
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                        <Border Background="{DynamicResource AccentBrush}" Padding="8,2" Margin="0,0,8,0">
+                                                            <TextBlock Text="DOWNLOAD EM LOTE" FontSize="11" FontWeight="Bold" Foreground="White" />
+                                                        </Border>
+                                                        <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="6,2" Margin="0,0,8,0">
+                                                            <TextBlock Text="{Binding BatchStatusText}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                        </Border>
+                                                        <TextBlock Text="{Binding BatchTitle}" FontSize="16" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                                                    </StackPanel>
+                                                    <TextBlock Text="{Binding ProgressSummaryText}" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                </StackPanel>
+
+                                                <Button Grid.Column="1" Style="{StaticResource SecondaryButtonStyle}" Content="Cancelar Lote"
+                                                        Command="{Binding CancelCommand}"
+                                                        Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}"
+                                                        VerticalAlignment="Center" Padding="14,6" />
+                                            </Grid>
+
+                                            <!-- Linha 2: Barra de Progresso Agregado Honesta por Itens -->
+                                            <ProgressBar Grid.Row="1" Value="{Binding ItemsProgressPercentage, Mode=OneWay}"
+                                                         Maximum="100" Height="8" Margin="0,0,0,10"
+                                                         Foreground="{DynamicResource AccentBrush}" />
+
+                                            <!-- Linha 3: Contadores Detalhados -->
+                                            <WrapPanel Grid.Row="2">
+                                                <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3" Margin="0,0,8,4">
+                                                    <TextBlock Text="{Binding CompletedCount, StringFormat='Concluídos: {0}'}" FontSize="12" Foreground="{DynamicResource SuccessBrush}" FontWeight="SemiBold" />
+                                                </Border>
+                                                <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3" Margin="0,0,8,4"
+                                                        Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}">
+                                                    <TextBlock Text="{Binding ActiveCount, StringFormat='Baixando: {0}'}" FontSize="12" Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" />
+                                                </Border>
+                                                <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3" Margin="0,0,8,4">
+                                                    <TextBlock Text="{Binding QueuedCount, StringFormat='Aguardando: {0}'}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                </Border>
+                                                <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3" Margin="0,0,8,4"
+                                                        Visibility="{Binding HasFailures, Converter={StaticResource BoolToVis}}">
+                                                    <TextBlock Text="{Binding FailedCount, StringFormat='Falhas: {0}'}" FontSize="12" Foreground="{DynamicResource DangerBrush}" FontWeight="SemiBold" />
+                                                </Border>
+                                                <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3" Margin="0,0,8,4"
+                                                        Visibility="{Binding HasCanceled, Converter={StaticResource BoolToVis}}">
+                                                    <TextBlock Text="{Binding CanceledCount, StringFormat='Cancelados: {0}'}" FontSize="12" Foreground="{DynamicResource WarningBrush}" />
+                                                </Border>
+                                            </WrapPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Itens Individuais da Fila -->
+                        <ItemsControl ItemsSource="{Binding QueueItems}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Style="{StaticResource CardBorderStyle}" Margin="0,0,0,16" Padding="18">
@@ -592,8 +886,18 @@
                                             </Grid.ColumnDefinitions>
 
                                             <StackPanel Grid.Column="0">
-                                                <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="Bold" TextTrimming="CharacterEllipsis" Margin="0,0,0,4" />
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                    <Border Background="{DynamicResource AccentBrush}" Padding="6,2" Margin="0,0,8,0"
+                                                            Visibility="{Binding IsBatchItem, Converter={StaticResource BoolToVis}}">
+                                                        <TextBlock Text="{Binding BatchBadgeText}" FontSize="12" FontWeight="Bold" Foreground="White" />
+                                                    </Border>
+                                                    <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                                                </StackPanel>
                                                 <StackPanel Orientation="Horizontal">
+                                                    <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="6,2" Margin="0,0,8,0"
+                                                            Visibility="{Binding IsBatchItem, Converter={StaticResource BoolToVis}}">
+                                                        <TextBlock Text="{Binding BatchTitle, StringFormat='Playlist: {0}'}" FontSize="12" Foreground="{DynamicResource AccentBrush}" />
+                                                    </Border>
                                                     <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="6,2" Margin="0,0,8,0">
                                                         <TextBlock Text="{Binding Quality}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
                                                     </Border>
@@ -679,6 +983,7 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+                    </StackPanel>
                 </ScrollViewer>
             </Grid>
 

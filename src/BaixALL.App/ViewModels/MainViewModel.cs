@@ -35,10 +35,39 @@ public partial class MainViewModel : ObservableObject
     private bool _isAnalyzing;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNoActiveContent))]
     private bool _hasVideoInfo;
 
     [ObservableProperty]
     private VideoInfo? _videoInfo;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNoActiveContent))]
+    private bool _hasPlaylistInfo;
+
+    [ObservableProperty]
+    private PlaylistInfo? _playlistInfo;
+
+    public bool HasNoActiveContent => !HasVideoInfo && !HasPlaylistInfo;
+
+    public ObservableCollection<FormatOption> BatchFormatOptions { get; } = new();
+
+    [ObservableProperty]
+    private FormatOption? _selectedBatchFormat;
+
+    [ObservableProperty]
+    private bool _isBatchAudioOnlyMode;
+
+    [ObservableProperty]
+    private bool _createPlaylistSubfolder = true;
+
+    [ObservableProperty]
+    private bool _isHybridUrlDetected;
+
+    [ObservableProperty]
+    private string _hybridPlaylistNotice = string.Empty;
+
+    public ObservableCollection<PlaylistItemInfo> PlaylistItems { get; } = new();
 
     public ObservableCollection<FormatOption> FormatOptions { get; } = new();
 
@@ -88,10 +117,13 @@ public partial class MainViewModel : ObservableObject
     public bool ShowSetupPrompt => !DependenciesReady;
 
     public ObservableCollection<DownloadItemViewModel> QueueItems => _downloadService.QueueItems;
+    public ObservableCollection<BatchProgressViewModel> ActiveBatches { get; } = new();
 
     public int ActiveDownloadsCount => QueueItems.Count(x => x.IsActive);
 
     public bool HasActiveDownloads => _downloadService.HasActiveDownloads;
+
+    private System.Threading.CancellationTokenSource? _analysisCts;
 
     public void CancelAllDownloads() => _downloadService.CancelAllDownloads();
 
@@ -150,9 +182,30 @@ public partial class MainViewModel : ObservableObject
             AudioFormatOptions.Add(a);
         SelectedAudioFormat = AudioFormatOptions.FirstOrDefault();
 
-        _downloadService.QueueItems.CollectionChanged += (_, _) =>
+        foreach (var item in _downloadService.QueueItems)
+        {
+            item.PropertyChanged += OnQueueItemPropertyChanged;
+        }
+        UpdateBatchProgress();
+
+        _downloadService.QueueItems.CollectionChanged += (s, e) =>
         {
             OnPropertyChanged(nameof(ActiveDownloadsCount));
+            if (e.NewItems != null)
+            {
+                foreach (DownloadItemViewModel item in e.NewItems)
+                {
+                    item.PropertyChanged += OnQueueItemPropertyChanged;
+                }
+            }
+            if (e.OldItems != null)
+            {
+                foreach (DownloadItemViewModel item in e.OldItems)
+                {
+                    item.PropertyChanged -= OnQueueItemPropertyChanged;
+                }
+            }
+            UpdateBatchProgress();
         };
     }
 
@@ -201,31 +254,48 @@ public partial class MainViewModel : ObservableObject
     {
         if (string.IsNullOrWhiteSpace(UrlInput))
         {
-            ShowNotification("Por favor, cole a URL de um vídeo do YouTube.", "Warning");
+            ShowNotification("Por favor, cole a URL de um vídeo ou playlist do YouTube.", "Warning");
             return;
         }
 
         if (!UrlValidator.IsValidYouTubeUrl(UrlInput))
         {
-            ShowNotification("A URL informada não é válida para vídeos do YouTube.", "Error");
+            ShowNotification("A URL informada não é válida para conteúdos do YouTube.", "Error");
             return;
         }
 
         if (!DependenciesReady && !_dependencyManager.AreAllDependenciesInstalled())
         {
             IsInitialSetupVisible = true;
-            ShowNotification("Instale os componentes necessários antes de analisar vídeos.", "Warning");
+            ShowNotification("Instale os componentes necessários antes de analisar conteúdos.", "Warning");
             return;
         }
 
+        // Se for URL pura de playlist, analisa a playlist diretamente
+        if (UrlValidator.IsPurePlaylistUrl(UrlInput))
+        {
+            await AnalyzePlaylistInternalAsync(UrlInput);
+            return;
+        }
+
+        // Se for URL híbrida (vídeo com lista associada), ativa aviso com opção de carregar a playlist completa
+        IsHybridUrlDetected = UrlValidator.IsHybridUrl(UrlInput);
+        HybridPlaylistNotice = IsHybridUrlDetected ? "Esta URL pertence a uma playlist do YouTube." : string.Empty;
+
         IsAnalyzing = true;
         HasVideoInfo = false;
+        HasPlaylistInfo = false;
         CanRetryAnalysis = false;
         ClearNotification();
 
+        _analysisCts?.Cancel();
+        _analysisCts?.Dispose();
+        _analysisCts = new System.Threading.CancellationTokenSource();
+        var ct = _analysisCts.Token;
+
         try
         {
-            var info = await _youtubeService.AnalyzeVideoAsync(UrlInput);
+            var info = await _youtubeService.AnalyzeVideoAsync(UrlInput, ct);
             VideoInfo = info;
 
             // Preenche opções de formato
@@ -240,6 +310,11 @@ public partial class MainViewModel : ObservableObject
             HasVideoInfo = true;
 
             ShowNotification($"Vídeo encontrado: {info.Title}", "Success");
+        }
+        catch (OperationCanceledException)
+        {
+            ShowNotification("Análise cancelada pelo usuário.", "Info");
+            HasVideoInfo = false;
         }
         catch (Exception ex)
         {
@@ -258,7 +333,242 @@ public partial class MainViewModel : ObservableObject
         finally
         {
             IsAnalyzing = false;
+            _analysisCts?.Dispose();
+            _analysisCts = null;
         }
+    }
+
+    [RelayCommand]
+    public void CancelAnalysis()
+    {
+        if (IsAnalyzing && _analysisCts != null)
+        {
+            try
+            {
+                _analysisCts.Cancel();
+                ShowNotification("Cancelando análise...", "Info");
+            }
+            catch { }
+        }
+    }
+
+    public async Task AnalyzePlaylistInternalAsync(string url)
+    {
+        IsAnalyzing = true;
+        HasVideoInfo = false;
+        HasPlaylistInfo = false;
+        CanRetryAnalysis = false;
+        ClearNotification();
+
+        _analysisCts?.Cancel();
+        _analysisCts?.Dispose();
+        _analysisCts = new System.Threading.CancellationTokenSource();
+        var ct = _analysisCts.Token;
+
+        try
+        {
+            var info = await _youtubeService.AnalyzePlaylistAsync(url, ct);
+            PlaylistInfo = info;
+
+            BatchFormatOptions.Clear();
+            var batchOpts = _formatSelectionService.BuildBatchFormatOptions();
+            foreach (var opt in batchOpts)
+            {
+                BatchFormatOptions.Add(opt);
+            }
+            SelectedBatchFormat = BatchFormatOptions.FirstOrDefault(x => x.IsBestQuality) ?? BatchFormatOptions.FirstOrDefault();
+
+            PlaylistItems.Clear();
+            foreach (var item in info.Items)
+            {
+                item.PropertyChanged += OnPlaylistItemPropertyChanged;
+                PlaylistItems.Add(item);
+            }
+
+            info.UpdateCounts();
+            HasPlaylistInfo = true;
+
+            ShowNotification($"Playlist encontrada: {info.Title} ({info.TotalVideosCount} vídeos)", "Success");
+        }
+        catch (OperationCanceledException)
+        {
+            ShowNotification("Análise da playlist cancelada pelo usuário.", "Info");
+            HasPlaylistInfo = false;
+        }
+        catch (Exception ex)
+        {
+            _logger?.Error($"Erro ao analisar playlist '{url}': {ex.GetType().FullName}: {ex.Message}", ex);
+
+            CanRetryAnalysis = true;
+            string friendlyMessage = ex switch
+            {
+                ArgumentException argEx => argEx.Message,
+                _ => "Não foi possível carregar a playlist. Verifique se a playlist é pública ou não listada."
+            };
+
+            ShowNotification(friendlyMessage, "Error");
+            HasPlaylistInfo = false;
+        }
+        finally
+        {
+            IsAnalyzing = false;
+            _analysisCts?.Dispose();
+            _analysisCts = null;
+        }
+    }
+
+    private void OnPlaylistItemPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(PlaylistItemInfo.IsSelected))
+        {
+            PlaylistInfo?.UpdateCounts();
+        }
+    }
+
+    [RelayCommand]
+    private void SelectAllPlaylistItems()
+    {
+        if (PlaylistInfo == null) return;
+        foreach (var item in PlaylistInfo.Items)
+        {
+            if (item.IsAvailable) item.IsSelected = true;
+        }
+        PlaylistInfo.UpdateCounts();
+    }
+
+    [RelayCommand]
+    private void DeselectAllPlaylistItems()
+    {
+        if (PlaylistInfo == null) return;
+        foreach (var item in PlaylistInfo.Items)
+        {
+            item.IsSelected = false;
+        }
+        PlaylistInfo.UpdateCounts();
+    }
+
+    [RelayCommand]
+    private void InvertPlaylistSelection()
+    {
+        if (PlaylistInfo == null) return;
+        foreach (var item in PlaylistInfo.Items)
+        {
+            if (item.IsAvailable) item.IsSelected = !item.IsSelected;
+        }
+        PlaylistInfo.UpdateCounts();
+    }
+
+    [RelayCommand]
+    private void ClearPlaylist()
+    {
+        HasPlaylistInfo = false;
+        PlaylistInfo = null;
+        PlaylistItems.Clear();
+        IsHybridUrlDetected = false;
+        ClearNotification();
+    }
+
+    [RelayCommand]
+    private async Task LoadFullPlaylistFromHybridAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(UrlInput))
+        {
+            await AnalyzePlaylistInternalAsync(UrlInput);
+        }
+    }
+
+    public static string GetCanonicalVideoKey(string? url, string? fallbackId = null)
+    {
+        var id = UrlValidator.ExtractVideoId(url);
+        if (!string.IsNullOrWhiteSpace(id))
+            return id;
+        if (!string.IsNullOrWhiteSpace(fallbackId))
+            return fallbackId;
+        return url?.Trim().ToLowerInvariant() ?? string.Empty;
+    }
+
+    [RelayCommand]
+    private void EnqueueSelectedPlaylistItems()
+    {
+        if (PlaylistInfo == null || SelectedBatchFormat == null)
+        {
+            ShowNotification("Analise uma playlist antes de iniciar o download em lote.", "Warning");
+            return;
+        }
+
+        var selected = PlaylistInfo.Items.Where(x => x.IsSelected && x.IsAvailable).ToList();
+        if (selected.Count == 0)
+        {
+            ShowNotification("Nenhum vídeo disponível foi selecionado na playlist.", "Warning");
+            return;
+        }
+
+        // Deduplicação interna na seleção de itens da playlist por identidade canônica do vídeo
+        var distinctSelected = selected
+            .GroupBy(x => GetCanonicalVideoKey(x.VideoUrl, x.Id), StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.First())
+            .ToList();
+
+        // Evita adicionar vídeos cuja identidade canônica já esteja ativa ou aguardando na fila
+        var activeKeys = new System.Collections.Generic.HashSet<string>(
+            _downloadService.QueueItems
+                .Where(x => x.IsActive)
+                .Select(x => GetCanonicalVideoKey(x.Request.VideoUrl)),
+            StringComparer.OrdinalIgnoreCase);
+
+        var itemsToEnqueue = distinctSelected
+            .Where(x => !activeKeys.Contains(GetCanonicalVideoKey(x.VideoUrl, x.Id)))
+            .ToList();
+        int skippedDuplicates = distinctSelected.Count - itemsToEnqueue.Count;
+
+        if (itemsToEnqueue.Count == 0)
+        {
+            ShowNotification("Todos os vídeos selecionados já estão ativos ou aguardando na fila.", "Warning");
+            CurrentTab = "Queue";
+            return;
+        }
+
+        var baseFolder = string.IsNullOrWhiteSpace(DestinationFolder)
+            ? AppConstants.DefaultDownloadFolder
+            : DestinationFolder;
+
+        var targetFolder = CreatePlaylistSubfolder
+            ? Path.Combine(baseFolder, FileHelper.SanitizeFileName(PlaylistInfo.Title))
+            : baseFolder;
+
+        FileHelper.EnsureDirectoryExists(targetFolder);
+
+        var isAudioOnly = IsBatchAudioOnlyMode || SelectedBatchFormat.IsAudioOnly;
+        var batchId = Guid.NewGuid();
+        int total = itemsToEnqueue.Count;
+
+        for (int i = 0; i < itemsToEnqueue.Count; i++)
+        {
+            var item = itemsToEnqueue[i];
+            var request = new DownloadRequest
+            {
+                VideoUrl = item.VideoUrl,
+                VideoTitle = item.Title,
+                DestinationFolder = targetFolder,
+                Format = SelectedBatchFormat,
+                Container = SelectedContainer ?? ContainerOption.DefaultOptions[0],
+                AudioFormat = SelectedAudioFormat ?? AudioFormatOption.DefaultOptions[0],
+                IsAudioOnly = isAudioOnly,
+                BatchId = batchId,
+                BatchTitle = PlaylistInfo.Title,
+                BatchIndex = i + 1,
+                BatchTotal = total
+            };
+
+            _downloadService.EnqueueDownload(request, item.ThumbnailUrl);
+        }
+
+        var notifMsg = skippedDuplicates > 0
+            ? $"Lote adicionado: {total} vídeo(s) da playlist '{PlaylistInfo.Title}' ({skippedDuplicates} duplicado(s) já na fila ignorados)."
+            : $"Lote adicionado à fila: {total} vídeo(s) da playlist '{PlaylistInfo.Title}'";
+
+        ShowNotification(notifMsg, "Success");
+        CurrentTab = "Queue";
     }
 
     [RelayCommand]
@@ -292,6 +602,15 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
+        // Verifica duplicata por identidade canônica na fila ativa
+        var canonicalKey = GetCanonicalVideoKey(VideoInfo.OriginalUrl, VideoInfo.Id);
+        if (_downloadService.QueueItems.Any(x => x.IsActive && string.Equals(GetCanonicalVideoKey(x.Request.VideoUrl), canonicalKey, StringComparison.OrdinalIgnoreCase)))
+        {
+            ShowNotification("Este vídeo já está ativo ou na fila de downloads.", "Warning");
+            CurrentTab = "Queue";
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(DestinationFolder))
         {
             DestinationFolder = AppConstants.DefaultDownloadFolder;
@@ -316,6 +635,68 @@ public partial class MainViewModel : ObservableObject
 
         ShowNotification($"Download adicionado à fila: '{VideoInfo.Title}'", "Success");
         CurrentTab = "Queue";
+    }
+
+    [RelayCommand]
+    public void CancelBatch(Guid batchId)
+    {
+        _downloadService.CancelBatch(batchId);
+        var batch = ActiveBatches.FirstOrDefault(b => b.BatchId == batchId);
+        var title = batch?.BatchTitle ?? "Lote";
+        ShowNotification($"Download do lote '{title}' cancelado.", "Info");
+        UpdateBatchProgress();
+    }
+
+    private void OnQueueItemPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(DownloadItemViewModel.Status) ||
+            e.PropertyName == nameof(DownloadItemViewModel.IsActive) ||
+            e.PropertyName == nameof(DownloadItemViewModel.IsCompleted) ||
+            e.PropertyName == nameof(DownloadItemViewModel.IsFailed) ||
+            e.PropertyName == nameof(DownloadItemViewModel.IsCanceled) ||
+            e.PropertyName == nameof(DownloadItemViewModel.ProgressPercentage))
+        {
+            UpdateBatchProgress();
+        }
+    }
+
+    public void UpdateBatchProgress()
+    {
+        var batchGroups = QueueItems
+            .Where(x => x.IsBatchItem && x.BatchId.HasValue)
+            .GroupBy(x => x.BatchId!.Value)
+            .ToList();
+
+        var activeBatchIds = batchGroups.Select(g => g.Key).ToHashSet();
+
+        for (int i = ActiveBatches.Count - 1; i >= 0; i--)
+        {
+            if (!activeBatchIds.Contains(ActiveBatches[i].BatchId))
+            {
+                ActiveBatches.RemoveAt(i);
+            }
+        }
+
+        foreach (var group in batchGroups)
+        {
+            var batchId = group.Key;
+            var firstItem = group.First();
+            var batchVm = ActiveBatches.FirstOrDefault(b => b.BatchId == batchId);
+
+            if (batchVm == null)
+            {
+                batchVm = new BatchProgressViewModel
+                {
+                    BatchId = batchId,
+                    BatchTitle = firstItem.BatchTitle ?? "Lote de Vídeos",
+                    TotalItems = firstItem.BatchTotal.GetValueOrDefault(group.Count())
+                };
+                batchVm.CancelRequested += (_, id) => CancelBatch(id);
+                ActiveBatches.Add(batchVm);
+            }
+
+            batchVm.UpdateCounts(group);
+        }
     }
 
     [RelayCommand]
