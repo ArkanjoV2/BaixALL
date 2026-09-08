@@ -657,6 +657,7 @@ public class ConcurrencyRegressionTests
         public DownloadItemViewModel EnqueueDownload(DownloadRequest request, string thumbnailUrl) => new();
         public void RemoveDownload(Guid id) { }
         public void UpdateConcurrencyLimit(int maxConcurrent) { }
+        public void CancelBatch(Guid batchId) { }
     }
     [Fact]
     public async Task DownloadFailure_DoesNotInterruptOtherDownloadsNorLeakSlots()

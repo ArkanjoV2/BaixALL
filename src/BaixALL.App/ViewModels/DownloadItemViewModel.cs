@@ -65,6 +65,15 @@ public partial class DownloadItemViewModel : ObservableObject
 
     public DownloadRequest Request { get; init; } = new();
 
+    public Guid? BatchId => Request.BatchId;
+    public string? BatchTitle => Request.BatchTitle;
+    public int? BatchIndex => Request.BatchIndex;
+    public int? BatchTotal => Request.BatchTotal;
+    public bool IsBatchItem => Request.IsBatchItem;
+    public string BatchBadgeText => IsBatchItem && BatchIndex.HasValue && BatchTotal.HasValue
+        ? $"[{BatchIndex.Value:D2}/{BatchTotal.Value:D2}]"
+        : string.Empty;
+
     public event EventHandler? CancelRequested;
     public event EventHandler? RemoveRequested;
 

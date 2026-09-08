@@ -35,10 +35,39 @@ public partial class MainViewModel : ObservableObject
     private bool _isAnalyzing;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNoActiveContent))]
     private bool _hasVideoInfo;
 
     [ObservableProperty]
     private VideoInfo? _videoInfo;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNoActiveContent))]
+    private bool _hasPlaylistInfo;
+
+    [ObservableProperty]
+    private PlaylistInfo? _playlistInfo;
+
+    public bool HasNoActiveContent => !HasVideoInfo && !HasPlaylistInfo;
+
+    public ObservableCollection<FormatOption> BatchFormatOptions { get; } = new();
+
+    [ObservableProperty]
+    private FormatOption? _selectedBatchFormat;
+
+    [ObservableProperty]
+    private bool _isBatchAudioOnlyMode;
+
+    [ObservableProperty]
+    private bool _createPlaylistSubfolder = true;
+
+    [ObservableProperty]
+    private bool _isHybridUrlDetected;
+
+    [ObservableProperty]
+    private string _hybridPlaylistNotice = string.Empty;
+
+    public ObservableCollection<PlaylistItemInfo> PlaylistItems { get; } = new();
 
     public ObservableCollection<FormatOption> FormatOptions { get; } = new();
 
@@ -201,25 +230,37 @@ public partial class MainViewModel : ObservableObject
     {
         if (string.IsNullOrWhiteSpace(UrlInput))
         {
-            ShowNotification("Por favor, cole a URL de um vídeo do YouTube.", "Warning");
+            ShowNotification("Por favor, cole a URL de um vídeo ou playlist do YouTube.", "Warning");
             return;
         }
 
         if (!UrlValidator.IsValidYouTubeUrl(UrlInput))
         {
-            ShowNotification("A URL informada não é válida para vídeos do YouTube.", "Error");
+            ShowNotification("A URL informada não é válida para conteúdos do YouTube.", "Error");
             return;
         }
 
         if (!DependenciesReady && !_dependencyManager.AreAllDependenciesInstalled())
         {
             IsInitialSetupVisible = true;
-            ShowNotification("Instale os componentes necessários antes de analisar vídeos.", "Warning");
+            ShowNotification("Instale os componentes necessários antes de analisar conteúdos.", "Warning");
             return;
         }
 
+        // Se for URL pura de playlist, analisa a playlist diretamente
+        if (UrlValidator.IsPurePlaylistUrl(UrlInput))
+        {
+            await AnalyzePlaylistInternalAsync(UrlInput);
+            return;
+        }
+
+        // Se for URL híbrida (vídeo com lista associada), ativa aviso com opção de carregar a playlist completa
+        IsHybridUrlDetected = UrlValidator.IsHybridUrl(UrlInput);
+        HybridPlaylistNotice = IsHybridUrlDetected ? "Esta URL pertence a uma playlist do YouTube." : string.Empty;
+
         IsAnalyzing = true;
         HasVideoInfo = false;
+        HasPlaylistInfo = false;
         CanRetryAnalysis = false;
         ClearNotification();
 
@@ -259,6 +300,174 @@ public partial class MainViewModel : ObservableObject
         {
             IsAnalyzing = false;
         }
+    }
+
+    public async Task AnalyzePlaylistInternalAsync(string url)
+    {
+        IsAnalyzing = true;
+        HasVideoInfo = false;
+        HasPlaylistInfo = false;
+        CanRetryAnalysis = false;
+        ClearNotification();
+
+        try
+        {
+            var info = await _youtubeService.AnalyzePlaylistAsync(url);
+            PlaylistInfo = info;
+
+            BatchFormatOptions.Clear();
+            var batchOpts = _formatSelectionService.BuildBatchFormatOptions();
+            foreach (var opt in batchOpts)
+            {
+                BatchFormatOptions.Add(opt);
+            }
+            SelectedBatchFormat = BatchFormatOptions.FirstOrDefault(x => x.IsBestQuality) ?? BatchFormatOptions.FirstOrDefault();
+
+            PlaylistItems.Clear();
+            foreach (var item in info.Items)
+            {
+                item.PropertyChanged += OnPlaylistItemPropertyChanged;
+                PlaylistItems.Add(item);
+            }
+
+            info.UpdateCounts();
+            HasPlaylistInfo = true;
+
+            ShowNotification($"Playlist encontrada: {info.Title} ({info.TotalVideosCount} vídeos)", "Success");
+        }
+        catch (Exception ex)
+        {
+            _logger?.Error($"Erro ao analisar playlist '{url}': {ex.GetType().FullName}: {ex.Message}", ex);
+
+            CanRetryAnalysis = true;
+            string friendlyMessage = ex switch
+            {
+                ArgumentException argEx => argEx.Message,
+                _ => "Não foi possível carregar a playlist. Verifique se a playlist é pública ou não listada."
+            };
+
+            ShowNotification(friendlyMessage, "Error");
+            HasPlaylistInfo = false;
+        }
+        finally
+        {
+            IsAnalyzing = false;
+        }
+    }
+
+    private void OnPlaylistItemPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(PlaylistItemInfo.IsSelected))
+        {
+            PlaylistInfo?.UpdateCounts();
+        }
+    }
+
+    [RelayCommand]
+    private void SelectAllPlaylistItems()
+    {
+        if (PlaylistInfo == null) return;
+        foreach (var item in PlaylistInfo.Items)
+        {
+            if (item.IsAvailable) item.IsSelected = true;
+        }
+        PlaylistInfo.UpdateCounts();
+    }
+
+    [RelayCommand]
+    private void DeselectAllPlaylistItems()
+    {
+        if (PlaylistInfo == null) return;
+        foreach (var item in PlaylistInfo.Items)
+        {
+            item.IsSelected = false;
+        }
+        PlaylistInfo.UpdateCounts();
+    }
+
+    [RelayCommand]
+    private void InvertPlaylistSelection()
+    {
+        if (PlaylistInfo == null) return;
+        foreach (var item in PlaylistInfo.Items)
+        {
+            if (item.IsAvailable) item.IsSelected = !item.IsSelected;
+        }
+        PlaylistInfo.UpdateCounts();
+    }
+
+    [RelayCommand]
+    private void ClearPlaylist()
+    {
+        HasPlaylistInfo = false;
+        PlaylistInfo = null;
+        PlaylistItems.Clear();
+        IsHybridUrlDetected = false;
+        ClearNotification();
+    }
+
+    [RelayCommand]
+    private async Task LoadFullPlaylistFromHybridAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(UrlInput))
+        {
+            await AnalyzePlaylistInternalAsync(UrlInput);
+        }
+    }
+
+    [RelayCommand]
+    private void EnqueueSelectedPlaylistItems()
+    {
+        if (PlaylistInfo == null || SelectedBatchFormat == null)
+        {
+            ShowNotification("Analise uma playlist antes de iniciar o download em lote.", "Warning");
+            return;
+        }
+
+        var selected = PlaylistInfo.Items.Where(x => x.IsSelected && x.IsAvailable).ToList();
+        if (selected.Count == 0)
+        {
+            ShowNotification("Nenhum vídeo disponível foi selecionado na playlist.", "Warning");
+            return;
+        }
+
+        var baseFolder = string.IsNullOrWhiteSpace(DestinationFolder)
+            ? AppConstants.DefaultDownloadFolder
+            : DestinationFolder;
+
+        var targetFolder = CreatePlaylistSubfolder
+            ? Path.Combine(baseFolder, FileHelper.SanitizeFileName(PlaylistInfo.Title))
+            : baseFolder;
+
+        FileHelper.EnsureDirectoryExists(targetFolder);
+
+        var isAudioOnly = IsBatchAudioOnlyMode || SelectedBatchFormat.IsAudioOnly;
+        var batchId = Guid.NewGuid();
+        int total = selected.Count;
+
+        for (int i = 0; i < selected.Count; i++)
+        {
+            var item = selected[i];
+            var request = new DownloadRequest
+            {
+                VideoUrl = item.VideoUrl,
+                VideoTitle = item.Title,
+                DestinationFolder = targetFolder,
+                Format = SelectedBatchFormat,
+                Container = SelectedContainer ?? ContainerOption.DefaultOptions[0],
+                AudioFormat = SelectedAudioFormat ?? AudioFormatOption.DefaultOptions[0],
+                IsAudioOnly = isAudioOnly,
+                BatchId = batchId,
+                BatchTitle = PlaylistInfo.Title,
+                BatchIndex = i + 1,
+                BatchTotal = total
+            };
+
+            _downloadService.EnqueueDownload(request, item.ThumbnailUrl);
+        }
+
+        ShowNotification($"Lote adicionado à fila: {total} vídeo(s) da playlist '{PlaylistInfo.Title}'", "Success");
+        CurrentTab = "Queue";
     }
 
     [RelayCommand]

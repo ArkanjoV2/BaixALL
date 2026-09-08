@@ -297,7 +297,7 @@ public class FormatSelectionService : IFormatSelectionService
             }
         }
 
-        return new PlaylistInfo
+        var playlistInfo = new PlaylistInfo
         {
             Id = id,
             Title = title,
@@ -307,6 +307,8 @@ public class FormatSelectionService : IFormatSelectionService
             TotalVideosCount = items.Count,
             Items = items
         };
+        playlistInfo.UpdateCounts();
+        return playlistInfo;
     }
 
     public List<FormatOption> BuildBatchFormatOptions()

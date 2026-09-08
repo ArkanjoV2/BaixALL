@@ -20,4 +20,9 @@ public class DownloadRequest
     public ContainerOption Container { get; set; } = new();
     public AudioFormatOption AudioFormat { get; set; } = new();
     public bool IsAudioOnly { get; set; }
+    public System.Guid? BatchId { get; set; }
+    public string? BatchTitle { get; set; }
+    public int? BatchIndex { get; set; }
+    public int? BatchTotal { get; set; }
+    public bool IsBatchItem => BatchId.HasValue;
 }

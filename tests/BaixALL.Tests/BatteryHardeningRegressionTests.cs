@@ -76,6 +76,7 @@ public class BatteryHardeningRegressionTests
         public void ClearCompleted() { }
         public void UpdateConcurrencyLimit(int maxConcurrent) { }
         public void CancelAllDownloads() { }
+        public void CancelBatch(Guid batchId) { }
     }
 
     [Fact]
