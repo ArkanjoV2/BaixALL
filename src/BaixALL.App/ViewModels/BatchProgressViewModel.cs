@@ -36,6 +36,18 @@ public partial class BatchProgressViewModel : ObservableObject
     public bool HasFailures => FailedCount > 0;
     public bool HasCanceled => CanceledCount > 0;
 
+    public string BatchStatusText
+    {
+        get
+        {
+            if (IsActive) return "Em andamento";
+            if (CompletedCount == TotalItems && TotalItems > 0) return "Concluído";
+            if (CanceledCount == TotalItems && TotalItems > 0) return "Cancelado";
+            if (FailedCount == TotalItems && TotalItems > 0) return "Falha";
+            return "Finalizado";
+        }
+    }
+
     public event EventHandler<Guid>? CancelRequested;
 
     [RelayCommand]
@@ -56,6 +68,7 @@ public partial class BatchProgressViewModel : ObservableObject
         OnPropertyChanged(nameof(ItemsProgressPercentage));
         OnPropertyChanged(nameof(ProgressSummaryText));
         OnPropertyChanged(nameof(IsActive));
+        OnPropertyChanged(nameof(BatchStatusText));
         OnPropertyChanged(nameof(HasFailures));
         OnPropertyChanged(nameof(HasCanceled));
     }

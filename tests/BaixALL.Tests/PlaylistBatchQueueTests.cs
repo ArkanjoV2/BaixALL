@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using BaixALL.App.Helpers;
 using BaixALL.App.Models;
 using BaixALL.App.Services;
 using BaixALL.App.ViewModels;
@@ -595,6 +596,117 @@ public class PlaylistBatchQueueTests
         Assert.False(vm.IsAnalyzing);
         Assert.False(vm.HasVideoInfo);
         Assert.Equal("Análise cancelada pelo usuário.", vm.StatusNotification);
+    }
+
+    [Fact]
+    public void BatchProgressViewModel_TerminalStates_ReportsCorrectStatus()
+    {
+        var batchVm = new BatchProgressViewModel
+        {
+            BatchId = Guid.NewGuid(),
+            BatchTitle = "Lote Terminal",
+            TotalItems = 2
+        };
+
+        // Estado 1: Em andamento
+        batchVm.UpdateCounts(new List<DownloadItemViewModel>
+        {
+            new() { Status = DownloadStatus.DownloadingVideo, IsActive = true },
+            new() { Status = DownloadStatus.Queued, IsActive = true }
+        });
+        Assert.True(batchVm.IsActive);
+        Assert.Equal("Em andamento", batchVm.BatchStatusText);
+
+        // Estado 2: Todos concluídos
+        batchVm.UpdateCounts(new List<DownloadItemViewModel>
+        {
+            new() { Status = DownloadStatus.Completed, IsActive = false, IsCompleted = true },
+            new() { Status = DownloadStatus.Completed, IsActive = false, IsCompleted = true }
+        });
+        Assert.False(batchVm.IsActive);
+        Assert.Equal("Concluído", batchVm.BatchStatusText);
+
+        // Estado 3: Todos cancelados
+        batchVm.UpdateCounts(new List<DownloadItemViewModel>
+        {
+            new() { Status = DownloadStatus.Canceled, IsActive = false, IsCanceled = true },
+            new() { Status = DownloadStatus.Canceled, IsActive = false, IsCanceled = true }
+        });
+        Assert.False(batchVm.IsActive);
+        Assert.Equal("Cancelado", batchVm.BatchStatusText);
+
+        // Estado 4: Todos falharam
+        batchVm.UpdateCounts(new List<DownloadItemViewModel>
+        {
+            new() { Status = DownloadStatus.Error, IsActive = false, IsFailed = true },
+            new() { Status = DownloadStatus.Error, IsActive = false, IsFailed = true }
+        });
+        Assert.False(batchVm.IsActive);
+        Assert.Equal("Falha", batchVm.BatchStatusText);
+
+        // Estado 5: Misto (1 concluído, 1 cancelado)
+        batchVm.UpdateCounts(new List<DownloadItemViewModel>
+        {
+            new() { Status = DownloadStatus.Completed, IsActive = false, IsCompleted = true },
+            new() { Status = DownloadStatus.Canceled, IsActive = false, IsCanceled = true }
+        });
+        Assert.False(batchVm.IsActive);
+        Assert.Equal("Finalizado", batchVm.BatchStatusText);
+    }
+
+    [Fact]
+    public void MainViewModel_CanonicalVideoIdentity_DeduplicatesDifferentUrlFormats()
+    {
+        var key1 = MainViewModel.GetCanonicalVideoKey("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+        var key2 = MainViewModel.GetCanonicalVideoKey("https://youtu.be/dQw4w9WgXcQ");
+        var key3 = MainViewModel.GetCanonicalVideoKey("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=45s&list=PL123");
+        var key4 = MainViewModel.GetCanonicalVideoKey(null, "dQw4w9WgXcQ");
+
+        Assert.Equal("dQw4w9WgXcQ", key1);
+        Assert.Equal(key1, key2);
+        Assert.Equal(key1, key3);
+        Assert.Equal(key1, key4);
+    }
+
+    [Fact]
+    public void FileHelper_ConcurrentUniquePaths_ProducesDistinctNonCollidingFiles()
+    {
+        var tempFolder = Path.Combine(Path.GetTempPath(), $"baixall_race_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(tempFolder);
+
+        try
+        {
+            var syncLock = new object();
+            var createdFiles = new System.Collections.Concurrent.ConcurrentBag<string>();
+
+            // Simula 5 threads concorrentes tentando gerar e gravar arquivos com o mesmo nome base
+            Parallel.For(0, 5, i =>
+            {
+                lock (syncLock)
+                {
+                    var uniquePath = FileHelper.GetUniqueFilePath(tempFolder, "VideoConcorrente", "mp4");
+                    File.WriteAllText(uniquePath, $"Conteudo {i}");
+                    createdFiles.Add(uniquePath);
+                }
+            });
+
+            Assert.Equal(5, createdFiles.Count);
+            // Todos os caminhos devem ser distintos
+            Assert.Equal(5, createdFiles.Distinct().Count());
+
+            // Todos os arquivos devem existir no disco
+            foreach (var file in createdFiles)
+            {
+                Assert.True(File.Exists(file));
+            }
+        }
+        finally
+        {
+            if (Directory.Exists(tempFolder))
+            {
+                try { Directory.Delete(tempFolder, true); } catch { }
+            }
+        }
     }
 
     private class SlowCancellableYoutubeService : IYoutubeService

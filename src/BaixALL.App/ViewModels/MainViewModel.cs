@@ -477,6 +477,16 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    public static string GetCanonicalVideoKey(string? url, string? fallbackId = null)
+    {
+        var id = UrlValidator.ExtractVideoId(url);
+        if (!string.IsNullOrWhiteSpace(id))
+            return id;
+        if (!string.IsNullOrWhiteSpace(fallbackId))
+            return fallbackId;
+        return url?.Trim().ToLowerInvariant() ?? string.Empty;
+    }
+
     [RelayCommand]
     private void EnqueueSelectedPlaylistItems()
     {
@@ -493,20 +503,22 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        // Deduplicação interna na seleção de itens da playlist (por URL)
+        // Deduplicação interna na seleção de itens da playlist por identidade canônica do vídeo
         var distinctSelected = selected
-            .GroupBy(x => x.VideoUrl, StringComparer.OrdinalIgnoreCase)
+            .GroupBy(x => GetCanonicalVideoKey(x.VideoUrl, x.Id), StringComparer.OrdinalIgnoreCase)
             .Select(g => g.First())
             .ToList();
 
-        // Evita adicionar vídeos que já estão ativamente baixando ou na fila
-        var activeUrls = new System.Collections.Generic.HashSet<string>(
+        // Evita adicionar vídeos cuja identidade canônica já esteja ativa ou aguardando na fila
+        var activeKeys = new System.Collections.Generic.HashSet<string>(
             _downloadService.QueueItems
                 .Where(x => x.IsActive)
-                .Select(x => x.Request.VideoUrl),
+                .Select(x => GetCanonicalVideoKey(x.Request.VideoUrl)),
             StringComparer.OrdinalIgnoreCase);
 
-        var itemsToEnqueue = distinctSelected.Where(x => !activeUrls.Contains(x.VideoUrl)).ToList();
+        var itemsToEnqueue = distinctSelected
+            .Where(x => !activeKeys.Contains(GetCanonicalVideoKey(x.VideoUrl, x.Id)))
+            .ToList();
         int skippedDuplicates = distinctSelected.Count - itemsToEnqueue.Count;
 
         if (itemsToEnqueue.Count == 0)
@@ -590,8 +602,9 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        // Verifica duplicata na fila ativa
-        if (_downloadService.QueueItems.Any(x => x.IsActive && string.Equals(x.Request.VideoUrl, VideoInfo.OriginalUrl, StringComparison.OrdinalIgnoreCase)))
+        // Verifica duplicata por identidade canônica na fila ativa
+        var canonicalKey = GetCanonicalVideoKey(VideoInfo.OriginalUrl, VideoInfo.Id);
+        if (_downloadService.QueueItems.Any(x => x.IsActive && string.Equals(GetCanonicalVideoKey(x.Request.VideoUrl), canonicalKey, StringComparison.OrdinalIgnoreCase)))
         {
             ShowNotification("Este vídeo já está ativo ou na fila de downloads.", "Warning");
             CurrentTab = "Queue";

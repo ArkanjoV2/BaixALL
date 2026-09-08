@@ -820,6 +820,9 @@
                                                         <Border Background="{DynamicResource AccentBrush}" Padding="8,2" Margin="0,0,8,0">
                                                             <TextBlock Text="DOWNLOAD EM LOTE" FontSize="11" FontWeight="Bold" Foreground="White" />
                                                         </Border>
+                                                        <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="6,2" Margin="0,0,8,0">
+                                                            <TextBlock Text="{Binding BatchStatusText}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                        </Border>
                                                         <TextBlock Text="{Binding BatchTitle}" FontSize="16" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
                                                     </StackPanel>
                                                     <TextBlock Text="{Binding ProgressSummaryText}" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
@@ -841,7 +844,8 @@
                                                 <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3" Margin="0,0,8,4">
                                                     <TextBlock Text="{Binding CompletedCount, StringFormat='Concluídos: {0}'}" FontSize="12" Foreground="{DynamicResource SuccessBrush}" FontWeight="SemiBold" />
                                                 </Border>
-                                                <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3" Margin="0,0,8,4">
+                                                <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3" Margin="0,0,8,4"
+                                                        Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}">
                                                     <TextBlock Text="{Binding ActiveCount, StringFormat='Baixando: {0}'}" FontSize="12" Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" />
                                                 </Border>
                                                 <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3" Margin="0,0,8,4">

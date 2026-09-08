@@ -17,6 +17,7 @@ public class YtDlpService : IYtDlpService
 {
     private readonly IDependencyManager _dependencyManager;
     private readonly ILoggerService? _logger;
+    private static readonly object _fileMoveLock = new();
 
     public const string ProgressTemplate = "baixall_prog:[%(progress.downloaded_bytes)s/%(progress.total_bytes_estimate)s|%(progress.speed)s|%(progress.eta)s|%(progress._percent_str)s|%(progress.status)s]";
 
@@ -289,13 +290,17 @@ public class YtDlpService : IYtDlpService
                     : (request.Container.Id == "auto" ? "mp4" : request.Container.Extension);
             }
 
-            // Garante nome de arquivo único e sem colisões na pasta de destino final
-            var finalDestinationPath = FileHelper.GetUniqueFilePath(
-                request.DestinationFolder,
-                request.VideoTitle,
-                actualExtension);
+            // Garante nome de arquivo único e atômico, eliminando race conditions entre downloads concorrentes
+            string finalDestinationPath;
+            lock (_fileMoveLock)
+            {
+                finalDestinationPath = FileHelper.GetUniqueFilePath(
+                    request.DestinationFolder,
+                    request.VideoTitle,
+                    actualExtension);
 
-            File.Move(producedFile, finalDestinationPath, overwrite: true);
+                File.Move(producedFile, finalDestinationPath, overwrite: false);
+            }
 
             progress.Report(new DownloadProgressReport
             {
