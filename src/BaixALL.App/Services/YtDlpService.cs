@@ -82,6 +82,61 @@ public class YtDlpService : IYtDlpService
         }
     }
 
+    public async Task<JsonDocument> GetPlaylistMetadataJsonAsync(string playlistUrl, CancellationToken ct = default)
+    {
+        var ytDlpPath = _dependencyManager.GetYtDlpPath();
+        if (!File.Exists(ytDlpPath))
+        {
+            throw new FileNotFoundException("O executável do yt-dlp não está instalado. Verifique as ferramentas.", ytDlpPath);
+        }
+
+        var arguments = new List<string>
+        {
+            "-J",
+            "--flat-playlist",
+            "--skip-download",
+            "--no-warnings",
+            "--no-check-certificates"
+        };
+
+        var ffmpegDir = Path.GetDirectoryName(_dependencyManager.GetFFmpegPath());
+        if (!string.IsNullOrEmpty(ffmpegDir) && Directory.Exists(ffmpegDir))
+        {
+            arguments.Add("--ffmpeg-location");
+            arguments.Add(ffmpegDir);
+        }
+
+        arguments.Add(playlistUrl);
+
+        var env = BuildProcessEnvironment();
+
+        _logger?.Info($"Obtendo metadados estruturados da playlist: {playlistUrl}");
+
+        var result = await ProcessRunner.RunAsync(
+            ytDlpPath,
+            arguments,
+            environmentVariables: env,
+            cancellationToken: ct).ConfigureAwait(false);
+
+        if (!result.IsSuccess)
+        {
+            var friendlyError = ParseYtDlpError(result.StandardError);
+            _logger?.Error($"Falha ao analisar playlist. Saída: {result.StandardError}");
+            throw new InvalidOperationException(friendlyError);
+        }
+
+        try
+        {
+            var json = JsonDocument.Parse(result.StandardOutput);
+            return json;
+        }
+        catch (JsonException ex)
+        {
+            _logger?.Error("Falha ao interpretar JSON da playlist retornado pelo yt-dlp.", ex);
+            throw new InvalidOperationException("Não foi possível interpretar os dados da playlist do YouTube.", ex);
+        }
+    }
+
     public async Task<string> DownloadAsync(
         DownloadRequest request,
         IProgress<DownloadProgressReport> progress,

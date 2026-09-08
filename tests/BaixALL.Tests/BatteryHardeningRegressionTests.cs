@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -28,6 +28,9 @@ public class BatteryHardeningRegressionTests
     private class FakeYtDlpService : IYtDlpService
     {
         public Task<JsonDocument> GetMetadataJsonAsync(string url, CancellationToken ct = default) =>
+            Task.FromResult(JsonDocument.Parse("{}"));
+
+        public Task<JsonDocument> GetPlaylistMetadataJsonAsync(string playlistUrl, CancellationToken ct = default) =>
             Task.FromResult(JsonDocument.Parse("{}"));
 
         public async Task<string> DownloadAsync(DownloadRequest request, IProgress<DownloadProgressReport> progress, CancellationToken ct = default)

@@ -208,6 +208,166 @@ public class FormatSelectionService : IFormatSelectionService
         return options;
     }
 
+    public PlaylistInfo ParsePlaylistInfo(JsonDocument json, string originalUrl)
+    {
+        var root = json.RootElement;
+
+        var id = root.GetStringSafe("id");
+        var title = root.GetStringSafe("title", "Playlist sem título");
+        var channel = root.GetStringNullable("uploader")
+            ?? root.GetStringNullable("channel")
+            ?? root.GetStringSafe("uploader_id", "YouTube");
+
+        var thumbnail = root.GetStringSafe("thumbnail");
+        if (string.IsNullOrEmpty(thumbnail) && root.TryGetProperty("thumbnails", out var rootThumbs) && rootThumbs.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var th in rootThumbs.EnumerateArray())
+            {
+                var url = th.GetStringSafe("url");
+                if (!string.IsNullOrEmpty(url)) thumbnail = url;
+            }
+        }
+
+        var items = new List<PlaylistItemInfo>();
+        int index = 1;
+
+        if (root.TryGetProperty("entries", out var entriesProp) && entriesProp.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var entry in entriesProp.EnumerateArray())
+            {
+                if (entry.ValueKind != JsonValueKind.Object)
+                    continue;
+
+                var entryId = entry.GetStringSafe("id");
+                var entryTitle = entry.GetStringSafe("title", $"Vídeo #{index}");
+                var duration = entry.GetDoubleNullable("duration");
+                var entryChannel = entry.GetStringNullable("uploader")
+                    ?? entry.GetStringNullable("channel")
+                    ?? channel;
+
+                var entryUrl = entry.GetStringSafe("url");
+                if (string.IsNullOrWhiteSpace(entryUrl) || !entryUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                {
+                    entryUrl = !string.IsNullOrEmpty(entryId)
+                        ? $"https://www.youtube.com/watch?v={entryId}"
+                        : string.Empty;
+                }
+
+                var entryThumb = entry.GetStringSafe("thumbnail");
+                if (string.IsNullOrEmpty(entryThumb) && entry.TryGetProperty("thumbnails", out var entryThumbs) && entryThumbs.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var th in entryThumbs.EnumerateArray())
+                    {
+                        var u = th.GetStringSafe("url");
+                        if (!string.IsNullOrEmpty(u)) entryThumb = u;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(entryThumb) && !string.IsNullOrEmpty(entryId))
+                {
+                    entryThumb = $"https://i.ytimg.com/vi/{entryId}/hqdefault.jpg";
+                }
+
+                // Se a playlist ainda não tiver miniatura definida, aproveita a do primeiro vídeo
+                if (string.IsNullOrEmpty(thumbnail) && !string.IsNullOrEmpty(entryThumb))
+                {
+                    thumbnail = entryThumb;
+                }
+
+                bool isUnavailable = string.IsNullOrEmpty(entryId) ||
+                                     entryTitle.Contains("[Private video]", StringComparison.OrdinalIgnoreCase) ||
+                                     entryTitle.Contains("[Deleted video]", StringComparison.OrdinalIgnoreCase);
+
+                var item = new PlaylistItemInfo
+                {
+                    Id = entryId,
+                    Title = entryTitle,
+                    VideoUrl = entryUrl,
+                    Channel = entryChannel,
+                    DurationSeconds = duration,
+                    ThumbnailUrl = entryThumb,
+                    PlaylistIndex = index,
+                    IsAvailable = !isUnavailable,
+                    IsSelected = !isUnavailable,
+                    AvailabilityNotice = isUnavailable ? "Vídeo indisponível ou privado" : string.Empty
+                };
+
+                items.Add(item);
+                index++;
+            }
+        }
+
+        return new PlaylistInfo
+        {
+            Id = id,
+            Title = title,
+            Channel = channel,
+            ThumbnailUrl = thumbnail,
+            OriginalUrl = originalUrl,
+            TotalVideosCount = items.Count,
+            Items = items
+        };
+    }
+
+    public List<FormatOption> BuildBatchFormatOptions()
+    {
+        return new List<FormatOption>
+        {
+            new()
+            {
+                Label = "Melhor qualidade disponível (Recomendado)",
+                FormatSelector = "bestvideo+bestaudio/best",
+                IsBestQuality = true,
+                IsAudioOnly = false,
+                Description = "Baixa a melhor resolução e áudio disponíveis de cada vídeo."
+            },
+            new()
+            {
+                Label = "Até 1080p (Full HD)",
+                Height = 1080,
+                FormatSelector = "bestvideo[height<=1080]+bestaudio/bestvideo[height<=1080]+bestaudio/best",
+                IsBestQuality = false,
+                IsAudioOnly = false,
+                Description = "Limita a resolução a no máximo 1080p com fallback automático."
+            },
+            new()
+            {
+                Label = "Até 720p (HD)",
+                Height = 720,
+                FormatSelector = "bestvideo[height<=720]+bestaudio/bestvideo[height<=720]+bestaudio/best",
+                IsBestQuality = false,
+                IsAudioOnly = false,
+                Description = "Limita a resolução a no máximo 720p com fallback automático."
+            },
+            new()
+            {
+                Label = "Até 480p",
+                Height = 480,
+                FormatSelector = "bestvideo[height<=480]+bestaudio/bestvideo[height<=480]+bestaudio/best",
+                IsBestQuality = false,
+                IsAudioOnly = false,
+                Description = "Vídeo com tamanho reduzido até 480p."
+            },
+            new()
+            {
+                Label = "Até 360p",
+                Height = 360,
+                FormatSelector = "bestvideo[height<=360]+bestaudio/bestvideo[height<=360]+bestaudio/best",
+                IsBestQuality = false,
+                IsAudioOnly = false,
+                Description = "Vídeo leve para conexões limitadas ou economia de espaço."
+            },
+            new()
+            {
+                Label = "🎵 Somente áudio",
+                FormatSelector = "bestaudio/best",
+                IsBestQuality = false,
+                IsAudioOnly = true,
+                Description = "Extrai apenas as faixas de áudio dos vídeos da playlist."
+            }
+        };
+    }
+
     public static string GetResolutionLabel(int height)
     {
         return height switch

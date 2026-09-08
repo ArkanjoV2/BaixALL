@@ -8,4 +8,6 @@ public interface IFormatSelectionService
 {
     VideoInfo ParseVideoInfo(JsonDocument json, string originalUrl);
     List<FormatOption> BuildFormatOptions(VideoInfo info);
+    PlaylistInfo ParsePlaylistInfo(JsonDocument json, string originalUrl);
+    List<FormatOption> BuildBatchFormatOptions();
 }

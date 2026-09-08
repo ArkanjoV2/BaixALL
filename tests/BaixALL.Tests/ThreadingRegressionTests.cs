@@ -65,6 +65,11 @@ public class ThreadingRegressionTests
         {
             return Task.FromResult(JsonDocument.Parse("{}"));
         }
+
+        public Task<JsonDocument> GetPlaylistMetadataJsonAsync(string playlistUrl, CancellationToken ct = default)
+        {
+            return Task.FromResult(JsonDocument.Parse("{}"));
+        }
     }
 
     [Fact]
