@@ -513,9 +513,9 @@
                                 <Border Grid.Column="0" Background="#11000000" Height="125" Width="220" Margin="0,0,20,0" VerticalAlignment="Top">
                                     <Grid>
                                         <Image Source="{Binding PlaylistInfo.ThumbnailUrl}" Stretch="UniformToFill" />
-                                        <!-- Badge inferior com quantidade de vídeos -->
+                                        <!-- Badge inferior com quantidade de vídeos/mídias -->
                                         <Border Background="#CC000000" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,8,8" Padding="8,3">
-                                            <TextBlock Text="{Binding PlaylistInfo.TotalVideosCount, StringFormat='{}{0} vídeos'}" Foreground="White" FontSize="11" FontWeight="Bold" />
+                                            <TextBlock Text="{Binding PlaylistInfo.BadgeCountSummary}" Foreground="White" FontSize="11" FontWeight="Bold" />
                                         </Border>
                                     </Grid>
                                 </Border>
@@ -535,7 +535,7 @@
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                         <TextBlock Text="{Binding PlaylistInfo.AuthorOrChannelLabel}" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" Margin="0,0,16,0" />
-                                        <TextBlock Text="{Binding PlaylistInfo.TotalVideosCount, StringFormat='Total: {0} vídeos'}" Foreground="{DynamicResource TextMutedBrush}" FontSize="13" />
+                                        <TextBlock Text="{Binding PlaylistInfo.DetailedCountSummary}" Foreground="{DynamicResource TextMutedBrush}" FontSize="13" />
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>

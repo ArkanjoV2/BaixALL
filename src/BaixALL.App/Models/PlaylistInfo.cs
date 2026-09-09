@@ -18,15 +18,55 @@ public partial class PlaylistInfo : ObservableObject
     public int TotalVideosCount { get; set; }
     public List<PlaylistItemInfo> Items { get; set; } = new();
 
+    public int TotalMediaCount => Items.Count;
+    public int SupportedVideosCount => Items.Count(x => x.IsAvailable);
+    public int PhotoCount => Items.Count(x => !x.IsAvailable && x.AvailabilityNotice.Contains("Foto", StringComparison.OrdinalIgnoreCase));
+
+    public string BadgeCountSummary
+    {
+        get
+        {
+            if (IsCarousel && PhotoCount > 0)
+            {
+                return $"{TotalMediaCount} mídias • {SupportedVideosCount} vídeos";
+            }
+            return $"{TotalVideosCount} vídeos";
+        }
+    }
+
+    public string DetailedCountSummary
+    {
+        get
+        {
+            if (IsCarousel && PhotoCount > 0)
+            {
+                return $"Total: {TotalMediaCount} mídias ({SupportedVideosCount} vídeos suportados, {PhotoCount} foto{(PhotoCount > 1 ? "s" : "")})";
+            }
+            return $"Total: {TotalVideosCount} vídeos";
+        }
+    }
+
     [ObservableProperty]
     private int _selectedVideosCount;
 
-    public string SelectionSummary => $"{SelectedVideosCount} de {TotalVideosCount} selecionados";
+    public string SelectionSummary
+    {
+        get
+        {
+            if (IsCarousel && PhotoCount > 0)
+            {
+                return $"{SelectedVideosCount} de {SupportedVideosCount} vídeos selecionados";
+            }
+            return $"{SelectedVideosCount} de {TotalVideosCount} selecionados";
+        }
+    }
 
     public void UpdateCounts()
     {
         SelectedVideosCount = Items.Count(x => x.IsSelected && x.IsAvailable);
         OnPropertyChanged(nameof(SelectionSummary));
+        OnPropertyChanged(nameof(BadgeCountSummary));
+        OnPropertyChanged(nameof(DetailedCountSummary));
     }
 
     public string FormattedTotalDuration

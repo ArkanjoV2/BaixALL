@@ -466,4 +466,90 @@ public class MultiplatformAnalysisTests
         Assert.False(format.HasVideo);
         Assert.False(format.HasAudio);
     }
+
+    [Fact]
+    public void PlaylistInfo_CountSummaries_DifferentiatesMediaAndVideos_WhenPhotosPresent()
+    {
+        var playlist = new PlaylistInfo
+        {
+            Title = "Carrossel Misto",
+            Platform = PlatformType.Instagram,
+            IsCarousel = true,
+            TotalVideosCount = 3,
+            Items = new List<PlaylistItemInfo>
+            {
+                new() { Id = "v1", Title = "Video 1", PlaylistIndex = 1, IsAvailable = true, IsSelected = true },
+                new() { Id = "f2", Title = "Foto 2", PlaylistIndex = 2, IsAvailable = false, IsSelected = false, AvailabilityNotice = "Foto (download de imagens em carrossel planejado para versão futura)" },
+                new() { Id = "v3", Title = "Video 3", PlaylistIndex = 3, IsAvailable = true, IsSelected = true }
+            }
+        };
+
+        playlist.UpdateCounts();
+
+        Assert.Equal(3, playlist.TotalMediaCount);
+        Assert.Equal(2, playlist.SupportedVideosCount);
+        Assert.Equal(1, playlist.PhotoCount);
+        Assert.Equal(2, playlist.SelectedVideosCount);
+        Assert.Equal("3 mídias • 2 vídeos", playlist.BadgeCountSummary);
+        Assert.Equal("Total: 3 mídias (2 vídeos suportados, 1 foto)", playlist.DetailedCountSummary);
+        Assert.Equal("2 de 2 vídeos selecionados", playlist.SelectionSummary);
+    }
+
+    [Fact]
+    public void FormatSelectionService_ParsePlaylistInfo_SimplifiesRedundantCarouselTitle_AndPreservesCaption()
+    {
+        var fmt = new FormatSelectionService();
+        var json = """
+        {
+            "id": "post123",
+            "title": "Post by instagram",
+            "uploader": "Instagram",
+            "description": "Surprise! Swipe left on the post above to see more.\nSecond line",
+            "entries": [
+                { "id": "sub1", "ext": "mp4", "vcodec": "avc1", "acodec": "mp4a" },
+                { "id": "sub2", "ext": "jpg" }
+            ]
+        }
+        """;
+
+        using var doc = JsonDocument.Parse(json);
+        var playlist = fmt.ParsePlaylistInfo(doc, "https://www.instagram.com/p/post123/");
+
+        Assert.Equal("Surprise! Swipe left on the post above to see more.", playlist.Title);
+        Assert.Equal(2, playlist.Items.Count);
+        Assert.Equal(1, playlist.Items[0].PlaylistIndex);
+        Assert.Equal(2, playlist.Items[1].PlaylistIndex);
+        Assert.True(playlist.Items[0].IsAvailable);
+        Assert.False(playlist.Items[1].IsAvailable);
+    }
+
+    [Fact]
+    public void FormatSelectionService_ParsePlaylistInfo_StrictlyPreserves1BasedPlaylistIndex_EvenWhenFirstIsPhoto()
+    {
+        var fmt = new FormatSelectionService();
+        var json = """
+        {
+            "id": "post456",
+            "title": "Photo First Carousel",
+            "uploader": "user1",
+            "entries": [
+                { "id": "photo1", "ext": "jpg" },
+                { "id": "vid2", "ext": "mp4", "vcodec": "avc1", "acodec": "mp4a" },
+                { "id": "vid3", "ext": "mp4", "vcodec": "avc1", "acodec": "mp4a" }
+            ]
+        }
+        """;
+
+        using var doc = JsonDocument.Parse(json);
+        var playlist = fmt.ParsePlaylistInfo(doc, "https://www.instagram.com/p/post456/");
+
+        Assert.Equal(1, playlist.Items[0].PlaylistIndex);
+        Assert.False(playlist.Items[0].IsAvailable);
+
+        Assert.Equal(2, playlist.Items[1].PlaylistIndex);
+        Assert.True(playlist.Items[1].IsAvailable);
+
+        Assert.Equal(3, playlist.Items[2].PlaylistIndex);
+        Assert.True(playlist.Items[2].IsAvailable);
+    }
 }

@@ -260,11 +260,33 @@ public class FormatSelectionService : IFormatSelectionService
 
         if (isCarousel)
         {
-            if (title.StartsWith("Post by", StringComparison.OrdinalIgnoreCase))
+            var rawDesc = root.GetStringNullable("description");
+            if (!string.IsNullOrWhiteSpace(rawDesc))
             {
-                title = platform == PlatformType.Instagram
-                    ? $"Carrossel do Instagram ({channel})"
-                    : $"Publicação do X/Twitter ({channel})";
+                var firstLine = rawDesc.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(l => l.Trim())
+                    .FirstOrDefault(l => !string.IsNullOrWhiteSpace(l));
+
+                if (!string.IsNullOrWhiteSpace(firstLine))
+                {
+                    title = firstLine.Length > 80 ? firstLine.Substring(0, 77) + "..." : firstLine;
+                }
+            }
+
+            if (title.StartsWith("Post by", StringComparison.OrdinalIgnoreCase) ||
+                title.StartsWith("Video by", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(title, "Publicação sem título", StringComparison.OrdinalIgnoreCase))
+            {
+                if (platform == PlatformType.Instagram)
+                {
+                    title = string.Equals(channel, "Instagram", StringComparison.OrdinalIgnoreCase)
+                        ? "Carrossel do Instagram"
+                        : $"Carrossel de @{channel.TrimStart('@')}";
+                }
+                else
+                {
+                    title = $"Publicação de @{channel.TrimStart('@')}";
+                }
             }
         }
 
