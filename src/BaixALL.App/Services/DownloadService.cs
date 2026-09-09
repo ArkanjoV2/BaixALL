@@ -316,7 +316,9 @@ public class DownloadService : IDownloadService
                 FinalFilePath = completedFilePath,
                 FileSizeBytes = fileSize,
                 Status = "Concluído",
-                ThumbnailUrl = item.ThumbnailUrl
+                ThumbnailUrl = item.ThumbnailUrl,
+                Platform = item.PlatformDisplayName,
+                CanonicalKey = item.CanonicalKey
             });
         }
         catch (OperationCanceledException)

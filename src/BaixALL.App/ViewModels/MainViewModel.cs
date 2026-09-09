@@ -22,6 +22,8 @@ public partial class MainViewModel : ObservableObject
     private readonly ISettingsService _settingsService;
     private readonly IDependencyManager _dependencyManager;
     private readonly ILoggerService? _logger;
+    private readonly IPlatformService _platformService;
+    private readonly IMediaAnalysisService? _mediaAnalysisService;
 
     public SettingsViewModel SettingsVm { get; }
     public HistoryViewModel HistoryVm { get; }
@@ -136,7 +138,9 @@ public partial class MainViewModel : ObservableObject
         IUpdateService updateService,
         IHistoryService historyService,
         IDispatcherService? dispatcher = null,
-        ILoggerService? logger = null)
+        ILoggerService? logger = null,
+        IPlatformService? platformService = null,
+        IMediaAnalysisService? mediaAnalysisService = null)
     {
         _youtubeService = youtubeService;
         _formatSelectionService = formatSelectionService;
@@ -144,6 +148,8 @@ public partial class MainViewModel : ObservableObject
         _settingsService = settingsService;
         _dependencyManager = dependencyManager;
         _logger = logger;
+        _platformService = platformService ?? new PlatformService();
+        _mediaAnalysisService = mediaAnalysisService ?? (_youtubeService as IMediaAnalysisService);
 
         SettingsVm = new SettingsViewModel(_settingsService, _dependencyManager, updateService, _downloadService, _logger);
         HistoryVm = new HistoryViewModel(historyService, dispatcher, _logger);
@@ -254,13 +260,13 @@ public partial class MainViewModel : ObservableObject
     {
         if (string.IsNullOrWhiteSpace(UrlInput))
         {
-            ShowNotification("Por favor, cole a URL de um vídeo ou playlist do YouTube.", "Warning");
+            ShowNotification("Por favor, cole a URL de um conteúdo do YouTube, Instagram ou X/Twitter.", "Warning");
             return;
         }
 
-        if (!UrlValidator.IsValidYouTubeUrl(UrlInput))
+        if (!_platformService.IsSupportedUrl(UrlInput))
         {
-            ShowNotification("A URL informada não é válida para conteúdos do YouTube.", "Error");
+            ShowNotification("A URL informada não pertence a uma plataforma suportada (YouTube, Instagram ou X/Twitter).", "Error");
             return;
         }
 
@@ -271,15 +277,17 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        // Se for URL pura de playlist, analisa a playlist diretamente
-        if (UrlValidator.IsPurePlaylistUrl(UrlInput))
+        var platform = _platformService.DetectPlatform(UrlInput);
+
+        // Se for URL pura de playlist do YouTube, analisa a playlist diretamente
+        if (platform == PlatformType.YouTube && UrlValidator.IsPurePlaylistUrl(UrlInput))
         {
             await AnalyzePlaylistInternalAsync(UrlInput);
             return;
         }
 
-        // Se for URL híbrida (vídeo com lista associada), ativa aviso com opção de carregar a playlist completa
-        IsHybridUrlDetected = UrlValidator.IsHybridUrl(UrlInput);
+        // Se for URL híbrida (vídeo com lista associada do YouTube)
+        IsHybridUrlDetected = platform == PlatformType.YouTube && UrlValidator.IsHybridUrl(UrlInput);
         HybridPlaylistNotice = IsHybridUrlDetected ? "Esta URL pertence a uma playlist do YouTube." : string.Empty;
 
         IsAnalyzing = true;
@@ -295,21 +303,56 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
-            var info = await _youtubeService.AnalyzeVideoAsync(UrlInput, ct);
-            VideoInfo = info;
-
-            // Preenche opções de formato
-            FormatOptions.Clear();
-            var options = _formatSelectionService.BuildFormatOptions(info);
-            foreach (var opt in options)
+            if (_mediaAnalysisService != null)
             {
-                FormatOptions.Add(opt);
+                var result = await _mediaAnalysisService.AnalyzeAsync(UrlInput, ct);
+                if (result.IsCollection && result.Collection != null)
+                {
+                    PlaylistInfo = result.Collection;
+                    PlaylistItems.Clear();
+                    foreach (var item in result.Collection.Items)
+                    {
+                        PlaylistItems.Add(item);
+                    }
+
+                    BatchFormatOptions.Clear();
+                    foreach (var opt in _formatSelectionService.BuildBatchFormatOptions())
+                    {
+                        BatchFormatOptions.Add(opt);
+                    }
+                    SelectedBatchFormat = BatchFormatOptions.FirstOrDefault();
+                    HasPlaylistInfo = true;
+
+                    ShowNotification($"{result.Collection.Title} ({result.Collection.TotalVideosCount} mídias)", "Success");
+                    return;
+                }
+
+                if (result.Video != null)
+                {
+                    VideoInfo = result.Video;
+                }
+            }
+            else
+            {
+                var info = await _youtubeService.AnalyzeVideoAsync(UrlInput, ct);
+                VideoInfo = info;
             }
 
-            SelectedFormat = FormatOptions.FirstOrDefault(x => x.IsBestQuality) ?? FormatOptions.FirstOrDefault();
-            HasVideoInfo = true;
+            if (VideoInfo != null)
+            {
+                // Preenche opções de formato
+                FormatOptions.Clear();
+                var options = _formatSelectionService.BuildFormatOptions(VideoInfo);
+                foreach (var opt in options)
+                {
+                    FormatOptions.Add(opt);
+                }
 
-            ShowNotification($"Vídeo encontrado: {info.Title}", "Success");
+                SelectedFormat = FormatOptions.FirstOrDefault(x => x.IsBestQuality) ?? FormatOptions.FirstOrDefault();
+                HasVideoInfo = true;
+
+                ShowNotification($"Vídeo encontrado: {VideoInfo.Title}", "Success");
+            }
         }
         catch (OperationCanceledException)
         {
@@ -324,7 +367,8 @@ public partial class MainViewModel : ObservableObject
             string friendlyMessage = ex switch
             {
                 ArgumentException argEx => argEx.Message,
-                _ => "Não foi possível analisar este vídeo. Algumas informações retornadas pelo YouTube não puderam ser processadas."
+                InvalidOperationException invEx => invEx.Message,
+                _ => YtDlpService.ParseYtDlpError(ex.Message)
             };
 
             ShowNotification(friendlyMessage, "Error");
@@ -557,7 +601,9 @@ public partial class MainViewModel : ObservableObject
                 BatchId = batchId,
                 BatchTitle = PlaylistInfo.Title,
                 BatchIndex = i + 1,
-                BatchTotal = total
+                BatchTotal = total,
+                Platform = PlaylistInfo.Platform,
+                CanonicalKey = item.CanonicalKey
             };
 
             _downloadService.EnqueueDownload(request, item.ThumbnailUrl);
@@ -628,7 +674,9 @@ public partial class MainViewModel : ObservableObject
             Format = SelectedFormat,
             Container = SelectedContainer ?? ContainerOption.DefaultOptions[0],
             AudioFormat = SelectedAudioFormat ?? AudioFormatOption.DefaultOptions[0],
-            IsAudioOnly = isAudioOnly
+            IsAudioOnly = isAudioOnly,
+            Platform = VideoInfo.Platform,
+            CanonicalKey = VideoInfo.CanonicalKey
         };
 
         _downloadService.EnqueueDownload(request, VideoInfo.ThumbnailUrl);

@@ -514,6 +514,21 @@ public class YtDlpService : IYtDlpService
 
         var lower = rawError.ToLowerInvariant();
 
+        if (lower.Contains("no video could be found in this tweet"))
+            return "Esta publicação do X/Twitter não contém nenhum vídeo.";
+
+        if (lower.Contains("this tweet has been deleted") || lower.Contains("tweet not found") || lower.Contains("status does not exist"))
+            return "Esta publicação do X/Twitter foi excluída ou não existe mais.";
+
+        if (lower.Contains("instagram api is not granting access") || lower.Contains("empty media response"))
+            return "O Instagram restringiu o acesso público a esta publicação (exige login na plataforma ou conteúdo privado). O BaixALL opera apenas com mídias públicas e não armazena credenciais do usuário.";
+
+        if (lower.Contains("this content is unreachable") || lower.Contains("use --cookies-from-browser"))
+            return "O download de Stories do Instagram exige login com conta de usuário, o que não é suportado pelo BaixALL por motivos de segurança.";
+
+        if (lower.Contains("http error 429") || lower.Contains("too many requests"))
+            return "A plataforma atingiu temporariamente o limite de requisições para o seu endereço IP. Aguarde alguns minutos antes de tentar novamente.";
+
         if (lower.Contains("private video"))
             return "Este vídeo é privado e não pode ser acessado publicamente.";
 
@@ -522,6 +537,12 @@ public class YtDlpService : IYtDlpService
 
         if (lower.Contains("this video has been removed") || lower.Contains("video has been removed"))
             return "Este vídeo foi removido pelo YouTube ou pelo criador.";
+
+        if (lower.Contains("post has been removed") || lower.Contains("media has been deleted"))
+            return "Esta publicação foi removida pelo autor ou pela plataforma.";
+
+        if (lower.Contains("account is private") || lower.Contains("is private"))
+            return "Esta publicação é privada e não pode ser acessada sem autorização do autor.";
 
         if (lower.Contains("sign in to confirm your age"))
             return "Este vídeo requer autenticação de idade e não pode ser baixado sem login.";

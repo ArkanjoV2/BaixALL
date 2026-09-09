@@ -12,6 +12,9 @@ public partial class PlaylistInfo : ObservableObject
     public string Channel { get; set; } = string.Empty;
     public string ThumbnailUrl { get; set; } = string.Empty;
     public string OriginalUrl { get; set; } = string.Empty;
+    public PlatformType Platform { get; set; } = PlatformType.YouTube;
+    public bool IsCarousel { get; set; }
+    public string Author => Channel;
     public int TotalVideosCount { get; set; }
     public List<PlaylistItemInfo> Items { get; set; } = new();
 

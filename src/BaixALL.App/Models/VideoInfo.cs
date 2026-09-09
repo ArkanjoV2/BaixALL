@@ -14,6 +14,9 @@ public class VideoInfo
     public string MaxResolution { get; set; } = string.Empty;
     public int? MaxFps { get; set; }
     public string OriginalUrl { get; set; } = string.Empty;
+    public PlatformType Platform { get; set; } = PlatformType.YouTube;
+    public string Author => Channel;
+    public string CanonicalKey { get; set; } = string.Empty;
     public List<VideoFormatRaw> Formats { get; set; } = new();
 
     public string FormattedDuration
@@ -53,6 +56,8 @@ public class VideoFormatRaw
     public int? Asr { get; set; }
     public int? AudioChannels { get; set; }
 
-    public bool HasVideo => !string.IsNullOrEmpty(VCodec) && VCodec != "none";
-    public bool HasAudio => !string.IsNullOrEmpty(ACodec) && ACodec != "none";
+    public bool HasVideo => (!string.IsNullOrEmpty(VCodec) && VCodec != "none") ||
+                            (string.IsNullOrEmpty(VCodec) && ((Height.HasValue && Height.Value > 0) || (Width.HasValue && Width.Value > 0)));
+    public bool HasAudio => (!string.IsNullOrEmpty(ACodec) && ACodec != "none") ||
+                            (string.IsNullOrEmpty(ACodec) && ((AudioChannels.HasValue && AudioChannels.Value > 0) || (Abr.HasValue && Abr.Value > 0) || (Asr.HasValue && Asr.Value > 0)));
 }

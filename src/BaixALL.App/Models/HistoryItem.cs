@@ -15,6 +15,8 @@ public class HistoryItem
     public long FileSizeBytes { get; set; }
     public string Status { get; set; } = "Concluído";
     public string ThumbnailUrl { get; set; } = string.Empty;
+    public string Platform { get; set; } = "YouTube";
+    public string CanonicalKey { get; set; } = string.Empty;
 
     public string FormattedDate => DownloadDate.ToString("dd/MM/yyyy HH:mm");
 }
