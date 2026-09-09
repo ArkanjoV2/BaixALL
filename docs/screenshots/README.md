@@ -4,13 +4,13 @@ Esta pasta armazena as capturas de tela reais da interface do BaixALL utilizadas
 
 ---
 
-## 📸 Capturas Oficiais (v1.1.0 e v1.2.0)
+## 📸 Capturas Oficiais (v1.1.0, v1.2.0 e v1.3.0)
 
 Todas as imagens são capturas reais da janela do aplicativo executado em ambiente Windows 11 x64, sem molduras fictícias, sem geração por inteligência artificial e sem simulações gráficas:
 
 | Arquivo | Resolução | Tamanho | Finalidade / Descrição |
 | :--- | :---: | :---: | :--- |
-| **`01-home-analise.png`** | 1264 × 761 | ~128 KB | **Tela Inicial (Downloader):** Exibe a análise de um vídeo público com miniatura em alta resolução, metadados (título, canal, duração, FPS), seletores e botão de download com a nova identidade visual. |
+| **`01-home-analise.png`** | 1264 × 761 | ~128 KB | **Tela Inicial (Downloader):** Exibe a análise de um vídeo público com miniatura em alta resolução, metadados (título, canal, duração, FPS), seletores e botão de download. |
 | **`02-selecao-qualidade.png`** | 1264 × 761 | ~133 KB | **Seleção de Qualidade:** Menu suspenso de resoluções aberto, exibindo opções disponíveis (1080p, 720p, 480p, 360p, 240p, 144p e somente áudio). |
 | **`03-fila-download.png`** | 1264 × 761 | ~77 KB | **Fila de Downloads:** Download ativo em andamento com barra de progresso, percentual (45%), tamanho transferido, taxa de transferência (8.4 MB/s) e botão Cancelar. |
 | **`04-historico.png`** | 1264 × 761 | ~80 KB | **Histórico de Downloads:** Mídias baixadas concluídas com formato, data/hora e botões de ação para abrir o arquivo ou exibir a pasta no Explorer. |
@@ -18,6 +18,11 @@ Todas as imagens são capturas reais da janela do aplicativo executado em ambien
 | **`06-playlist-selecao.png`** | 1024 × 720 | ~152 KB | **Seleção de Playlist:** Interface granular de seleção de vídeos de playlist com botões em massa, opções de qualidade, áudio e subpasta. |
 | **`07-fila-lote.png`** | 1024 × 720 | ~83 KB | **Fila e Card de Lote:** Acompanhamento agregado de download em lote com barra de progresso consolidada por itens, taxa de transferência e contadores em tempo real. |
 | **`08-url-hibrida.png`** | 1024 × 720 | ~126 KB | **Detecção de URL Híbrida:** Diálogo preventivo oferecendo escolha ao usuário entre baixar vídeo avulso ou carregar a playlist inteira. |
+| **`09-instagram-reel.png`** | 1024 × 720 | ~155 KB | **Análise de Reel do Instagram:** Identificação automática da plataforma com badge rosa `Instagram`, miniatura real do post, metadados e seletores de container/qualidade. |
+| **`10-twitter-video.png`** | 1024 × 720 | ~161 KB | **Análise de Vídeo do X/Twitter:** Identificação automática da plataforma com badge ciano `X / Twitter`, resolução máxima detectada e opção de download em MP4. |
+| **`11-carrossel-selecao.png`** | 1024 × 720 | ~128 KB | **Carrossel do Instagram com Múltiplos Vídeos:** Listagem com identificação de tipo, seleção individual com checkboxes, botões em lote e desativação com aviso de fotos estáticas. |
+| **`12-fila-multiplataforma.png`** | 1024 × 720 | ~96 KB | **Fila Multiplataforma:** Itens do Instagram, YouTube e X/Twitter convivendo na mesma fila com badges coloridos por plataforma, progresso independente e ações individuais. |
+| **`13-historico-multiplataforma.png`** | 1024 × 720 | ~109 KB | **Histórico Multiplataforma:** Registro unificado de downloads com badges de plataforma (`Instagram`, `YouTube`), data/hora, formato e atalhos para abrir arquivo ou pasta. |
 
 ---
 
@@ -26,7 +31,7 @@ Todas as imagens são capturas reais da janela do aplicativo executado em ambien
 Ao capturar ou atualizar imagens neste diretório:
 1. **Dados Pessoais e Credenciais:** Nunca exponha tokens, chaves de API, cookies, credenciais de login ou informações de contas privadas.
 2. **Caminhos de Diretórios:** Mantenha caminhos genéricos padrão do sistema operacional, sem expor nomes de usuário pessoais ou pastas restritas.
-3. **Mídias Utilizadas:** Utilize exclusivamente vídeos de domínio público, canais oficiais abertos (ex.: trailers públicos ou conteúdos livres).
+3. **Mídias Utilizadas:** Utilize exclusivamente vídeos de domínio público ou canais e contas públicas oficiais abertas (ex.: trailers públicos, contas institucionais oficiais).
 4. **Sem Elementos Externos:** Não capture a barra de tarefas do Windows, notificações do sistema operacional ou janelas de terceiros em segundo plano.
 
 ---
