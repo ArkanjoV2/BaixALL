@@ -5,15 +5,15 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <AssemblyName>BaixALL</AssemblyName>
     <RootNamespace>BaixALL.App</RootNamespace>
-    <Version>1.2.0</Version>
-    <AssemblyVersion>1.2.0.0</AssemblyVersion>
-    <FileVersion>1.2.0.0</FileVersion>
-    <InformationalVersion>1.2.0</InformationalVersion>
+    <Version>1.3.0</Version>
+    <AssemblyVersion>1.3.0.0</AssemblyVersion>
+    <FileVersion>1.3.0.0</FileVersion>
+    <InformationalVersion>1.3.0</InformationalVersion>
     <Product>BaixALL</Product>
     <Company>BaixALL</Company>
     <Authors>BaixALL Team</Authors>
     <Copyright>Copyright © 2026 BaixALL</Copyright>
-    <Description>Aplicativo desktop para download de vídeos do YouTube com yt-dlp e FFmpeg</Description>
+    <Description>Aplicativo desktop para download de vídeos do YouTube, Instagram e X/Twitter com yt-dlp e FFmpeg</Description>
     <PackageProjectUrl>https://github.com/BaixALL/BaixALL</PackageProjectUrl>
     <RepositoryUrl>https://github.com/BaixALL/BaixALL</RepositoryUrl>
     <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
