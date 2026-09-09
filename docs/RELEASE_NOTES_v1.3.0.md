@@ -67,11 +67,10 @@ Apresentamos a versão estável **1.3.0** do **BaixALL** — a maior atualizaç�
 
 | Arquivo | Descrição | Tamanho | SHA-256 |
 | :--- | :--- | :--- | :--- |
-| `BaixALL-Setup-1.3.0.exe` | Instalador assistido para Windows x64 (Inno Setup) | — | — |
-| `BaixALL-1.3.0-win-x64.zip` | Pacote portátil autônomo (execução direta) | — | — |
-| `checksums-1.3.0.txt` | Hashes de integridade criptográfica SHA-256 | — | — |
+| `BaixALL-Setup-1.3.0.exe` | Instalador assistido para Windows x64 (Inno Setup) | 45.890.001 bytes | `b434214ae7b121347f034d0e0bbc74d708688b48d2bcce5e6eeb879b999985c8` |
+| `BaixALL-1.3.0-win-x64.zip` | Pacote portátil autônomo (execução direta) | 65.504.526 bytes | `2310927586a61f8155944f5a2636399fdba7cf24c0f52e5fbd534c02699d6b01` |
+| `checksums-1.3.0.txt` | Hashes de integridade criptográfica SHA-256 | 185 bytes | `1823e861154b9197c5529d41b3cca61619c3d57c3e3041ab6e4a745cdb6eb0d7` |
 
-*Tamanhos e hashes serão preenchidos após a geração dos artefatos definitivos.*
 
 ---
 
