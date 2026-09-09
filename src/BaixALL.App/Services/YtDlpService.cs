@@ -161,10 +161,19 @@ public class YtDlpService : IYtDlpService
         var arguments = new List<string>
         {
             "--newline",
-            "--no-playlist",
             "--no-warnings",
             "--progress-template", ProgressTemplate
         };
+
+        if (request.PlaylistIndex.HasValue && request.PlaylistIndex.Value > 0)
+        {
+            arguments.Add("--playlist-items");
+            arguments.Add(request.PlaylistIndex.Value.ToString());
+        }
+        else
+        {
+            arguments.Add("--no-playlist");
+        }
 
         // Aponta para o FFmpeg
         var ffmpegDir = Path.GetDirectoryName(_dependencyManager.GetFFmpegPath());
@@ -525,6 +534,9 @@ public class YtDlpService : IYtDlpService
 
         if (lower.Contains("this content is unreachable") || lower.Contains("use --cookies-from-browser"))
             return "O download de Stories do Instagram exige login com conta de usuário, o que não é suportado pelo BaixALL por motivos de segurança.";
+
+        if (lower.Contains("url has expired") || lower.Contains("signature has expired") || lower.Contains("signature expired") || (lower.Contains("http error 403") && lower.Contains("fbcdn")))
+            return "O link temporário da mídia expirou. Realize uma nova análise da publicação para obter links atualizados.";
 
         if (lower.Contains("http error 429") || lower.Contains("too many requests"))
             return "A plataforma atingiu temporariamente o limite de requisições para o seu endereço IP. Aguarde alguns minutos antes de tentar novamente.";

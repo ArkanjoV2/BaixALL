@@ -21,6 +21,7 @@ public partial class MainViewModel : ObservableObject
     private readonly IDownloadService _downloadService;
     private readonly ISettingsService _settingsService;
     private readonly IDependencyManager _dependencyManager;
+    private readonly IDispatcherService? _dispatcher;
     private readonly ILoggerService? _logger;
     private readonly IPlatformService _platformService;
     private readonly IMediaAnalysisService? _mediaAnalysisService;
@@ -171,6 +172,7 @@ public partial class MainViewModel : ObservableObject
         _downloadService = downloadService;
         _settingsService = settingsService;
         _dependencyManager = dependencyManager;
+        _dispatcher = dispatcher;
         _logger = logger;
         _platformService = platformService ?? new PlatformService();
         _mediaAnalysisService = mediaAnalysisService ?? (_youtubeService as IMediaAnalysisService);
@@ -626,6 +628,7 @@ public partial class MainViewModel : ObservableObject
                 BatchTitle = PlaylistInfo.Title,
                 BatchIndex = i + 1,
                 BatchTotal = total,
+                PlaylistIndex = item.PlaylistIndex,
                 Platform = PlaylistInfo.Platform,
                 CanonicalKey = item.CanonicalKey
             };
@@ -740,41 +743,54 @@ public partial class MainViewModel : ObservableObject
 
     public void UpdateBatchProgress()
     {
-        var batchGroups = QueueItems
-            .Where(x => x.IsBatchItem && x.BatchId.HasValue)
-            .GroupBy(x => x.BatchId!.Value)
-            .ToList();
-
-        var activeBatchIds = batchGroups.Select(g => g.Key).ToHashSet();
-
-        for (int i = ActiveBatches.Count - 1; i >= 0; i--)
+        void RunUpdate()
         {
-            if (!activeBatchIds.Contains(ActiveBatches[i].BatchId))
+            var snapshot = QueueItems.ToList();
+            var batchGroups = snapshot
+                .Where(x => x.IsBatchItem && x.BatchId.HasValue)
+                .GroupBy(x => x.BatchId!.Value)
+                .ToList();
+
+            var activeBatchIds = batchGroups.Select(g => g.Key).ToHashSet();
+
+            for (int i = ActiveBatches.Count - 1; i >= 0; i--)
             {
-                ActiveBatches.RemoveAt(i);
+                if (!activeBatchIds.Contains(ActiveBatches[i].BatchId))
+                {
+                    ActiveBatches.RemoveAt(i);
+                }
+            }
+
+            foreach (var group in batchGroups)
+            {
+                var batchId = group.Key;
+                var firstItem = group.First();
+                var batchVm = ActiveBatches.FirstOrDefault(b => b.BatchId == batchId);
+
+                if (batchVm == null)
+                {
+                    batchVm = new BatchProgressViewModel
+                    {
+                        BatchId = batchId,
+                        BatchTitle = firstItem.BatchTitle ?? "Lote de Vídeos",
+                        TotalItems = firstItem.BatchTotal.GetValueOrDefault(group.Count()),
+                        Platform = firstItem.Platform
+                    };
+                    batchVm.CancelRequested += (_, id) => CancelBatch(id);
+                    ActiveBatches.Add(batchVm);
+                }
+
+                batchVm.UpdateCounts(group);
             }
         }
 
-        foreach (var group in batchGroups)
+        if (_dispatcher != null && !_dispatcher.CheckAccess())
         {
-            var batchId = group.Key;
-            var firstItem = group.First();
-            var batchVm = ActiveBatches.FirstOrDefault(b => b.BatchId == batchId);
-
-            if (batchVm == null)
-            {
-                batchVm = new BatchProgressViewModel
-                {
-                    BatchId = batchId,
-                    BatchTitle = firstItem.BatchTitle ?? "Lote de Vídeos",
-                    TotalItems = firstItem.BatchTotal.GetValueOrDefault(group.Count()),
-                    Platform = firstItem.Platform
-                };
-                batchVm.CancelRequested += (_, id) => CancelBatch(id);
-                ActiveBatches.Add(batchVm);
-            }
-
-            batchVm.UpdateCounts(group);
+            _dispatcher.Invoke(RunUpdate);
+        }
+        else
+        {
+            RunUpdate();
         }
     }
 

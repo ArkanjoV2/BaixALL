@@ -224,8 +224,8 @@ public class HistoryPersistenceTests
     [InlineData("Instagram", "Instagram", "#F472B6", "#331424")]
     [InlineData("X / Twitter", "X / Twitter", "#38BDF8", "#0C2538")]
     [InlineData("Twitter", "Twitter", "#38BDF8", "#0C2538")]
-    [InlineData("", "YouTube", "#FF4444", "#331414")]
-    [InlineData(null, "YouTube", "#FF4444", "#331414")]
+    [InlineData("", "Desconhecido", "#94A3B8", "#1E293B")]
+    [InlineData(null, "Desconhecido", "#94A3B8", "#1E293B")]
     public void HistoryItem_UIProperties_ReturnExpectedBadgesAndColors(
         string? platform,
         string expectedDisplayName,
@@ -240,5 +240,19 @@ public class HistoryPersistenceTests
         Assert.Equal(expectedDisplayName, item.PlatformDisplayName);
         Assert.Equal(expectedBadgeColor, item.PlatformBadgeColor);
         Assert.Equal(expectedBgColor, item.PlatformBackgroundColor);
+    }
+
+    [Fact]
+    public void HistoryService_InferPlatform_IdentifiesPlatformsFromEvidenceOrReturnsDesconhecido()
+    {
+        var itemYt = new HistoryItem { VideoId = "dQw4w9WgXcQ" };
+        var itemIg = new HistoryItem { ThumbnailUrl = "https://instagram.fbcdn.net/p/xyz.jpg" };
+        var itemX = new HistoryItem { CanonicalKey = "x:12345678" };
+        var itemUnknown = new HistoryItem { Title = "Arquivo Local Sem Plataforma", VideoId = "" };
+
+        Assert.Equal("YouTube", HistoryService.InferPlatform(itemYt));
+        Assert.Equal("Instagram", HistoryService.InferPlatform(itemIg));
+        Assert.Equal("X / Twitter", HistoryService.InferPlatform(itemX));
+        Assert.Equal("Desconhecido", HistoryService.InferPlatform(itemUnknown));
     }
 }

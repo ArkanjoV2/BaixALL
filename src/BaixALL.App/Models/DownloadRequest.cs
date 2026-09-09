@@ -24,6 +24,7 @@ public class DownloadRequest
     public string? BatchTitle { get; set; }
     public int? BatchIndex { get; set; }
     public int? BatchTotal { get; set; }
+    public int? PlaylistIndex { get; set; }
     public bool IsBatchItem => BatchId.HasValue;
     public PlatformType Platform { get; set; } = PlatformType.YouTube;
     public string CanonicalKey { get; set; } = string.Empty;

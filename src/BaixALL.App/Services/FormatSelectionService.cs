@@ -305,7 +305,16 @@ public class FormatSelectionService : IFormatSelectionService
                                (vcodec == "none" && acodec == "none" && !entry.TryGetProperty("formats", out _));
 
                 var entryUrl = entry.GetStringSafe("url");
-                if (string.IsNullOrWhiteSpace(entryUrl) || !entryUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                if (isCarousel && platform == PlatformType.Instagram)
+                {
+                    // Para carrosséis do Instagram, utiliza a URL canônica e estável da publicação original.
+                    // A extração da mídia exata do subitem é feita via --playlist-items <PlaylistIndex>,
+                    // evitando expiração de tokens e assinaturas temporárias de URLs diretas da CDN.
+                    entryUrl = !string.IsNullOrWhiteSpace(originalUrl)
+                        ? originalUrl
+                        : (!string.IsNullOrWhiteSpace(id) ? $"https://www.instagram.com/p/{id}/" : entryUrl);
+                }
+                else if (string.IsNullOrWhiteSpace(entryUrl) || !entryUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
                 {
                     if (!string.IsNullOrEmpty(entryId))
                     {
