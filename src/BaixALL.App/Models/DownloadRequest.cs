@@ -17,8 +17,8 @@ public class DownloadRequest
     public string VideoTitle { get; set; } = string.Empty;
     public string DestinationFolder { get; set; } = string.Empty;
     public FormatOption Format { get; set; } = new();
-    public ContainerOption Container { get; set; } = new();
-    public AudioFormatOption AudioFormat { get; set; } = new();
+    public ContainerOption Container { get; set; } = ContainerOption.DefaultOptions[0];
+    public AudioFormatOption AudioFormat { get; set; } = AudioFormatOption.DefaultOptions[0];
     public bool IsAudioOnly { get; set; }
     public System.Guid? BatchId { get; set; }
     public string? BatchTitle { get; set; }

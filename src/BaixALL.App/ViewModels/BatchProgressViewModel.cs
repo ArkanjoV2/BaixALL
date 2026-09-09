@@ -12,6 +12,31 @@ public partial class BatchProgressViewModel : ObservableObject
     public Guid BatchId { get; init; }
     public string BatchTitle { get; init; } = string.Empty;
     public int TotalItems { get; init; }
+    public PlatformType Platform { get; init; } = PlatformType.YouTube;
+
+    public string PlatformDisplayName => Platform switch
+    {
+        PlatformType.YouTube => "YouTube",
+        PlatformType.Instagram => "Instagram",
+        PlatformType.Twitter => "X / Twitter",
+        _ => "Lote"
+    };
+
+    public string PlatformBadgeColor => Platform switch
+    {
+        PlatformType.YouTube => "#FF4444",
+        PlatformType.Instagram => "#F472B6",
+        PlatformType.Twitter => "#38BDF8",
+        _ => "#94A3B8"
+    };
+
+    public string PlatformBackgroundColor => Platform switch
+    {
+        PlatformType.YouTube => "#331414",
+        PlatformType.Instagram => "#331424",
+        PlatformType.Twitter => "#0C2538",
+        _ => "#1E293B"
+    };
 
     [ObservableProperty]
     private int _completedCount;

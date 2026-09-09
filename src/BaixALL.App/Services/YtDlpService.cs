@@ -204,7 +204,7 @@ public class YtDlpService : IYtDlpService
             arguments.Add("-f");
             arguments.Add(request.Format.FormatSelector);
 
-            if (request.Container.Id != "auto")
+            if (request.Container != null && !string.IsNullOrWhiteSpace(request.Container.Extension) && request.Container.Id != "auto")
             {
                 arguments.Add("--merge-output-format");
                 arguments.Add(request.Container.Extension);
@@ -213,7 +213,7 @@ public class YtDlpService : IYtDlpService
             }
             else
             {
-                // No modo automático, mescla para mp4 ou mkv conforme melhor compatibilidade
+                // No modo automático ou padrão, mescla para mp4 ou mkv conforme melhor compatibilidade
                 arguments.Add("--merge-output-format");
                 arguments.Add("mp4/mkv");
             }
@@ -286,8 +286,8 @@ public class YtDlpService : IYtDlpService
             if (string.IsNullOrWhiteSpace(actualExtension))
             {
                 actualExtension = request.IsAudioOnly
-                    ? request.AudioFormat.Extension
-                    : (request.Container.Id == "auto" ? "mp4" : request.Container.Extension);
+                    ? (request.AudioFormat?.Extension ?? "mp3")
+                    : ((request.Container?.Id == "auto" || string.IsNullOrWhiteSpace(request.Container?.Extension)) ? "mp4" : request.Container.Extension);
             }
 
             // Garante nome de arquivo único e atômico, eliminando race conditions entre downloads concorrentes

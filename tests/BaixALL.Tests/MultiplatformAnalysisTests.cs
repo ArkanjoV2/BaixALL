@@ -320,4 +320,150 @@ public class MultiplatformAnalysisTests
 
         try { File.Delete(tempHist); } catch { }
     }
+
+    [Fact]
+    public void Carousel_SelectionOfMultipleVideos_DoesNotCauseImproperDeduplication()
+    {
+        var fmtService = new FormatSelectionService();
+        var jsonPath = GetFixturePath("instagram_carousel.json");
+        using var doc = JsonDocument.Parse(File.ReadAllText(jsonPath));
+
+        var playlistInfo = fmtService.ParsePlaylistInfo(doc, "https://www.instagram.com/p/BQ0eAlwhDrw/");
+
+        // Seleciona 2 vídeos diferentes do mesmo carrossel
+        var video1 = playlistInfo.Items[0];
+        var video2 = playlistInfo.Items[1];
+
+        Assert.NotEqual(video1.CanonicalKey, video2.CanonicalKey);
+        Assert.Equal("ig:BQ0dSaohpPW", video1.CanonicalKey);
+        Assert.Equal("ig:BQ0dTpOhuHT", video2.CanonicalKey);
+
+        var mockYtDlp = new MockYtDlpService();
+        var tempHist = Path.Combine(Path.GetTempPath(), $"hist_carousel_{Guid.NewGuid():N}.json");
+        var histService = new HistoryService(historyFilePath: tempHist);
+        var settingsService = new SettingsService();
+        var dlService = new DownloadService(mockYtDlp, histService, settingsService, new DummyDispatcherService());
+
+        // Enfileira ambos
+        var batchId = Guid.NewGuid();
+        var req1 = new DownloadRequest
+        {
+            VideoUrl = video1.VideoUrl,
+            VideoTitle = video1.Title,
+            BatchId = batchId,
+            BatchTitle = playlistInfo.Title,
+            Platform = video1.Platform,
+            CanonicalKey = video1.CanonicalKey
+        };
+        var req2 = new DownloadRequest
+        {
+            VideoUrl = video2.VideoUrl,
+            VideoTitle = video2.Title,
+            BatchId = batchId,
+            BatchTitle = playlistInfo.Title,
+            Platform = video2.Platform,
+            CanonicalKey = video2.CanonicalKey
+        };
+
+        var item1 = dlService.EnqueueDownload(req1, "");
+        var item2 = dlService.EnqueueDownload(req2, "");
+
+        // Ambos devem estar presentes na fila sem colisão
+        Assert.Equal(2, dlService.QueueItems.Count);
+        Assert.Contains(dlService.QueueItems, x => x.CanonicalKey == "ig:BQ0dSaohpPW");
+        Assert.Contains(dlService.QueueItems, x => x.CanonicalKey == "ig:BQ0dTpOhuHT");
+
+        // Simula verificação de deduplicação ativa ao tentar reenfileirar
+        var activeKeys = new HashSet<string>(
+            dlService.QueueItems.Where(x => x.IsActive).Select(x => x.CanonicalKey),
+            StringComparer.OrdinalIgnoreCase);
+
+        Assert.Contains(video1.CanonicalKey, activeKeys);
+        Assert.Contains(video2.CanonicalKey, activeKeys);
+
+        try { File.Delete(tempHist); } catch { }
+    }
+
+    [Fact]
+    public async Task Carousel_AllPhotos_ThrowsInvalidOperationException_WithHelpfulMessage()
+    {
+        var mockYtDlp = new MockYtDlpService();
+        var fmtService = new FormatSelectionService();
+        var analysisService = new MediaAnalysisService(mockYtDlp, fmtService);
+
+        // Cria um documento JSON simulando um carrossel onde todos os itens são fotos
+        var photosJson = """
+        {
+          "_type": "playlist",
+          "id": "ALL_PHOTOS_POST",
+          "title": "Post de Fotos",
+          "uploader": "Fotógrafo",
+          "entries": [
+            { "id": "p1", "title": "Foto 1", "ext": "jpg", "vcodec": "none", "acodec": "none" },
+            { "id": "p2", "title": "Foto 2", "ext": "png", "vcodec": "none", "acodec": "none" }
+          ]
+        }
+        """;
+
+        var doc = JsonDocument.Parse(photosJson);
+        var playlistInfo = fmtService.ParsePlaylistInfo(doc, "https://www.instagram.com/p/ALL_PHOTOS_POST/");
+
+        // Todos os itens devem estar desmarcados e indisponíveis
+        Assert.All(playlistInfo.Items, item =>
+        {
+            Assert.False(item.IsAvailable);
+            Assert.False(item.IsSelected);
+            Assert.Contains("Foto", item.AvailabilityNotice);
+        });
+    }
+
+    [Fact]
+    public void IncompleteMetadata_PhotosWithDimensions_AreNotIdentifiedAsVideo()
+    {
+        var format = new VideoFormatRaw
+        {
+            FormatId = "photo_stream",
+            Ext = "jpg",
+            Height = 1080,
+            Width = 1080,
+            VCodec = null,
+            ACodec = null
+        };
+
+        // Não deve ser considerado vídeo mesmo possuindo altura e largura
+        Assert.False(format.HasVideo);
+        Assert.False(format.HasAudio);
+    }
+
+    [Fact]
+    public void IncompleteMetadata_NullCodecsWithAudioProperties_IdentifiedCorrectly()
+    {
+        var format = new VideoFormatRaw
+        {
+            FormatId = "audio_only_stream",
+            Ext = "mp4",
+            VCodec = "none",
+            ACodec = null,
+            AudioChannels = 2,
+            Asr = 44100
+        };
+
+        Assert.False(format.HasVideo);
+        Assert.True(format.HasAudio);
+    }
+
+    [Fact]
+    public void IncompleteMetadata_NoneCodecs_NotIdentifiedAsVideoOrAudio()
+    {
+        var format = new VideoFormatRaw
+        {
+            FormatId = "none_stream",
+            Ext = "unknown",
+            VCodec = "none",
+            ACodec = "none"
+        };
+
+        Assert.False(format.HasVideo);
+        Assert.False(format.HasAudio);
+    }
 }

@@ -164,15 +164,23 @@ public class MediaAnalysisService : IMediaAnalysisService, IYoutubeService
         using var jsonDoc = await _ytDlpService.GetMetadataJsonAsync(normalizedUrl, ct).ConfigureAwait(false);
         var root = jsonDoc.RootElement;
 
-        bool isPlaylistType = root.TryGetProperty("_type", out var typeProp) &&
-                              typeProp.ValueKind == JsonValueKind.String &&
-                              typeProp.GetString() == "playlist";
+        bool isPlaylistType = (root.TryGetProperty("_type", out var typeProp) &&
+                               typeProp.ValueKind == JsonValueKind.String &&
+                               typeProp.GetString() == "playlist") ||
+                              (root.TryGetProperty("entries", out var entriesProp) &&
+                               entriesProp.ValueKind == JsonValueKind.Array);
 
         if (isPlaylistType)
         {
             var collection = _formatSelectionService.ParsePlaylistInfo(jsonDoc, normalizedUrl);
             collection.Platform = platform;
-            collection.IsCarousel = true;
+            collection.IsCarousel = (platform != PlatformType.YouTube);
+
+            if (collection.Items.Count > 0 && collection.Items.All(x => !x.IsAvailable))
+            {
+                throw new InvalidOperationException("Esta publicação contém apenas fotos. O BaixALL suporta apenas vídeos (download de imagens em carrossel planejado para versão futura).");
+            }
+
             return new MediaAnalysisResult
             {
                 Platform = platform,

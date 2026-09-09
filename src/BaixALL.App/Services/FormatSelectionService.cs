@@ -296,7 +296,13 @@ public class FormatSelectionService : IFormatSelectionService
                     ?? channel;
 
                 var entryExt = entry.GetStringSafe("ext").ToLowerInvariant();
-                bool isPhoto = (entryExt == "jpg" || entryExt == "jpeg" || entryExt == "png" || entryExt == "webp");
+                var formatNote = entry.GetStringSafe("format_note").ToLowerInvariant();
+                var vcodec = entry.GetStringSafe("vcodec").ToLowerInvariant();
+                var acodec = entry.GetStringSafe("acodec").ToLowerInvariant();
+
+                bool isPhoto = (entryExt == "jpg" || entryExt == "jpeg" || entryExt == "png" || entryExt == "webp" || entryExt == "heic") ||
+                               formatNote.Contains("photo") ||
+                               (vcodec == "none" && acodec == "none" && !entry.TryGetProperty("formats", out _));
 
                 var entryUrl = entry.GetStringSafe("url");
                 if (string.IsNullOrWhiteSpace(entryUrl) || !entryUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))

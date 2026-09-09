@@ -56,8 +56,39 @@ public class VideoFormatRaw
     public int? Asr { get; set; }
     public int? AudioChannels { get; set; }
 
-    public bool HasVideo => (!string.IsNullOrEmpty(VCodec) && VCodec != "none") ||
-                            (string.IsNullOrEmpty(VCodec) && ((Height.HasValue && Height.Value > 0) || (Width.HasValue && Width.Value > 0)));
-    public bool HasAudio => (!string.IsNullOrEmpty(ACodec) && ACodec != "none") ||
-                            (string.IsNullOrEmpty(ACodec) && ((AudioChannels.HasValue && AudioChannels.Value > 0) || (Abr.HasValue && Abr.Value > 0) || (Asr.HasValue && Asr.Value > 0)));
+    private static readonly HashSet<string> ImageExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "jpg", "jpeg", "png", "webp", "gif", "bmp", "heic", "tiff", "mhtml"
+    };
+
+    public bool HasVideo
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(Ext) && ImageExtensions.Contains(Ext))
+                return false;
+
+            if (!string.IsNullOrEmpty(VCodec))
+                return VCodec != "none";
+
+            // Sem vcodec explícito: requer dimensões espaciais válidas
+            return (Height.HasValue && Height.Value > 0) || (Width.HasValue && Width.Value > 0);
+        }
+    }
+
+    public bool HasAudio
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(Ext) && ImageExtensions.Contains(Ext))
+                return false;
+
+            if (!string.IsNullOrEmpty(ACodec))
+                return ACodec != "none";
+
+            return (AudioChannels.HasValue && AudioChannels.Value > 0) ||
+                   (Abr.HasValue && Abr.Value > 0) ||
+                   (Asr.HasValue && Asr.Value > 0);
+        }
+    }
 }

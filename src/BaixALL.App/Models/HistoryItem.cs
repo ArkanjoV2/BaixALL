@@ -19,4 +19,20 @@ public class HistoryItem
     public string CanonicalKey { get; set; } = string.Empty;
 
     public string FormattedDate => DownloadDate.ToString("dd/MM/yyyy HH:mm");
+
+    public string PlatformDisplayName => string.IsNullOrWhiteSpace(Platform) ? "YouTube" : Platform;
+
+    public string PlatformBadgeColor => PlatformDisplayName switch
+    {
+        "Instagram" => "#F472B6",
+        "X / Twitter" or "Twitter" => "#38BDF8",
+        _ => "#FF4444"
+    };
+
+    public string PlatformBackgroundColor => PlatformDisplayName switch
+    {
+        "Instagram" => "#331424",
+        "X / Twitter" or "Twitter" => "#0C2538",
+        _ => "#331414"
+    };
 }

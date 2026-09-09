@@ -41,7 +41,31 @@ public partial class MainViewModel : ObservableObject
     private bool _hasVideoInfo;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(VideoPlatformDisplayName))]
+    [NotifyPropertyChangedFor(nameof(VideoPlatformBadgeColor))]
+    [NotifyPropertyChangedFor(nameof(VideoPlatformBackgroundColor))]
     private VideoInfo? _videoInfo;
+
+    public string VideoPlatformDisplayName => VideoInfo?.Platform switch
+    {
+        PlatformType.Instagram => "Instagram",
+        PlatformType.Twitter => "X / Twitter",
+        _ => "YouTube"
+    };
+
+    public string VideoPlatformBadgeColor => VideoInfo?.Platform switch
+    {
+        PlatformType.Instagram => "#F472B6",
+        PlatformType.Twitter => "#38BDF8",
+        _ => "#FF4444"
+    };
+
+    public string VideoPlatformBackgroundColor => VideoInfo?.Platform switch
+    {
+        PlatformType.Instagram => "#331424",
+        PlatformType.Twitter => "#0C2538",
+        _ => "#331414"
+    };
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasNoActiveContent))]
@@ -549,7 +573,7 @@ public partial class MainViewModel : ObservableObject
 
         // Deduplicação interna na seleção de itens da playlist por identidade canônica do vídeo
         var distinctSelected = selected
-            .GroupBy(x => GetCanonicalVideoKey(x.VideoUrl, x.Id), StringComparer.OrdinalIgnoreCase)
+            .GroupBy(x => !string.IsNullOrWhiteSpace(x.CanonicalKey) ? x.CanonicalKey : GetCanonicalVideoKey(x.VideoUrl, x.Id), StringComparer.OrdinalIgnoreCase)
             .Select(g => g.First())
             .ToList();
 
@@ -557,11 +581,11 @@ public partial class MainViewModel : ObservableObject
         var activeKeys = new System.Collections.Generic.HashSet<string>(
             _downloadService.QueueItems
                 .Where(x => x.IsActive)
-                .Select(x => GetCanonicalVideoKey(x.Request.VideoUrl)),
+                .Select(x => !string.IsNullOrWhiteSpace(x.CanonicalKey) ? x.CanonicalKey : GetCanonicalVideoKey(x.Request.VideoUrl)),
             StringComparer.OrdinalIgnoreCase);
 
         var itemsToEnqueue = distinctSelected
-            .Where(x => !activeKeys.Contains(GetCanonicalVideoKey(x.VideoUrl, x.Id)))
+            .Where(x => !activeKeys.Contains(!string.IsNullOrWhiteSpace(x.CanonicalKey) ? x.CanonicalKey : GetCanonicalVideoKey(x.VideoUrl, x.Id)))
             .ToList();
         int skippedDuplicates = distinctSelected.Count - itemsToEnqueue.Count;
 
@@ -649,8 +673,14 @@ public partial class MainViewModel : ObservableObject
         }
 
         // Verifica duplicata por identidade canônica na fila ativa
-        var canonicalKey = GetCanonicalVideoKey(VideoInfo.OriginalUrl, VideoInfo.Id);
-        if (_downloadService.QueueItems.Any(x => x.IsActive && string.Equals(GetCanonicalVideoKey(x.Request.VideoUrl), canonicalKey, StringComparison.OrdinalIgnoreCase)))
+        var canonicalKey = !string.IsNullOrWhiteSpace(VideoInfo.CanonicalKey)
+            ? VideoInfo.CanonicalKey
+            : GetCanonicalVideoKey(VideoInfo.OriginalUrl, VideoInfo.Id);
+
+        if (_downloadService.QueueItems.Any(x => x.IsActive && string.Equals(
+            !string.IsNullOrWhiteSpace(x.CanonicalKey) ? x.CanonicalKey : GetCanonicalVideoKey(x.Request.VideoUrl),
+            canonicalKey,
+            StringComparison.OrdinalIgnoreCase)))
         {
             ShowNotification("Este vídeo já está ativo ou na fila de downloads.", "Warning");
             CurrentTab = "Queue";
@@ -737,7 +767,8 @@ public partial class MainViewModel : ObservableObject
                 {
                     BatchId = batchId,
                     BatchTitle = firstItem.BatchTitle ?? "Lote de Vídeos",
-                    TotalItems = firstItem.BatchTotal.GetValueOrDefault(group.Count())
+                    TotalItems = firstItem.BatchTotal.GetValueOrDefault(group.Count()),
+                    Platform = firstItem.Platform
                 };
                 batchVm.CancelRequested += (_, id) => CancelBatch(id);
                 ActiveBatches.Add(batchVm);

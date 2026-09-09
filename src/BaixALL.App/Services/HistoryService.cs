@@ -78,6 +78,14 @@ public class HistoryService : IHistoryService
                     var list = JsonSerializer.Deserialize<List<HistoryItem>>(json);
                     if (list != null)
                     {
+                        foreach (var item in list)
+                        {
+                            if (string.IsNullOrWhiteSpace(item.Platform))
+                            {
+                                item.Platform = "YouTube";
+                            }
+                        }
+
                         _items.Clear();
                         _items.AddRange(list);
                     }
