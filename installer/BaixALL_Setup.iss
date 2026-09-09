@@ -3,7 +3,7 @@
 ; Aplicativo Self-Contained para Windows x64 (Nao exige .NET instalado)
 
 #define MyAppName "BaixALL"
-#define MyAppVersion "1.2.0"
+#define MyAppVersion "1.3.0-rc.1"
 #define MyAppPublisher "BaixALL"
 #define MyAppURL "https://github.com/BaixALL/BaixALL"
 #define MyAppExeName "BaixALL.exe"
