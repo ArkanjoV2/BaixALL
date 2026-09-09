@@ -68,6 +68,28 @@ A inspeção do catálogo interno de extratores do yt-dlp revelou:
   - `twitter:spaces`: Áudios de transmissões ao vivo.
   - `twitter:broadcast`: Transmissões ao vivo de vídeo.
 
+### 2.2. Matriz de Compatibilidade por Plataforma
+
+A tabela a seguir consolida o escopo formal da versão 1.3.0, distinguindo o que é suportado com segurança, o que é tratado como erro amigável e o que foi conscientemente postergado ou excluído por limitações de autenticação/segurança:
+
+| Plataforma | Tipo de Conteúdo | Status na v1.3.0 | Extrator yt-dlp | Requer Login? | Observações Técnicas |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **YouTube** | Vídeo Individual | **Suportado (Estável)** | `youtube` | Não | Mantido integralmente da v1.0.0/v1.1.0/v1.2.0 |
+| **YouTube** | Playlist Completa | **Suportado (Estável)** | `youtube:tab` | Não | Mantido da v1.2.0 com seleção de itens em lote |
+| **YouTube** | URL Híbrida (`watch?v=...&list=...`) | **Suportado (Estável)** | `youtube` | Não | Detecção inteligente e opção de carregar playlist |
+| **Instagram** | Reel Público (`/reel/<id>`) | **Suportado (Novo)** | `Instagram` | Não | Extração direta, formatos MP4 verticais até 720p/1080p |
+| **Instagram** | Post com Vídeo (`/p/<id>`) | **Suportado (Novo)** | `Instagram` | Não | Processado pelo mesmo extrator unificado |
+| **Instagram** | Carrossel c/ Vídeos (`/p/<id>`) | **Suportado (Novo)** | `Instagram` | Não | Detectado como coleção (`_type: playlist`), lote na UI |
+| **Instagram** | Fotos em Carrossel | *Postergado (v1.4+)* | — | Não | Foco da v1.3.0 é vídeo. Pipeline de imagens requer novos handlers |
+| **Instagram** | Stories e Destaques | *Fora de Escopo* | `instagram:story` | **Sim (Obrigatório)** | Exige cookies/sessão de usuário. Rejeitado por segurança |
+| **Instagram** | Perfis Inteiros (`/<user>`) | *Fora de Escopo* | `instagram:user` | Sim | Extrator marcado como quebrado no upstream do yt-dlp |
+| **X / Twitter** | Post c/ Vídeo (`x.com` / `twitter.com`) | **Suportado (Novo)** | `twitter` | Não | Formatos HTTP progressivos e HLS até 720p/1080p |
+| **X / Twitter** | GIFs Animados | **Suportado (Novo)** | `twitter` | Não | Na infraestrutura do X são MP4 em loop |
+| **X / Twitter** | Post sem Vídeo (Texto / Fotos) | *Tratamento Limpo* | `twitter` | Não | Detectado sem crash; exibe aviso informativo |
+| **X / Twitter** | URLs com Parâmetros (`?s=20`, etc.) | **Suportado (Novo)** | `twitter` | Não | Higienização de parâmetros de compartilhamento |
+| **X / Twitter** | Spaces / Transmissões de Áudio | *Fora de Escopo* | `twitter:spaces` | Não | Duração indeterminada e tokens altamente voláteis |
+| **X / Twitter** | Perfis / Linhas do Tempo | *Fora de Escopo* | — | Sim | Rate limits severos e bloqueio em tokens de convidado |
+
 ---
 
 ## 📸 3. Instagram: Análise de Viabilidade e Escopo

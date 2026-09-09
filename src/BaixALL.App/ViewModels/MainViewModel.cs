@@ -345,8 +345,8 @@ public partial class MainViewModel : ObservableObject
         {
             try
             {
-                _analysisCts.Cancel();
                 ShowNotification("Cancelando análise...", "Info");
+                _analysisCts.Cancel();
             }
             catch { }
         }
