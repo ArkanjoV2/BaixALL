@@ -8,14 +8,16 @@ Apresentamos a **Release Candidate 1** da versão **1.3.0** do **BaixALL**. Esta
 
 ## 🚀 Principais Novidades da Versão 1.3.0-rc.1
 
-### 1. Suporte Multiplataforma Nativo
-- **Instagram:**
+### 1. Suporte Multiplataforma Experimental
+> **Nota de Pré-lançamento:** O suporte a Instagram e X/Twitter é adicionado em caráter **experimental** e depende estritamente das regras de extração do motor `yt-dlp` e da disponibilidade de acesso público das respectivas plataformas. O suporte consolidado ao YouTube permanece o padrão primário estável.
+
+- **Instagram (Experimental):**
   - Reels públicos (`/reel/` e `/reels/`).
-  - Publicações de vídeo no feed (`/p/`).
-  - Carrosséis com múltiplas mídias: análise agregada de itens, diferenciação clara de contadores ("3 mídias • 2 vídeos"), desativação de fotos estáticas com aviso informativo âmbar e execução via `--playlist-items` com tokens de CDN atualizados sob demanda.
-- **X / Twitter:**
+  - Publicações de vídeo públicas no feed (`/p/`).
+  - Carrosséis com múltiplas mídias públicas: análise agregada de itens, diferenciação clara de contadores ("3 mídias • 2 vídeos"), desativação de fotos estáticas com aviso informativo âmbar e execução via `--playlist-items` com tokens de CDN atualizados sob demanda.
+- **X / Twitter (Experimental):**
   - Publicações de vídeo com links `x.com` e `twitter.com`.
-  - Tratamento de GIFs animados como fluxos de vídeo.
+  - Tratamento de GIFs animados como fluxos de vídeo (MP4).
   - Rejeição preventiva em posts de texto puro ou fotos sem vídeo.
 
 ### 2. Refinamentos Visuais e Consistência de Design
@@ -47,8 +49,9 @@ Apresentamos a **Release Candidate 1** da versão **1.3.0** do **BaixALL**. Esta
 
 ---
 
-## ⚠️ Limitações Conhecidas
+## ⚠️ Limitações Conhecidas e Escopo Experimental
 
-1. **Autenticação:** Conteúdo que exige login (Stories, perfis privados ou restritos por idade) não é suportado.
-2. **Fotos em Carrosséis:** O BaixALL foca exclusivamente no download de fluxos de vídeo. O suporte ao download de fotos estáticas em carrosséis está planejado para versões futuras.
-3. **Persistência da Fila:** Itens na fila não são persistidos entre reinicializações do aplicativo.
+1. **Dependência de Extratores e Disponibilidade das Plataformas:** O suporte a Instagram e X/Twitter é experimental e depende diretamente do motor upstream `yt-dlp`. Mudanças unilaterais de layout, restrições temporárias de IP ou mecanismos anti-scraping adotados por essas redes podem afetar a extração até que uma nova versão do componente seja atualizada na aba *Ferramentas*.
+2. **Autenticação e Sessão:** O BaixALL não solicita, não armazena e não utiliza credenciais ou cookies locais de navegadores. Qualquer mídia que exija sessão logada (Stories, contas privadas, restrição por idade ou publicações em que a plataforma decida bloquear o acesso anônimo retornando *empty media response*) não poderá ser baixada e exibirá uma mensagem informativa ao usuário.
+3. **Mídias em Carrosséis:** Em postagens com múltiplos itens, o BaixALL suporta exclusivamente as mídias em formato de vídeo. Imagens e fotos estáticas são desabilitadas com aviso visual informativo e não entram na fila de downloads.
+4. **Persistência da Fila:** A fila de downloads não é persistida em disco entre reinicializações do aplicativo; caso o usuário encerre o app durante um lote, os itens pendentes deverão ser enfileirados novamente.
