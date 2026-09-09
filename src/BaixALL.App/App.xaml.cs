@@ -47,14 +47,15 @@ public partial class App : Application
             var historyService = new HistoryService(_logger);
             var dependencyManager = new DependencyManager(_logger);
             var ytDlpService = new YtDlpService(dependencyManager, _logger);
-            var formatSelectionService = new FormatSelectionService();
-            var youtubeService = new YoutubeService(ytDlpService, formatSelectionService, _logger);
+            var platformService = new PlatformService();
+            var formatSelectionService = new FormatSelectionService(platformService);
+            var mediaAnalysisService = new MediaAnalysisService(ytDlpService, formatSelectionService, platformService, _logger);
             var downloadService = new DownloadService(ytDlpService, historyService, settingsService, dispatcherService, _logger);
             _downloadService = downloadService;
             var updateService = new UpdateService(dependencyManager, downloadService, _logger);
 
             var mainViewModel = new MainViewModel(
-                youtubeService,
+                mediaAnalysisService,
                 formatSelectionService,
                 downloadService,
                 settingsService,
@@ -62,7 +63,9 @@ public partial class App : Application
                 updateService,
                 historyService,
                 dispatcherService,
-                _logger);
+                _logger,
+                platformService,
+                mediaAnalysisService);
 
             var mainWindow = new MainWindow(mainViewModel);
             MainWindow = mainWindow;

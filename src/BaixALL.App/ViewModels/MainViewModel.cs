@@ -21,7 +21,10 @@ public partial class MainViewModel : ObservableObject
     private readonly IDownloadService _downloadService;
     private readonly ISettingsService _settingsService;
     private readonly IDependencyManager _dependencyManager;
+    private readonly IDispatcherService? _dispatcher;
     private readonly ILoggerService? _logger;
+    private readonly IPlatformService _platformService;
+    private readonly IMediaAnalysisService? _mediaAnalysisService;
 
     public SettingsViewModel SettingsVm { get; }
     public HistoryViewModel HistoryVm { get; }
@@ -39,7 +42,31 @@ public partial class MainViewModel : ObservableObject
     private bool _hasVideoInfo;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(VideoPlatformDisplayName))]
+    [NotifyPropertyChangedFor(nameof(VideoPlatformBadgeColor))]
+    [NotifyPropertyChangedFor(nameof(VideoPlatformBackgroundColor))]
     private VideoInfo? _videoInfo;
+
+    public string VideoPlatformDisplayName => VideoInfo?.Platform switch
+    {
+        PlatformType.Instagram => "Instagram",
+        PlatformType.Twitter => "X / Twitter",
+        _ => "YouTube"
+    };
+
+    public string VideoPlatformBadgeColor => VideoInfo?.Platform switch
+    {
+        PlatformType.Instagram => "#F472B6",
+        PlatformType.Twitter => "#38BDF8",
+        _ => "#FF4444"
+    };
+
+    public string VideoPlatformBackgroundColor => VideoInfo?.Platform switch
+    {
+        PlatformType.Instagram => "#331424",
+        PlatformType.Twitter => "#0C2538",
+        _ => "#331414"
+    };
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasNoActiveContent))]
@@ -136,14 +163,19 @@ public partial class MainViewModel : ObservableObject
         IUpdateService updateService,
         IHistoryService historyService,
         IDispatcherService? dispatcher = null,
-        ILoggerService? logger = null)
+        ILoggerService? logger = null,
+        IPlatformService? platformService = null,
+        IMediaAnalysisService? mediaAnalysisService = null)
     {
         _youtubeService = youtubeService;
         _formatSelectionService = formatSelectionService;
         _downloadService = downloadService;
         _settingsService = settingsService;
         _dependencyManager = dependencyManager;
+        _dispatcher = dispatcher;
         _logger = logger;
+        _platformService = platformService ?? new PlatformService();
+        _mediaAnalysisService = mediaAnalysisService ?? (_youtubeService as IMediaAnalysisService);
 
         SettingsVm = new SettingsViewModel(_settingsService, _dependencyManager, updateService, _downloadService, _logger);
         HistoryVm = new HistoryViewModel(historyService, dispatcher, _logger);
@@ -254,13 +286,13 @@ public partial class MainViewModel : ObservableObject
     {
         if (string.IsNullOrWhiteSpace(UrlInput))
         {
-            ShowNotification("Por favor, cole a URL de um vídeo ou playlist do YouTube.", "Warning");
+            ShowNotification("Por favor, cole a URL de um conteúdo do YouTube, Instagram ou X/Twitter.", "Warning");
             return;
         }
 
-        if (!UrlValidator.IsValidYouTubeUrl(UrlInput))
+        if (!_platformService.IsSupportedUrl(UrlInput))
         {
-            ShowNotification("A URL informada não é válida para conteúdos do YouTube.", "Error");
+            ShowNotification("A URL informada não pertence a uma plataforma suportada (YouTube, Instagram ou X/Twitter).", "Error");
             return;
         }
 
@@ -271,15 +303,17 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        // Se for URL pura de playlist, analisa a playlist diretamente
-        if (UrlValidator.IsPurePlaylistUrl(UrlInput))
+        var platform = _platformService.DetectPlatform(UrlInput);
+
+        // Se for URL pura de playlist do YouTube, analisa a playlist diretamente
+        if (platform == PlatformType.YouTube && UrlValidator.IsPurePlaylistUrl(UrlInput))
         {
             await AnalyzePlaylistInternalAsync(UrlInput);
             return;
         }
 
-        // Se for URL híbrida (vídeo com lista associada), ativa aviso com opção de carregar a playlist completa
-        IsHybridUrlDetected = UrlValidator.IsHybridUrl(UrlInput);
+        // Se for URL híbrida (vídeo com lista associada do YouTube)
+        IsHybridUrlDetected = platform == PlatformType.YouTube && UrlValidator.IsHybridUrl(UrlInput);
         HybridPlaylistNotice = IsHybridUrlDetected ? "Esta URL pertence a uma playlist do YouTube." : string.Empty;
 
         IsAnalyzing = true;
@@ -295,21 +329,56 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
-            var info = await _youtubeService.AnalyzeVideoAsync(UrlInput, ct);
-            VideoInfo = info;
-
-            // Preenche opções de formato
-            FormatOptions.Clear();
-            var options = _formatSelectionService.BuildFormatOptions(info);
-            foreach (var opt in options)
+            if (_mediaAnalysisService != null)
             {
-                FormatOptions.Add(opt);
+                var result = await _mediaAnalysisService.AnalyzeAsync(UrlInput, ct);
+                if (result.IsCollection && result.Collection != null)
+                {
+                    PlaylistInfo = result.Collection;
+                    PlaylistItems.Clear();
+                    foreach (var item in result.Collection.Items)
+                    {
+                        PlaylistItems.Add(item);
+                    }
+
+                    BatchFormatOptions.Clear();
+                    foreach (var opt in _formatSelectionService.BuildBatchFormatOptions())
+                    {
+                        BatchFormatOptions.Add(opt);
+                    }
+                    SelectedBatchFormat = BatchFormatOptions.FirstOrDefault();
+                    HasPlaylistInfo = true;
+
+                    ShowNotification($"{result.Collection.Title} ({result.Collection.TotalVideosCount} mídias)", "Success");
+                    return;
+                }
+
+                if (result.Video != null)
+                {
+                    VideoInfo = result.Video;
+                }
+            }
+            else
+            {
+                var info = await _youtubeService.AnalyzeVideoAsync(UrlInput, ct);
+                VideoInfo = info;
             }
 
-            SelectedFormat = FormatOptions.FirstOrDefault(x => x.IsBestQuality) ?? FormatOptions.FirstOrDefault();
-            HasVideoInfo = true;
+            if (VideoInfo != null)
+            {
+                // Preenche opções de formato
+                FormatOptions.Clear();
+                var options = _formatSelectionService.BuildFormatOptions(VideoInfo);
+                foreach (var opt in options)
+                {
+                    FormatOptions.Add(opt);
+                }
 
-            ShowNotification($"Vídeo encontrado: {info.Title}", "Success");
+                SelectedFormat = FormatOptions.FirstOrDefault(x => x.IsBestQuality) ?? FormatOptions.FirstOrDefault();
+                HasVideoInfo = true;
+
+                ShowNotification($"Vídeo encontrado: {VideoInfo.Title}", "Success");
+            }
         }
         catch (OperationCanceledException)
         {
@@ -324,7 +393,8 @@ public partial class MainViewModel : ObservableObject
             string friendlyMessage = ex switch
             {
                 ArgumentException argEx => argEx.Message,
-                _ => "Não foi possível analisar este vídeo. Algumas informações retornadas pelo YouTube não puderam ser processadas."
+                InvalidOperationException invEx => invEx.Message,
+                _ => YtDlpService.ParseYtDlpError(ex.Message)
             };
 
             ShowNotification(friendlyMessage, "Error");
@@ -345,8 +415,8 @@ public partial class MainViewModel : ObservableObject
         {
             try
             {
-                _analysisCts.Cancel();
                 ShowNotification("Cancelando análise...", "Info");
+                _analysisCts.Cancel();
             }
             catch { }
         }
@@ -505,7 +575,7 @@ public partial class MainViewModel : ObservableObject
 
         // Deduplicação interna na seleção de itens da playlist por identidade canônica do vídeo
         var distinctSelected = selected
-            .GroupBy(x => GetCanonicalVideoKey(x.VideoUrl, x.Id), StringComparer.OrdinalIgnoreCase)
+            .GroupBy(x => !string.IsNullOrWhiteSpace(x.CanonicalKey) ? x.CanonicalKey : GetCanonicalVideoKey(x.VideoUrl, x.Id), StringComparer.OrdinalIgnoreCase)
             .Select(g => g.First())
             .ToList();
 
@@ -513,11 +583,11 @@ public partial class MainViewModel : ObservableObject
         var activeKeys = new System.Collections.Generic.HashSet<string>(
             _downloadService.QueueItems
                 .Where(x => x.IsActive)
-                .Select(x => GetCanonicalVideoKey(x.Request.VideoUrl)),
+                .Select(x => !string.IsNullOrWhiteSpace(x.CanonicalKey) ? x.CanonicalKey : GetCanonicalVideoKey(x.Request.VideoUrl)),
             StringComparer.OrdinalIgnoreCase);
 
         var itemsToEnqueue = distinctSelected
-            .Where(x => !activeKeys.Contains(GetCanonicalVideoKey(x.VideoUrl, x.Id)))
+            .Where(x => !activeKeys.Contains(!string.IsNullOrWhiteSpace(x.CanonicalKey) ? x.CanonicalKey : GetCanonicalVideoKey(x.VideoUrl, x.Id)))
             .ToList();
         int skippedDuplicates = distinctSelected.Count - itemsToEnqueue.Count;
 
@@ -557,7 +627,10 @@ public partial class MainViewModel : ObservableObject
                 BatchId = batchId,
                 BatchTitle = PlaylistInfo.Title,
                 BatchIndex = i + 1,
-                BatchTotal = total
+                BatchTotal = total,
+                PlaylistIndex = item.PlaylistIndex,
+                Platform = PlaylistInfo.Platform,
+                CanonicalKey = item.CanonicalKey
             };
 
             _downloadService.EnqueueDownload(request, item.ThumbnailUrl);
@@ -603,8 +676,14 @@ public partial class MainViewModel : ObservableObject
         }
 
         // Verifica duplicata por identidade canônica na fila ativa
-        var canonicalKey = GetCanonicalVideoKey(VideoInfo.OriginalUrl, VideoInfo.Id);
-        if (_downloadService.QueueItems.Any(x => x.IsActive && string.Equals(GetCanonicalVideoKey(x.Request.VideoUrl), canonicalKey, StringComparison.OrdinalIgnoreCase)))
+        var canonicalKey = !string.IsNullOrWhiteSpace(VideoInfo.CanonicalKey)
+            ? VideoInfo.CanonicalKey
+            : GetCanonicalVideoKey(VideoInfo.OriginalUrl, VideoInfo.Id);
+
+        if (_downloadService.QueueItems.Any(x => x.IsActive && string.Equals(
+            !string.IsNullOrWhiteSpace(x.CanonicalKey) ? x.CanonicalKey : GetCanonicalVideoKey(x.Request.VideoUrl),
+            canonicalKey,
+            StringComparison.OrdinalIgnoreCase)))
         {
             ShowNotification("Este vídeo já está ativo ou na fila de downloads.", "Warning");
             CurrentTab = "Queue";
@@ -628,7 +707,9 @@ public partial class MainViewModel : ObservableObject
             Format = SelectedFormat,
             Container = SelectedContainer ?? ContainerOption.DefaultOptions[0],
             AudioFormat = SelectedAudioFormat ?? AudioFormatOption.DefaultOptions[0],
-            IsAudioOnly = isAudioOnly
+            IsAudioOnly = isAudioOnly,
+            Platform = VideoInfo.Platform,
+            CanonicalKey = VideoInfo.CanonicalKey
         };
 
         _downloadService.EnqueueDownload(request, VideoInfo.ThumbnailUrl);
@@ -662,40 +743,54 @@ public partial class MainViewModel : ObservableObject
 
     public void UpdateBatchProgress()
     {
-        var batchGroups = QueueItems
-            .Where(x => x.IsBatchItem && x.BatchId.HasValue)
-            .GroupBy(x => x.BatchId!.Value)
-            .ToList();
-
-        var activeBatchIds = batchGroups.Select(g => g.Key).ToHashSet();
-
-        for (int i = ActiveBatches.Count - 1; i >= 0; i--)
+        void RunUpdate()
         {
-            if (!activeBatchIds.Contains(ActiveBatches[i].BatchId))
+            var snapshot = QueueItems.ToList();
+            var batchGroups = snapshot
+                .Where(x => x.IsBatchItem && x.BatchId.HasValue)
+                .GroupBy(x => x.BatchId!.Value)
+                .ToList();
+
+            var activeBatchIds = batchGroups.Select(g => g.Key).ToHashSet();
+
+            for (int i = ActiveBatches.Count - 1; i >= 0; i--)
             {
-                ActiveBatches.RemoveAt(i);
+                if (!activeBatchIds.Contains(ActiveBatches[i].BatchId))
+                {
+                    ActiveBatches.RemoveAt(i);
+                }
+            }
+
+            foreach (var group in batchGroups)
+            {
+                var batchId = group.Key;
+                var firstItem = group.First();
+                var batchVm = ActiveBatches.FirstOrDefault(b => b.BatchId == batchId);
+
+                if (batchVm == null)
+                {
+                    batchVm = new BatchProgressViewModel
+                    {
+                        BatchId = batchId,
+                        BatchTitle = firstItem.BatchTitle ?? "Lote de Vídeos",
+                        TotalItems = firstItem.BatchTotal.GetValueOrDefault(group.Count()),
+                        Platform = firstItem.Platform
+                    };
+                    batchVm.CancelRequested += (_, id) => CancelBatch(id);
+                    ActiveBatches.Add(batchVm);
+                }
+
+                batchVm.UpdateCounts(group);
             }
         }
 
-        foreach (var group in batchGroups)
+        if (_dispatcher != null && !_dispatcher.CheckAccess())
         {
-            var batchId = group.Key;
-            var firstItem = group.First();
-            var batchVm = ActiveBatches.FirstOrDefault(b => b.BatchId == batchId);
-
-            if (batchVm == null)
-            {
-                batchVm = new BatchProgressViewModel
-                {
-                    BatchId = batchId,
-                    BatchTitle = firstItem.BatchTitle ?? "Lote de Vídeos",
-                    TotalItems = firstItem.BatchTotal.GetValueOrDefault(group.Count())
-                };
-                batchVm.CancelRequested += (_, id) => CancelBatch(id);
-                ActiveBatches.Add(batchVm);
-            }
-
-            batchVm.UpdateCounts(group);
+            _dispatcher.Invoke(RunUpdate);
+        }
+        else
+        {
+            RunUpdate();
         }
     }
 

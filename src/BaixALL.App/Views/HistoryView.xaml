@@ -54,6 +54,9 @@
                                     <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="Bold" Margin="0,0,0,6" TextTrimming="CharacterEllipsis" />
                                     
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <Border Background="{Binding PlatformBackgroundColor}" Padding="6,2" Margin="0,0,8,0">
+                                            <TextBlock Text="{Binding PlatformDisplayName}" FontSize="11" FontWeight="Bold" Foreground="{Binding PlatformBadgeColor}" />
+                                        </Border>
                                         <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="6,2" Margin="0,0,8,0">
                                             <TextBlock Text="{Binding Quality}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
                                         </Border>

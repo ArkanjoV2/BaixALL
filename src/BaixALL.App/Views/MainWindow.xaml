@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:BaixALL.App.Views"
         mc:Ignorable="d"
-        Title="BaixALL - Download de Vídeos do YouTube"
+        Title="BaixALL - Download de Vídeos Multiplataforma"
         Icon="pack://application:,,,/BaixALL;component/Resources/icon.ico"
         Height="780" Width="1080"
         MinHeight="650" MinWidth="850"
@@ -293,7 +293,7 @@
                     <!-- Seção Hero -->
                     <StackPanel HorizontalAlignment="Center" Margin="0,16,0,28">
                         <TextBlock Text="Baixe seus vídeos" FontSize="32" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,6" />
-                        <TextBlock Text="Na melhor qualidade disponível original do YouTube"
+                        <TextBlock Text="Na melhor qualidade disponível do YouTube, Instagram e X"
                                    FontSize="16" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" />
                     </StackPanel>
 
@@ -328,7 +328,7 @@
                                     Command="{Binding AnalyzeCommand}"
                                     IsEnabled="{Binding CanAnalyze}"
                                     Padding="24,10"
-                                    ToolTip="Cole o link de um vídeo do YouTube para analisar as qualidades disponíveis">
+                                    ToolTip="Cole o link do YouTube, Instagram ou X/Twitter para analisar as qualidades disponíveis">
                                 <TextBlock Text="Analisar" Foreground="White" FontWeight="SemiBold" />
                             </Button>
                         </Grid>
@@ -358,7 +358,7 @@
                             Visibility="{Binding IsAnalyzing, Converter={StaticResource BoolToVis}}">
                         <StackPanel HorizontalAlignment="Center">
                             <ProgressBar IsIndeterminate="True" Height="4" Width="300" Margin="0,0,0,12" />
-                            <TextBlock Text="Analisando metadados e formatos disponíveis no YouTube..."
+                            <TextBlock Text="Analisando metadados e formatos disponíveis..."
                                        Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14" HorizontalAlignment="Center" Margin="0,0,0,12" />
                             <Button Style="{StaticResource SecondaryButtonStyle}" Content="Cancelar Análise"
                                     Command="{Binding CancelAnalysisCommand}" HorizontalAlignment="Center" Padding="16,6" />
@@ -410,8 +410,11 @@
                                         <TextBlock Text="{Binding VideoInfo.UploadDate, StringFormat='📅 {0}'}" Foreground="{DynamicResource TextMutedBrush}" FontSize="13" />
                                     </StackPanel>
 
-                                    <!-- Tags de Qualidade Máxima e FPS -->
+                                    <!-- Tags de Plataforma, Qualidade Máxima e FPS -->
                                     <StackPanel Orientation="Horizontal">
+                                        <Border Background="{Binding VideoPlatformBackgroundColor}" Padding="8,3" Margin="0,0,8,0">
+                                            <TextBlock Text="{Binding VideoPlatformDisplayName}" FontWeight="Bold" FontSize="11" Foreground="{Binding VideoPlatformBadgeColor}" />
+                                        </Border>
                                         <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3" Margin="0,0,8,0">
                                             <TextBlock Text="{Binding VideoInfo.MaxResolution, StringFormat='Máx: {0}'}" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource AccentBrush}" />
                                         </Border>
@@ -510,9 +513,9 @@
                                 <Border Grid.Column="0" Background="#11000000" Height="125" Width="220" Margin="0,0,20,0" VerticalAlignment="Top">
                                     <Grid>
                                         <Image Source="{Binding PlaylistInfo.ThumbnailUrl}" Stretch="UniformToFill" />
-                                        <!-- Badge inferior com quantidade de vídeos -->
+                                        <!-- Badge inferior com quantidade de vídeos/mídias -->
                                         <Border Background="#CC000000" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,8,8" Padding="8,3">
-                                            <TextBlock Text="{Binding PlaylistInfo.TotalVideosCount, StringFormat='{}{0} vídeos'}" Foreground="White" FontSize="11" FontWeight="Bold" />
+                                            <TextBlock Text="{Binding PlaylistInfo.BadgeCountSummary}" Foreground="White" FontSize="11" FontWeight="Bold" />
                                         </Border>
                                     </Grid>
                                 </Border>
@@ -520,8 +523,8 @@
                                 <!-- Metadados -->
                                 <StackPanel Grid.Column="1" VerticalAlignment="Top">
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                        <Border Background="{DynamicResource AccentBrush}" Padding="8,3" Margin="0,0,8,0">
-                                            <TextBlock Text="PLAYLIST DO YOUTUBE" FontWeight="Bold" FontSize="11" Foreground="White" />
+                                        <Border Background="{Binding PlaylistInfo.PlatformBackgroundColor}" Padding="8,3" Margin="0,0,8,0">
+                                            <TextBlock Text="{Binding PlaylistInfo.CollectionTypeBadgeText}" FontWeight="Bold" FontSize="11" Foreground="{Binding PlaylistInfo.PlatformBadgeColor}" />
                                         </Border>
                                         <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3">
                                             <TextBlock Text="{Binding PlaylistInfo.FormattedTotalDuration, StringFormat='Duração est.: ~{0}'}" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
@@ -531,8 +534,8 @@
                                     <TextBlock Text="{Binding PlaylistInfo.Title}" FontSize="18" FontWeight="Bold" Margin="0,0,0,6" TextWrapping="Wrap" />
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                        <TextBlock Text="{Binding PlaylistInfo.Channel, StringFormat='Canal: {0}'}" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" Margin="0,0,16,0" />
-                                        <TextBlock Text="{Binding PlaylistInfo.TotalVideosCount, StringFormat='Total: {0} vídeos'}" Foreground="{DynamicResource TextMutedBrush}" FontSize="13" />
+                                        <TextBlock Text="{Binding PlaylistInfo.AuthorOrChannelLabel}" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" Margin="0,0,16,0" />
+                                        <TextBlock Text="{Binding PlaylistInfo.DetailedCountSummary}" Foreground="{DynamicResource TextMutedBrush}" FontSize="13" />
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>
@@ -720,7 +723,12 @@
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel Grid.Column="0">
-                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis" />
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                                                        <Border Background="{Binding PlatformBackgroundColor}" Padding="4,1" Margin="0,0,6,0">
+                                                            <TextBlock Text="{Binding PlatformDisplayName}" FontSize="10" FontWeight="Bold" Foreground="{Binding PlatformBadgeColor}" />
+                                                        </Border>
+                                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis" />
+                                                    </StackPanel>
                                                     <StackPanel Orientation="Horizontal" Margin="0,2,0,4">
                                                         <TextBlock Text="{Binding Quality}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="0,0,10,0" />
                                                         <TextBlock Text="{Binding StatusMessage}" Foreground="{Binding Status, Converter={StaticResource StatusToColor}}" FontSize="12" />
@@ -817,8 +825,8 @@
 
                                                 <StackPanel Grid.Column="0">
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                                        <Border Background="{DynamicResource AccentBrush}" Padding="8,2" Margin="0,0,8,0">
-                                                            <TextBlock Text="DOWNLOAD EM LOTE" FontSize="11" FontWeight="Bold" Foreground="White" />
+                                                        <Border Background="{Binding PlatformBackgroundColor}" Padding="8,2" Margin="0,0,8,0">
+                                                            <TextBlock Text="{Binding PlatformDisplayName, StringFormat='LOTE {0}'}" FontSize="11" FontWeight="Bold" Foreground="{Binding PlatformBadgeColor}" />
                                                         </Border>
                                                         <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="6,2" Margin="0,0,8,0">
                                                             <TextBlock Text="{Binding BatchStatusText}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
@@ -887,6 +895,9 @@
 
                                             <StackPanel Grid.Column="0">
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                    <Border Background="{Binding PlatformBackgroundColor}" Padding="6,2" Margin="0,0,8,0">
+                                                        <TextBlock Text="{Binding PlatformDisplayName}" FontSize="11" FontWeight="Bold" Foreground="{Binding PlatformBadgeColor}" />
+                                                    </Border>
                                                     <Border Background="{DynamicResource AccentBrush}" Padding="6,2" Margin="0,0,8,0"
                                                             Visibility="{Binding IsBatchItem, Converter={StaticResource BoolToVis}}">
                                                         <TextBlock Text="{Binding BatchBadgeText}" FontSize="12" FontWeight="Bold" Foreground="White" />
@@ -896,7 +907,7 @@
                                                 <StackPanel Orientation="Horizontal">
                                                     <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="6,2" Margin="0,0,8,0"
                                                             Visibility="{Binding IsBatchItem, Converter={StaticResource BoolToVis}}">
-                                                        <TextBlock Text="{Binding BatchTitle, StringFormat='Playlist: {0}'}" FontSize="12" Foreground="{DynamicResource AccentBrush}" />
+                                                        <TextBlock Text="{Binding BatchTitle, StringFormat='Origem: {0}'}" FontSize="12" Foreground="{DynamicResource AccentBrush}" />
                                                     </Border>
                                                     <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="6,2" Margin="0,0,8,0">
                                                         <TextBlock Text="{Binding Quality}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />

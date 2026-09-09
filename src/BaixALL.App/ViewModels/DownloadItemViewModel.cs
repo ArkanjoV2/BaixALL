@@ -74,6 +74,30 @@ public partial class DownloadItemViewModel : ObservableObject
         ? $"[{BatchIndex.Value:D2}/{BatchTotal.Value:D2}]"
         : string.Empty;
 
+    public PlatformType Platform => Request.Platform;
+    public string CanonicalKey => Request.CanonicalKey;
+    public string PlatformDisplayName => Platform switch
+    {
+        PlatformType.YouTube => "YouTube",
+        PlatformType.Instagram => "Instagram",
+        PlatformType.Twitter => "X / Twitter",
+        _ => "Desconhecido"
+    };
+    public string PlatformBadgeColor => Platform switch
+    {
+        PlatformType.YouTube => "#FF4444",
+        PlatformType.Instagram => "#F472B6",
+        PlatformType.Twitter => "#38BDF8",
+        _ => "#94A3B8"
+    };
+    public string PlatformBackgroundColor => Platform switch
+    {
+        PlatformType.YouTube => "#331414",
+        PlatformType.Instagram => "#331424",
+        PlatformType.Twitter => "#0C2538",
+        _ => "#1E293B"
+    };
+
     public event EventHandler? CancelRequested;
     public event EventHandler? RemoveRequested;
 

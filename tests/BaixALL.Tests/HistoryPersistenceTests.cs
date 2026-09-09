@@ -141,4 +141,118 @@ public class HistoryPersistenceTests
             if (File.Exists(tempFile)) File.Delete(tempFile);
         }
     }
+
+    [Fact]
+    public void HistoryService_LoadsLegacyV12History_DefaultsPlatformToYouTube_WithoutDataLoss()
+    {
+        var tempFile = Path.Combine(Path.GetTempPath(), $"history_legacy_{Guid.NewGuid():N}.json");
+
+        // Simula exatamente o JSON gerado pela versão 1.2.0 (sem Platform e sem CanonicalKey)
+        var legacyJson = """
+        [
+          {
+            "Id": "11111111-1111-1111-1111-111111111111",
+            "VideoId": "dQw4w9WgXcQ",
+            "Title": "Never Gonna Give You Up (v1.2.0 Legacy)",
+            "Channel": "Rick Astley",
+            "Quality": "1080p (Full HD)",
+            "Format": "MP4",
+            "FinalFilePath": "C:\\Downloads\\rick.mp4",
+            "DownloadDate": "2026-08-15T10:30:00",
+            "FileSizeBytes": 75000000,
+            "Status": "Concluído",
+            "ThumbnailUrl": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg"
+          }
+        ]
+        """;
+
+        try
+        {
+            File.WriteAllText(tempFile, legacyJson);
+
+            // Carrega com o HistoryService da 1.3.0
+            var service = new HistoryService(historyFilePath: tempFile);
+            var items = service.GetHistory();
+
+            Assert.Single(items);
+            var item = items[0];
+
+            // Verifica que dados originais foram preservados intactos
+            Assert.Equal("Never Gonna Give You Up (v1.2.0 Legacy)", item.Title);
+            Assert.Equal("Rick Astley", item.Channel);
+            Assert.Equal("1080p (Full HD)", item.Quality);
+            Assert.Equal("MP4", item.Format);
+            Assert.Equal("C:\\Downloads\\rick.mp4", item.FinalFilePath);
+            Assert.Equal(75000000, item.FileSizeBytes);
+
+            // Verifica que a plataforma recebeu fallback seguro para "YouTube"
+            Assert.Equal("YouTube", item.Platform);
+            Assert.Equal("YouTube", item.PlatformDisplayName);
+            Assert.Equal("#FF4444", item.PlatformBadgeColor);
+            Assert.Equal("#331414", item.PlatformBackgroundColor);
+
+            // Adiciona novo item da 1.3.0 com Instagram e CanonicalKey
+            service.AddItem(new HistoryItem
+            {
+                Title = "Instagram Reel Moderno",
+                Platform = "Instagram",
+                CanonicalKey = "ig:Chunk8-jurw",
+                FinalFilePath = @"C:\Downloads\reel.mp4",
+                FileSizeBytes = 1800000
+            });
+
+            // Recarrega em uma nova instância para verificar persistência completa
+            var service2 = new HistoryService(historyFilePath: tempFile);
+            var reloaded = service2.GetHistory();
+
+            Assert.Equal(2, reloaded.Count);
+            Assert.Equal("Instagram Reel Moderno", reloaded[0].Title);
+            Assert.Equal("Instagram", reloaded[0].Platform);
+            Assert.Equal("ig:Chunk8-jurw", reloaded[0].CanonicalKey);
+
+            Assert.Equal("Never Gonna Give You Up (v1.2.0 Legacy)", reloaded[1].Title);
+            Assert.Equal("YouTube", reloaded[1].Platform);
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+        }
+    }
+
+    [Theory]
+    [InlineData("YouTube", "YouTube", "#FF4444", "#331414")]
+    [InlineData("Instagram", "Instagram", "#F472B6", "#331424")]
+    [InlineData("X / Twitter", "X / Twitter", "#38BDF8", "#0C2538")]
+    [InlineData("Twitter", "Twitter", "#38BDF8", "#0C2538")]
+    [InlineData("", "Desconhecido", "#94A3B8", "#1E293B")]
+    [InlineData(null, "Desconhecido", "#94A3B8", "#1E293B")]
+    public void HistoryItem_UIProperties_ReturnExpectedBadgesAndColors(
+        string? platform,
+        string expectedDisplayName,
+        string expectedBadgeColor,
+        string expectedBgColor)
+    {
+        var item = new HistoryItem
+        {
+            Platform = platform!
+        };
+
+        Assert.Equal(expectedDisplayName, item.PlatformDisplayName);
+        Assert.Equal(expectedBadgeColor, item.PlatformBadgeColor);
+        Assert.Equal(expectedBgColor, item.PlatformBackgroundColor);
+    }
+
+    [Fact]
+    public void HistoryService_InferPlatform_IdentifiesPlatformsFromEvidenceOrReturnsDesconhecido()
+    {
+        var itemYt = new HistoryItem { VideoId = "dQw4w9WgXcQ" };
+        var itemIg = new HistoryItem { ThumbnailUrl = "https://instagram.fbcdn.net/p/xyz.jpg" };
+        var itemX = new HistoryItem { CanonicalKey = "x:12345678" };
+        var itemUnknown = new HistoryItem { Title = "Arquivo Local Sem Plataforma", VideoId = "" };
+
+        Assert.Equal("YouTube", HistoryService.InferPlatform(itemYt));
+        Assert.Equal("Instagram", HistoryService.InferPlatform(itemIg));
+        Assert.Equal("X / Twitter", HistoryService.InferPlatform(itemX));
+        Assert.Equal("Desconhecido", HistoryService.InferPlatform(itemUnknown));
+    }
 }

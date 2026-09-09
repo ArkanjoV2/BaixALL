@@ -12,6 +12,8 @@ public partial class PlaylistItemInfo : ObservableObject
     public double? DurationSeconds { get; set; }
     public string ThumbnailUrl { get; set; } = string.Empty;
     public int PlaylistIndex { get; set; }
+    public PlatformType Platform { get; set; } = PlatformType.YouTube;
+    public string CanonicalKey { get; set; } = string.Empty;
 
     [ObservableProperty]
     private bool _isSelected = true;

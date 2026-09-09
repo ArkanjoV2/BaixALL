@@ -161,10 +161,19 @@ public class YtDlpService : IYtDlpService
         var arguments = new List<string>
         {
             "--newline",
-            "--no-playlist",
             "--no-warnings",
             "--progress-template", ProgressTemplate
         };
+
+        if (request.PlaylistIndex.HasValue && request.PlaylistIndex.Value > 0)
+        {
+            arguments.Add("--playlist-items");
+            arguments.Add(request.PlaylistIndex.Value.ToString());
+        }
+        else
+        {
+            arguments.Add("--no-playlist");
+        }
 
         // Aponta para o FFmpeg
         var ffmpegDir = Path.GetDirectoryName(_dependencyManager.GetFFmpegPath());
@@ -204,7 +213,7 @@ public class YtDlpService : IYtDlpService
             arguments.Add("-f");
             arguments.Add(request.Format.FormatSelector);
 
-            if (request.Container.Id != "auto")
+            if (request.Container != null && !string.IsNullOrWhiteSpace(request.Container.Extension) && request.Container.Id != "auto")
             {
                 arguments.Add("--merge-output-format");
                 arguments.Add(request.Container.Extension);
@@ -213,7 +222,7 @@ public class YtDlpService : IYtDlpService
             }
             else
             {
-                // No modo automático, mescla para mp4 ou mkv conforme melhor compatibilidade
+                // No modo automático ou padrão, mescla para mp4 ou mkv conforme melhor compatibilidade
                 arguments.Add("--merge-output-format");
                 arguments.Add("mp4/mkv");
             }
@@ -286,8 +295,8 @@ public class YtDlpService : IYtDlpService
             if (string.IsNullOrWhiteSpace(actualExtension))
             {
                 actualExtension = request.IsAudioOnly
-                    ? request.AudioFormat.Extension
-                    : (request.Container.Id == "auto" ? "mp4" : request.Container.Extension);
+                    ? (request.AudioFormat?.Extension ?? "mp3")
+                    : ((request.Container?.Id == "auto" || string.IsNullOrWhiteSpace(request.Container?.Extension)) ? "mp4" : request.Container.Extension);
             }
 
             // Garante nome de arquivo único e atômico, eliminando race conditions entre downloads concorrentes
@@ -514,6 +523,24 @@ public class YtDlpService : IYtDlpService
 
         var lower = rawError.ToLowerInvariant();
 
+        if (lower.Contains("no video could be found in this tweet"))
+            return "Esta publicação do X/Twitter não contém nenhum vídeo.";
+
+        if (lower.Contains("this tweet has been deleted") || lower.Contains("tweet not found") || lower.Contains("status does not exist"))
+            return "Esta publicação do X/Twitter foi excluída ou não existe mais.";
+
+        if (lower.Contains("instagram api is not granting access") || lower.Contains("empty media response"))
+            return "O Instagram restringiu o acesso público a esta publicação (exige login na plataforma ou conteúdo privado). O BaixALL opera apenas com mídias públicas e não armazena credenciais do usuário.";
+
+        if (lower.Contains("this content is unreachable") || lower.Contains("use --cookies-from-browser"))
+            return "O download de Stories do Instagram exige login com conta de usuário, o que não é suportado pelo BaixALL por motivos de segurança.";
+
+        if (lower.Contains("url has expired") || lower.Contains("signature has expired") || lower.Contains("signature expired") || (lower.Contains("http error 403") && lower.Contains("fbcdn")))
+            return "O link temporário da mídia expirou. Realize uma nova análise da publicação para obter links atualizados.";
+
+        if (lower.Contains("http error 429") || lower.Contains("too many requests"))
+            return "A plataforma atingiu temporariamente o limite de requisições para o seu endereço IP. Aguarde alguns minutos antes de tentar novamente.";
+
         if (lower.Contains("private video"))
             return "Este vídeo é privado e não pode ser acessado publicamente.";
 
@@ -522,6 +549,12 @@ public class YtDlpService : IYtDlpService
 
         if (lower.Contains("this video has been removed") || lower.Contains("video has been removed"))
             return "Este vídeo foi removido pelo YouTube ou pelo criador.";
+
+        if (lower.Contains("post has been removed") || lower.Contains("media has been deleted"))
+            return "Esta publicação foi removida pelo autor ou pela plataforma.";
+
+        if (lower.Contains("account is private") || lower.Contains("is private"))
+            return "Esta publicação é privada e não pode ser acessada sem autorização do autor.";
 
         if (lower.Contains("sign in to confirm your age"))
             return "Este vídeo requer autenticação de idade e não pode ser baixado sem login.";

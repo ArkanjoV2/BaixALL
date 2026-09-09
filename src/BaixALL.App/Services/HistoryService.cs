@@ -78,6 +78,14 @@ public class HistoryService : IHistoryService
                     var list = JsonSerializer.Deserialize<List<HistoryItem>>(json);
                     if (list != null)
                     {
+                        foreach (var item in list)
+                        {
+                            if (string.IsNullOrWhiteSpace(item.Platform))
+                            {
+                                item.Platform = InferPlatform(item);
+                            }
+                        }
+
                         _items.Clear();
                         _items.AddRange(list);
                     }
@@ -113,5 +121,43 @@ public class HistoryService : IHistoryService
         {
             _logger?.Error("Falha ao salvar arquivo de histórico.", ex);
         }
+    }
+
+    public static string InferPlatform(HistoryItem item)
+    {
+        if (!string.IsNullOrWhiteSpace(item.Platform))
+            return item.Platform;
+
+        if (!string.IsNullOrWhiteSpace(item.CanonicalKey))
+        {
+            if (item.CanonicalKey.StartsWith("yt:", StringComparison.OrdinalIgnoreCase)) return "YouTube";
+            if (item.CanonicalKey.StartsWith("ig:", StringComparison.OrdinalIgnoreCase)) return "Instagram";
+            if (item.CanonicalKey.StartsWith("x:", StringComparison.OrdinalIgnoreCase)) return "X / Twitter";
+        }
+
+        if (!string.IsNullOrEmpty(item.ThumbnailUrl))
+        {
+            if (item.ThumbnailUrl.Contains("ytimg.com", StringComparison.OrdinalIgnoreCase) ||
+                item.ThumbnailUrl.Contains("youtube.com", StringComparison.OrdinalIgnoreCase))
+                return "YouTube";
+
+            if (item.ThumbnailUrl.Contains("fbcdn.net", StringComparison.OrdinalIgnoreCase) ||
+                item.ThumbnailUrl.Contains("cdninstagram.com", StringComparison.OrdinalIgnoreCase) ||
+                item.ThumbnailUrl.Contains("instagram.com", StringComparison.OrdinalIgnoreCase))
+                return "Instagram";
+
+            if (item.ThumbnailUrl.Contains("twimg.com", StringComparison.OrdinalIgnoreCase) ||
+                item.ThumbnailUrl.Contains("twitter.com", StringComparison.OrdinalIgnoreCase) ||
+                item.ThumbnailUrl.Contains("x.com", StringComparison.OrdinalIgnoreCase))
+                return "X / Twitter";
+        }
+
+        // Histórico legado da v1.2.0: se possuir VideoId típico do YouTube (11 chars), é comprovadamente YouTube
+        if (!string.IsNullOrWhiteSpace(item.VideoId) && item.VideoId.Length == 11)
+        {
+            return "YouTube";
+        }
+
+        return "Desconhecido";
     }
 }
