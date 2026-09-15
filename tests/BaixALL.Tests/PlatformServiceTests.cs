@@ -1,3 +1,4 @@
+using BaixALL.App.Infrastructure;
 using BaixALL.App.Models;
 using BaixALL.App.Services;
 using Xunit;
@@ -128,5 +129,11 @@ public class PlatformServiceTests
         var url = "https://x.com/unknown/path";
         var key = _service.GetCanonicalKey(url, PlatformType.Twitter);
         Assert.StartsWith("twitter:", key);
+    }
+
+    [Fact]
+    public void AppConstants_AppVersion_MatchesExpectedRelease_1_3_1()
+    {
+        Assert.Equal("1.3.1", AppConstants.AppVersion);
     }
 }
