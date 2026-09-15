@@ -308,7 +308,36 @@ public class FormatSelectionService : IFormatSelectionService
             foreach (var entry in entriesProp.EnumerateArray())
             {
                 if (entry.ValueKind != JsonValueKind.Object)
+                {
+                    var nullMediaId = !string.IsNullOrEmpty(id) ? $"{id}_{index}" : $"item_{index}";
+                    var nullMediaUrl = isCarousel && platform == PlatformType.Instagram
+                        ? (!string.IsNullOrWhiteSpace(originalUrl) ? originalUrl : (!string.IsNullOrWhiteSpace(id) ? $"https://www.instagram.com/p/{id}/" : string.Empty))
+                        : (!string.IsNullOrWhiteSpace(originalUrl) ? originalUrl : string.Empty);
+
+                    var nullItem = new PlaylistItemInfo
+                    {
+                        Id = nullMediaId,
+                        Title = $"Mídia #{index} (Indisponível)",
+                        VideoUrl = nullMediaUrl,
+                        Channel = channel,
+                        DurationSeconds = null,
+                        ThumbnailUrl = thumbnail,
+                        PlaylistIndex = index,
+                        Platform = platform,
+                        CanonicalKey = _platformService.GetCanonicalKey(
+                            nullMediaUrl,
+                            platform,
+                            nullMediaId,
+                            index),
+                        IsAvailable = false,
+                        IsSelected = false,
+                        AvailabilityNotice = "Mídia indisponível ou não suportada"
+                    };
+
+                    items.Add(nullItem);
+                    index++;
                     continue;
+                }
 
                 var entryId = entry.GetStringSafe("id");
                 var entryTitle = entry.GetStringSafe("title", $"Vídeo #{index}");
@@ -322,35 +351,19 @@ public class FormatSelectionService : IFormatSelectionService
                 var vcodec = entry.GetStringSafe("vcodec").ToLowerInvariant();
                 var acodec = entry.GetStringSafe("acodec").ToLowerInvariant();
 
-                bool isPhoto = (entryExt == "jpg" || entryExt == "jpeg" || entryExt == "png" || entryExt == "webp" || entryExt == "heic") ||
-                               formatNote.Contains("photo") ||
-                               (vcodec == "none" && acodec == "none" && !entry.TryGetProperty("formats", out _));
+                bool isPhoto = false;
+                bool isExplicitUnavailable = false;
+                string explicitUnavailableNotice = "Vídeo indisponível ou privado";
 
-                var entryUrl = entry.GetStringSafe("url");
-                if (isCarousel && platform == PlatformType.Instagram)
+                // Sinais de erro, exclusão ou autenticação requerida
+                if (entryTitle.Contains("[Private video]", StringComparison.OrdinalIgnoreCase) ||
+                    entryTitle.Contains("[Deleted video]", StringComparison.OrdinalIgnoreCase) ||
+                    entryTitle.Contains("private", StringComparison.OrdinalIgnoreCase) ||
+                    entryTitle.Contains("login", StringComparison.OrdinalIgnoreCase) ||
+                    entryTitle.Contains("auth", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Para carrosséis do Instagram, utiliza a URL canônica e estável da publicação original.
-                    // A extração da mídia exata do subitem é feita via --playlist-items <PlaylistIndex>,
-                    // evitando expiração de tokens e assinaturas temporárias de URLs diretas da CDN.
-                    entryUrl = !string.IsNullOrWhiteSpace(originalUrl)
-                        ? originalUrl
-                        : (!string.IsNullOrWhiteSpace(id) ? $"https://www.instagram.com/p/{id}/" : entryUrl);
-                }
-                else if (string.IsNullOrWhiteSpace(entryUrl) || !entryUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (!string.IsNullOrEmpty(entryId))
-                    {
-                        entryUrl = platform switch
-                        {
-                            PlatformType.Instagram => $"https://www.instagram.com/p/{entryId}/",
-                            PlatformType.Twitter => $"https://x.com/i/status/{entryId}",
-                            _ => $"https://www.youtube.com/watch?v={entryId}"
-                        };
-                    }
-                    else
-                    {
-                        entryUrl = string.Empty;
-                    }
+                    isExplicitUnavailable = true;
+                    explicitUnavailableNotice = "Vídeo indisponível ou privado";
                 }
 
                 var entryThumb = entry.GetStringSafe("thumbnail");
@@ -374,9 +387,92 @@ public class FormatSelectionService : IFormatSelectionService
                     thumbnail = entryThumb;
                 }
 
-                bool isUnavailable = string.IsNullOrEmpty(entryId) ||
-                                     entryTitle.Contains("[Private video]", StringComparison.OrdinalIgnoreCase) ||
-                                     entryTitle.Contains("[Deleted video]", StringComparison.OrdinalIgnoreCase);
+                if (string.IsNullOrEmpty(entryThumb) && !string.IsNullOrEmpty(thumbnail))
+                {
+                    entryThumb = thumbnail;
+                }
+
+                if (isCarousel)
+                {
+                    var isImageExt = entryExt == "jpg" || entryExt == "jpeg" || entryExt == "png" || entryExt == "webp" || entryExt == "heic" || entryExt == "bmp";
+
+                    bool hasVideoFormat = false;
+                    if (entry.TryGetProperty("formats", out var formatsProp) && formatsProp.ValueKind == JsonValueKind.Array && formatsProp.GetArrayLength() > 0)
+                    {
+                        foreach (var fmt in formatsProp.EnumerateArray())
+                        {
+                            if (fmt.ValueKind != JsonValueKind.Object)
+                                continue;
+
+                            var fmtVcodec = fmt.GetStringSafe("vcodec").ToLowerInvariant();
+                            var fmtExt = fmt.GetStringSafe("ext").ToLowerInvariant();
+                            var fmtHeight = fmt.GetInt32Nullable("height");
+                            var fmtWidth = fmt.GetInt32Nullable("width");
+                            var isFmtImg = fmtExt == "jpg" || fmtExt == "jpeg" || fmtExt == "png" || fmtExt == "webp" || fmtExt == "heic" || fmtExt == "bmp";
+
+                            if (!string.IsNullOrEmpty(fmtVcodec) && fmtVcodec != "none")
+                            {
+                                hasVideoFormat = true;
+                                break;
+                            }
+                            if (!isFmtImg && ((fmtHeight.HasValue && fmtHeight.Value > 0) || (fmtWidth.HasValue && fmtWidth.Value > 0)))
+                            {
+                                hasVideoFormat = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    bool hasExplicitVideoStreams = hasVideoFormat || (!string.IsNullOrEmpty(vcodec) && vcodec != "none");
+
+                    if (!hasExplicitVideoStreams && !isExplicitUnavailable)
+                    {
+                        // Evidências de que o item é imagem estática
+                        bool hasPhotoEvidence = isImageExt ||
+                            formatNote.Contains("photo") ||
+                            formatNote.Contains("image") ||
+                            (vcodec == "none" && acodec == "none") ||
+                            entryThumb.Contains("regular_photo", StringComparison.OrdinalIgnoreCase) ||
+                            thumbnail.Contains("regular_photo", StringComparison.OrdinalIgnoreCase) ||
+                            (platform == PlatformType.Instagram && (!entry.TryGetProperty("formats", out var f) || f.GetArrayLength() == 0) && !isExplicitUnavailable);
+
+                        if (hasPhotoEvidence)
+                        {
+                            isPhoto = true;
+                        }
+                        else
+                        {
+                            isExplicitUnavailable = true;
+                            explicitUnavailableNotice = "Mídia indisponível ou sem formatos de vídeo compatíveis";
+                        }
+                    }
+                }
+
+                var entryUrl = entry.GetStringSafe("url");
+                if (isCarousel && platform == PlatformType.Instagram)
+                {
+                    entryUrl = !string.IsNullOrWhiteSpace(originalUrl)
+                        ? originalUrl
+                        : (!string.IsNullOrWhiteSpace(id) ? $"https://www.instagram.com/p/{id}/" : entryUrl);
+                }
+                else if (string.IsNullOrWhiteSpace(entryUrl) || !entryUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (!string.IsNullOrEmpty(entryId))
+                    {
+                        entryUrl = platform switch
+                        {
+                            PlatformType.Instagram => $"https://www.instagram.com/p/{entryId}/",
+                            PlatformType.Twitter => $"https://x.com/i/status/{entryId}",
+                            _ => $"https://www.youtube.com/watch?v={entryId}"
+                        };
+                    }
+                    else
+                    {
+                        entryUrl = string.Empty;
+                    }
+                }
+
+                bool isUnavailable = !isPhoto && (isExplicitUnavailable || string.IsNullOrEmpty(entryId));
 
                 string notice = string.Empty;
                 bool isItemAvailable = !isUnavailable;
@@ -386,16 +482,33 @@ public class FormatSelectionService : IFormatSelectionService
                 {
                     isItemAvailable = false;
                     isItemSelected = false;
-                    notice = "Foto (download de imagens em carrossel planejado para versão futura)";
+                    notice = "Foto / imagem estática (download de imagens em carrossel planejado para versão futura)";
+
+                    if (string.IsNullOrWhiteSpace(entryTitle) ||
+                        entryTitle.StartsWith("Video by", StringComparison.OrdinalIgnoreCase) ||
+                        entryTitle.StartsWith("Post by", StringComparison.OrdinalIgnoreCase) ||
+                        entryTitle.StartsWith("Vídeo #", StringComparison.OrdinalIgnoreCase))
+                    {
+                        entryTitle = $"Foto #{index}";
+                    }
                 }
                 else if (isUnavailable)
                 {
-                    notice = "Vídeo indisponível ou privado";
+                    notice = explicitUnavailableNotice;
+                    if (string.IsNullOrWhiteSpace(entryTitle) ||
+                        entryTitle.StartsWith("Video by", StringComparison.OrdinalIgnoreCase) ||
+                        entryTitle.StartsWith("Post by", StringComparison.OrdinalIgnoreCase) ||
+                        entryTitle.StartsWith("Vídeo #", StringComparison.OrdinalIgnoreCase))
+                    {
+                        entryTitle = $"Mídia #{index} (Indisponível)";
+                    }
                 }
+
+                var finalId = !string.IsNullOrEmpty(entryId) ? entryId : (!string.IsNullOrEmpty(id) ? $"{id}_{index}" : $"item_{index}");
 
                 var item = new PlaylistItemInfo
                 {
-                    Id = entryId,
+                    Id = finalId,
                     Title = entryTitle,
                     VideoUrl = entryUrl,
                     Channel = entryChannel,
@@ -406,7 +519,7 @@ public class FormatSelectionService : IFormatSelectionService
                     CanonicalKey = _platformService.GetCanonicalKey(
                         !string.IsNullOrEmpty(entryUrl) ? entryUrl : originalUrl,
                         platform,
-                        entryId,
+                        finalId,
                         index),
                     IsAvailable = isItemAvailable,
                     IsSelected = isItemSelected,

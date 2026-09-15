@@ -82,6 +82,9 @@ public class PlatformServiceTests
         var igPost = _service.NormalizeUrl("https://instagram.com/p/BQ0eAlwhDrw/?utm_source=copy", PlatformType.Instagram);
         Assert.Equal("https://www.instagram.com/p/BQ0eAlwhDrw/", igPost);
 
+        var igMixedStkn = _service.NormalizeUrl("https://www.instagram.com/p/DdUAEH9lVF8/?stkn=MzRlODBiNWFlZA==", PlatformType.Instagram);
+        Assert.Equal("https://www.instagram.com/p/DdUAEH9lVF8/", igMixedStkn);
+
         var xPost = _service.NormalizeUrl("https://twitter.com/user/status/719944021058060289?s=20&t=123", PlatformType.Twitter);
         Assert.Equal("https://x.com/i/status/719944021058060289", xPost);
     }

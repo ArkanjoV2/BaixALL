@@ -41,7 +41,8 @@ public class YtDlpService : IYtDlpService
             "--no-playlist",
             "--skip-download",
             "--no-warnings",
-            "--no-check-certificates"
+            "--no-check-certificates",
+            "--ignore-no-formats-error"
         };
 
         // Adiciona localização do ffmpeg se existir
@@ -66,6 +67,24 @@ public class YtDlpService : IYtDlpService
 
         if (!result.IsSuccess)
         {
+            if (!string.IsNullOrWhiteSpace(result.StandardOutput))
+            {
+                try
+                {
+                    var recoveredJson = JsonDocument.Parse(result.StandardOutput);
+                    if (recoveredJson.RootElement.TryGetProperty("entries", out _) ||
+                        (recoveredJson.RootElement.TryGetProperty("_type", out var t) && t.GetString() == "playlist"))
+                    {
+                        _logger?.Warning($"yt-dlp retornou exit code não-zero ({result.ExitCode}), mas recuperou JSON estruturado de playlist/coleção.");
+                        return recoveredJson;
+                    }
+                }
+                catch
+                {
+                    // Falha no parse do stdout, prossegue para o erro padrão
+                }
+            }
+
             var friendlyError = ParseYtDlpError(result.StandardError);
             _logger?.Error($"Falha ao analisar vídeo. Saída: {result.StandardError}");
             throw new InvalidOperationException(friendlyError);
@@ -525,6 +544,9 @@ public class YtDlpService : IYtDlpService
 
         if (lower.Contains("no video could be found in this tweet"))
             return "Esta publicação do X/Twitter não contém nenhum vídeo.";
+
+        if (lower.Contains("no video formats found") || lower.Contains("no video could be found"))
+            return "Esta publicação não contém vídeos disponíveis para download.";
 
         if (lower.Contains("this tweet has been deleted") || lower.Contains("tweet not found") || lower.Contains("status does not exist"))
             return "Esta publicação do X/Twitter foi excluída ou não existe mais.";
