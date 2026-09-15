@@ -26,11 +26,13 @@ public partial class PlaylistInfo : ObservableObject
     {
         get
         {
-            if (IsCarousel && PhotoCount > 0)
+            var vWord = SupportedVideosCount == 1 ? "vídeo" : "vídeos";
+            var mWord = TotalMediaCount == 1 ? "mídia" : "mídias";
+            if (IsCarousel && (PhotoCount > 0 || Items.Any(x => !x.IsAvailable)))
             {
-                return $"{TotalMediaCount} mídias • {SupportedVideosCount} vídeos";
+                return $"{TotalMediaCount} {mWord} • {SupportedVideosCount} {vWord}";
             }
-            return $"{TotalVideosCount} vídeos";
+            return $"{TotalVideosCount} {(TotalVideosCount == 1 ? "vídeo" : "vídeos")}";
         }
     }
 
@@ -38,11 +40,18 @@ public partial class PlaylistInfo : ObservableObject
     {
         get
         {
-            if (IsCarousel && PhotoCount > 0)
+            var vWord = SupportedVideosCount == 1 ? "vídeo suportado" : "vídeos suportados";
+            var mWord = TotalMediaCount == 1 ? "mídia" : "mídias";
+            var pWord = PhotoCount == 1 ? "foto" : "fotos";
+            if (IsCarousel && (PhotoCount > 0 || Items.Any(x => !x.IsAvailable)))
             {
-                return $"Total: {TotalMediaCount} mídias ({SupportedVideosCount} vídeos suportados, {PhotoCount} foto{(PhotoCount > 1 ? "s" : "")})";
+                if (PhotoCount > 0)
+                {
+                    return $"Total: {TotalMediaCount} {mWord} ({SupportedVideosCount} {vWord}, {PhotoCount} {pWord})";
+                }
+                return $"Total: {TotalMediaCount} {mWord} ({SupportedVideosCount} {vWord})";
             }
-            return $"Total: {TotalVideosCount} vídeos";
+            return $"{TotalVideosCount} {(TotalVideosCount == 1 ? "vídeo" : "vídeos")}";
         }
     }
 
@@ -53,9 +62,11 @@ public partial class PlaylistInfo : ObservableObject
     {
         get
         {
-            if (IsCarousel && PhotoCount > 0)
+            var vWord = SupportedVideosCount == 1 ? "vídeo" : "vídeos";
+            var sWord = SelectedVideosCount == 1 ? "selecionado" : "selecionados";
+            if (IsCarousel && (PhotoCount > 0 || Items.Any(x => !x.IsAvailable)))
             {
-                return $"{SelectedVideosCount} de {SupportedVideosCount} vídeos selecionados";
+                return $"{SelectedVideosCount} de {SupportedVideosCount} {vWord} {sWord}";
             }
             return $"{SelectedVideosCount} de {TotalVideosCount} selecionados";
         }

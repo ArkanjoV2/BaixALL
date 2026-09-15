@@ -178,7 +178,15 @@ public class MediaAnalysisService : IMediaAnalysisService, IYoutubeService
 
             if (collection.Items.Count > 0 && collection.Items.All(x => !x.IsAvailable))
             {
-                throw new InvalidOperationException("Esta publicação contém apenas fotos. O BaixALL suporta apenas vídeos (download de imagens em carrossel planejado para versão futura).");
+                if (collection.PhotoCount == collection.TotalMediaCount)
+                {
+                    throw new InvalidOperationException("Esta publicação contém apenas fotos. O BaixALL suporta apenas vídeos (download de imagens em carrossel planejado para versão futura).");
+                }
+                if (collection.Items.Any(x => x.AvailabilityNotice.Contains("privad", StringComparison.OrdinalIgnoreCase) || x.AvailabilityNotice.Contains("login", StringComparison.OrdinalIgnoreCase) || x.AvailabilityNotice.Contains("auth", StringComparison.OrdinalIgnoreCase)))
+                {
+                    throw new InvalidOperationException("As mídias desta publicação estão indisponíveis ou exigem autenticação na plataforma.");
+                }
+                throw new InvalidOperationException("Esta publicação não contém nenhum vídeo compatível ou disponível para download.");
             }
 
             return new MediaAnalysisResult

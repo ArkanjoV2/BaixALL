@@ -34,9 +34,16 @@ public class MultiplatformAnalysisTests
             return Task.FromResult(filePath);
         }
 
+        public Func<string, JsonDocument>? CustomMetadataHandler { get; set; }
+
         public Task<JsonDocument> GetMetadataJsonAsync(string url, CancellationToken ct = default)
         {
             LastUrlRequested = url;
+            if (CustomMetadataHandler != null)
+            {
+                return Task.FromResult(CustomMetadataHandler(url));
+            }
+
             string fixturePath = "";
 
             if (url.Contains("x.com") || url.Contains("twitter.com"))
@@ -550,4 +557,333 @@ public class MultiplatformAnalysisTests
         Assert.Equal(3, playlist.Items[2].PlaylistIndex);
         Assert.True(playlist.Items[2].IsAvailable);
     }
+
+    [Fact]
+    public void FormatSelectionService_MixedCarousel_EmptyFormatsArrayOnPhoto_DetectedAsPhoto_PreservesVideoIndex2()
+    {
+        var fmt = new FormatSelectionService();
+        // Simula exatamente a resposta do yt-dlp na URL real DdUAEH9lVF8
+        var json = """
+        {
+            "_type": "playlist",
+            "id": "DdUAEH9lVF8",
+            "title": "Post by minecraft",
+            "uploader": "minecraft",
+            "entries": [
+                {
+                    "id": "DdUAEBClcjl",
+                    "title": "Video by minecraft",
+                    "ext": null,
+                    "formats": []
+                },
+                {
+                    "id": "DdUABjMibMh",
+                    "title": "Video by minecraft",
+                    "ext": "mp4",
+                    "formats": [
+                        {
+                            "format_id": "dash-1",
+                            "ext": "mp4",
+                            "vcodec": "vp09.00.40.08",
+                            "acodec": "none",
+                            "width": 1080,
+                            "height": 1080
+                        },
+                        {
+                            "format_id": "dash-2",
+                            "ext": "m4a",
+                            "vcodec": "none",
+                            "acodec": "mp4a.40.5"
+                        }
+                    ]
+                }
+            ]
+        }
+        """;
+
+        using var doc = JsonDocument.Parse(json);
+        var playlist = fmt.ParsePlaylistInfo(doc, "https://www.instagram.com/p/DdUAEH9lVF8/");
+
+        Assert.Equal(2, playlist.Items.Count);
+
+        // Item 1: Foto
+        Assert.Equal(1, playlist.Items[0].PlaylistIndex);
+        Assert.Equal("Foto #1", playlist.Items[0].Title);
+        Assert.False(playlist.Items[0].IsAvailable);
+        Assert.False(playlist.Items[0].IsSelected);
+        Assert.Contains("Foto", playlist.Items[0].AvailabilityNotice);
+
+        // Item 2: Vídeo real com índice 2 preservado
+        Assert.Equal(2, playlist.Items[1].PlaylistIndex);
+        Assert.Equal("Video by minecraft", playlist.Items[1].Title);
+        Assert.True(playlist.Items[1].IsAvailable);
+        Assert.True(playlist.Items[1].IsSelected);
+        Assert.Empty(playlist.Items[1].AvailabilityNotice);
+
+        // Contadores e resumos com pluralização correta (1 vídeo no singular)
+        playlist.UpdateCounts();
+        Assert.Equal(2, playlist.TotalMediaCount);
+        Assert.Equal(1, playlist.SupportedVideosCount);
+        Assert.Equal(1, playlist.PhotoCount);
+        Assert.Equal(1, playlist.SelectedVideosCount);
+        Assert.Equal("2 mídias • 1 vídeo", playlist.BadgeCountSummary);
+        Assert.Equal("1 de 1 vídeo selecionado", playlist.SelectionSummary);
+    }
+
+    [Fact]
+    public void FormatSelectionService_MixedCarousel_NullEntry_PreservesSubsequentIndexes_AndClassifiesAsUnavailable()
+    {
+        var fmt = new FormatSelectionService();
+        // Simula caso em que yt-dlp produz null no array de entries
+        var json = """
+        {
+            "_type": "playlist",
+            "id": "null_test",
+            "title": "Null Entry Carousel",
+            "uploader": "creator",
+            "entries": [
+                null,
+                {
+                    "id": "vid_real",
+                    "title": "Real Video",
+                    "ext": "mp4",
+                    "vcodec": "avc1",
+                    "acodec": "mp4a"
+                }
+            ]
+        }
+        """;
+
+        using var doc = JsonDocument.Parse(json);
+        var playlist = fmt.ParsePlaylistInfo(doc, "https://www.instagram.com/p/null_test/");
+
+        Assert.Equal(2, playlist.Items.Count);
+
+        // Subitem nulo vira placeholder desabilitado de mídia indisponível com índice 1 (não classificado como foto)
+        Assert.Equal(1, playlist.Items[0].PlaylistIndex);
+        Assert.Equal("Mídia #1 (Indisponível)", playlist.Items[0].Title);
+        Assert.False(playlist.Items[0].IsAvailable);
+        Assert.False(playlist.Items[0].IsSelected);
+        Assert.Equal("Mídia indisponível ou não suportada", playlist.Items[0].AvailabilityNotice);
+        Assert.DoesNotContain("Foto", playlist.Items[0].AvailabilityNotice);
+
+        // Subitem de vídeo subsequente mantém rigorosamente índice 2
+        Assert.Equal(2, playlist.Items[1].PlaylistIndex);
+        Assert.True(playlist.Items[1].IsAvailable);
+        Assert.True(playlist.Items[1].IsSelected);
+    }
+
+    [Fact]
+    public void FormatSelectionService_MixedCarousel_FourItemsAlternating_StrictlyPreservesIndexes2And4_AndPluralizesCorrectly()
+    {
+        var fmt = new FormatSelectionService();
+        // Carrossel com 4 mídias alternadas: Foto, Vídeo, Foto, Vídeo
+        var json = """
+        {
+            "_type": "playlist",
+            "id": "alt_carousel",
+            "title": "Post by test",
+            "uploader": "testuser",
+            "entries": [
+                {
+                    "id": "item1",
+                    "title": "Photo 1",
+                    "ext": "jpg",
+                    "vcodec": "none",
+                    "acodec": "none",
+                    "formats": []
+                },
+                {
+                    "id": "item2",
+                    "title": "Video 2",
+                    "ext": "mp4",
+                    "vcodec": "avc1",
+                    "acodec": "mp4a",
+                    "formats": [
+                        { "format_id": "v2", "ext": "mp4", "vcodec": "avc1", "width": 1080, "height": 1080 }
+                    ]
+                },
+                {
+                    "id": "item3",
+                    "title": "Photo 3",
+                    "ext": "png",
+                    "vcodec": "none",
+                    "acodec": "none",
+                    "formats": []
+                },
+                {
+                    "id": "item4",
+                    "title": "Video 4",
+                    "ext": "mp4",
+                    "vcodec": "avc1",
+                    "acodec": "mp4a",
+                    "formats": [
+                        { "format_id": "v4", "ext": "mp4", "vcodec": "avc1", "width": 1080, "height": 1080 }
+                    ]
+                }
+            ]
+        }
+        """;
+
+        using var doc = JsonDocument.Parse(json);
+        var playlist = fmt.ParsePlaylistInfo(doc, "https://www.instagram.com/p/alt_carousel/");
+
+        Assert.Equal(4, playlist.Items.Count);
+
+        // Índices rigorosamente preservados: 1, 2, 3, 4
+        Assert.Equal(1, playlist.Items[0].PlaylistIndex);
+        Assert.False(playlist.Items[0].IsAvailable);
+
+        Assert.Equal(2, playlist.Items[1].PlaylistIndex);
+        Assert.True(playlist.Items[1].IsAvailable);
+
+        Assert.Equal(3, playlist.Items[2].PlaylistIndex);
+        Assert.False(playlist.Items[2].IsAvailable);
+
+        Assert.Equal(4, playlist.Items[3].PlaylistIndex);
+        Assert.True(playlist.Items[3].IsAvailable);
+
+        // Contadores e pluralização no plural (2 vídeos)
+        playlist.UpdateCounts();
+        Assert.Equal(4, playlist.TotalMediaCount);
+        Assert.Equal(2, playlist.SupportedVideosCount);
+        Assert.Equal(2, playlist.PhotoCount);
+        Assert.Equal(2, playlist.SelectedVideosCount);
+        Assert.Equal("4 mídias • 2 vídeos", playlist.BadgeCountSummary);
+        Assert.Equal("2 de 2 vídeos selecionados", playlist.SelectionSummary);
+        Assert.Equal("Total: 4 mídias (2 vídeos suportados, 2 fotos)", playlist.DetailedCountSummary);
+    }
+
+    [Fact]
+    public void FormatSelectionService_EmptyFormatsWithAuthOrPrivateSignal_ClassifiedAsUnavailableNotPhoto()
+    {
+        var fmt = new FormatSelectionService();
+        var json = """
+        {
+            "_type": "playlist",
+            "id": "auth_test",
+            "title": "Auth Test",
+            "uploader": "private_user",
+            "entries": [
+                {
+                    "id": "item_auth",
+                    "title": "Private login required",
+                    "ext": null,
+                    "formats": []
+                }
+            ]
+        }
+        """;
+
+        using var doc = JsonDocument.Parse(json);
+        var playlist = fmt.ParsePlaylistInfo(doc, "https://www.instagram.com/p/auth_test/");
+
+        Assert.Single(playlist.Items);
+        Assert.False(playlist.Items[0].IsAvailable);
+        Assert.Contains("privad", playlist.Items[0].AvailabilityNotice, StringComparison.OrdinalIgnoreCase);
+        // Não deve ser classificado como foto
+        Assert.DoesNotContain("Foto", playlist.Items[0].AvailabilityNotice);
+    }
+
+    [Fact]
+    public async Task MediaAnalysisService_MixedCarousel_ImageAndVideo_ReturnsCollectionWithCorrectSelection()
+    {
+        var mockYtDlp = new MockYtDlpService();
+        mockYtDlp.CustomMetadataHandler = (url) =>
+        {
+            var json = """
+            {
+                "_type": "playlist",
+                "id": "DdUAEH9lVF8",
+                "title": "Post by minecraft",
+                "uploader": "minecraft",
+                "entries": [
+                    {
+                        "id": "DdUAEBClcjl",
+                        "title": "Video by minecraft",
+                        "ext": null,
+                        "formats": []
+                    },
+                    {
+                        "id": "DdUABjMibMh",
+                        "title": "Video by minecraft",
+                        "ext": "mp4",
+                        "formats": [
+                            {
+                                "format_id": "v1",
+                                "ext": "mp4",
+                                "vcodec": "avc1",
+                                "width": 1080,
+                                "height": 1080
+                            }
+                        ]
+                    }
+                ]
+            }
+            """;
+            return JsonDocument.Parse(json);
+        };
+
+        var platformService = new PlatformService();
+        var formatService = new FormatSelectionService(platformService);
+        var analysisService = new MediaAnalysisService(mockYtDlp, formatService, platformService);
+
+        var result = await analysisService.AnalyzeAsync("https://www.instagram.com/p/DdUAEH9lVF8/?stkn=MzRlODBiNWFlZA==");
+
+        Assert.True(result.IsCollection);
+        Assert.NotNull(result.Collection);
+        Assert.Equal(2, result.Collection.Items.Count);
+
+        // Foto desabilitada
+        Assert.False(result.Collection.Items[0].IsAvailable);
+        Assert.False(result.Collection.Items[0].IsSelected);
+        Assert.Equal(1, result.Collection.Items[0].PlaylistIndex);
+
+        // Vídeo habilitado e selecionado
+        Assert.True(result.Collection.Items[1].IsAvailable);
+        Assert.True(result.Collection.Items[1].IsSelected);
+        Assert.Equal(2, result.Collection.Items[1].PlaylistIndex);
+    }
+
+    [Fact]
+    public async Task MediaAnalysisService_AllPhotosCarousel_ThrowsFriendlyMessage()
+    {
+        var mockYtDlp = new MockYtDlpService();
+        mockYtDlp.CustomMetadataHandler = (url) =>
+        {
+            var json = """
+            {
+                "_type": "playlist",
+                "id": "all_photos",
+                "title": "Photos Carousel",
+                "uploader": "user",
+                "entries": [
+                    { "id": "p1", "ext": "jpg", "vcodec": "none", "acodec": "none", "formats": [] },
+                    { "id": "p2", "ext": "png", "vcodec": "none", "acodec": "none", "formats": [] }
+                ]
+            }
+            """;
+            return JsonDocument.Parse(json);
+        };
+
+        var platformService = new PlatformService();
+        var formatService = new FormatSelectionService(platformService);
+        var analysisService = new MediaAnalysisService(mockYtDlp, formatService, platformService);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            analysisService.AnalyzeAsync("https://www.instagram.com/p/all_photos/"));
+
+        Assert.Contains("apenas fotos", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void YtDlpService_ParseYtDlpError_NoVideoFormatsFound_ReturnsNeutralFriendlyMessage()
+    {
+        var rawError = "ERROR: [Instagram] DdUAEBClcjl: No video formats found!; please report this issue on https://github.com/yt-dlp/yt-dlp/issues";
+        var parsed = YtDlpService.ParseYtDlpError(rawError);
+
+        Assert.Equal("Esta publicação não contém vídeos disponíveis para download.", parsed);
+    }
 }
+
+
