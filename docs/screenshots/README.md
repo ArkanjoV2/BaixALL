@@ -4,7 +4,7 @@ Esta pasta armazena as capturas de tela reais da interface do BaixALL utilizadas
 
 ---
 
-## 📸 Capturas Oficiais (v1.1.0, v1.2.0 e v1.3.0)
+## 📸 Capturas Oficiais (v1.1.0, v1.2.0, v1.3.0 e v1.3.1)
 
 Todas as imagens são capturas reais da janela do aplicativo executado em ambiente Windows 11 x64, sem molduras fictícias, sem geração por inteligência artificial e sem simulações gráficas:
 

@@ -1,6 +1,6 @@
 # Guia de Instalação e Uso do BaixALL
 
-Este guia foi elaborado para orientar usuários no download, verificação, instalação e operação do **BaixALL 1.3.0** no Windows 10 e Windows 11 com segurança, conformidade e transparência.
+Este guia foi elaborado para orientar usuários no download, verificação, instalação e operação do **BaixALL 1.3.1** no Windows 10 e Windows 11 com segurança, conformidade e transparência.
 
 ---
 
@@ -40,15 +40,15 @@ Este guia foi elaborado para orientar usuários no download, verificação, inst
 Obtenha sempre os arquivos a partir da página oficial de lançamentos no GitHub:
 
 - **Instalador Oficial (Recomendado):**  
-  [Baixar BaixALL-Setup-1.3.0.exe](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.0/BaixALL-Setup-1.3.0.exe)  
+  [Baixar BaixALL-Setup-1.3.1.exe](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-Setup-1.3.1.exe)  
   *Assistente de instalação completo que cria atalhos no Menu Iniciar e na Área de Trabalho e registra desinstalador seguro no painel do Windows.*
 
 - **Pacote Portátil (.ZIP):**  
-  [Baixar BaixALL-1.3.0-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.0/BaixALL-1.3.0-win-x64.zip)  
+  [Baixar BaixALL-1.3.1-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-1.3.1-win-x64.zip)  
   *Não requer instalação no sistema. Basta descompactar o arquivo `.zip` e executar diretamente o arquivo `BaixALL.exe`.*
 
 - **Manifesto de Hashes:**  
-  [Baixar checksums-1.3.0.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.0/checksums-1.3.0.txt)
+  [Baixar checksums-1.3.1.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/checksums-1.3.1.txt)
 
 ---
 
@@ -56,16 +56,16 @@ Obtenha sempre os arquivos a partir da página oficial de lançamentos no GitHub
 
 Antes de abrir qualquer executável baixado da internet, é uma boa prática de segurança verificar sua integridade criptográfica.
 
-1. Baixe o arquivo oficial de hashes: [checksums-1.3.0.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.0/checksums-1.3.0.txt).
+1. Baixe o arquivo oficial de hashes: [checksums-1.3.1.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/checksums-1.3.1.txt).
 2. Abra o **PowerShell** na pasta onde o arquivo foi baixado e execute:
    ```powershell
-   Get-FileHash BaixALL-Setup-1.3.0.exe -Algorithm SHA256
+   Get-FileHash BaixALL-Setup-1.3.1.exe -Algorithm SHA256
    ```
-3. Compare o valor retornado com os hashes oficiais da versão 1.3.0:
+3. Compare o valor retornado com os hashes oficiais da versão 1.3.1:
    ```text
-   b434214ae7b121347f034d0e0bbc74d708688b48d2bcce5e6eeb879b999985c8  BaixALL-Setup-1.3.0.exe
-   2310927586a61f8155944f5a2636399fdba7cf24c0f52e5fbd534c02699d6b01  BaixALL-1.3.0-win-x64.zip
-   1823e861154b9197c5529d41b3cca61619c3d57c3e3041ab6e4a745cdb6eb0d7  checksums-1.3.0.txt
+   9a6e02f1584decb3310ad6f6e9154db07562b87b3313554b277aa393b4fc7a55  BaixALL-Setup-1.3.1.exe
+   501cd5f67af74005eb676a11097f4ec5eabe5837ab61b15b73b51ef61563295f  BaixALL-1.3.1-win-x64.zip
+   cc25adde56857a40dd05729347a11842cbc6166c8003f1bce0305e43da7b3df8  checksums-1.3.1.txt
    ```
 4. Se o hash calculado for idêntico, o arquivo está íntegro e não sofreu alterações durante a transferência.
 
@@ -81,8 +81,8 @@ Ao executar um executável novo no seu sistema, o **Windows Defender SmartScreen
 - Softwares de código aberto independentes recém-lançados ainda não acumularam histórico estatístico nos servidores da Microsoft, acionando o alerta preventivo.
 
 ### Recomendações de segurança:
-1. **Confirme a procedência:** Certifique-se de que o arquivo foi obtido exclusivamente a partir do repositório oficial: `https://github.com/ArkanjoV2/BaixALL/releases/tag/v1.3.0`.
-2. **Confira o hash SHA-256:** Valide o arquivo contra o `checksums-1.3.0.txt` oficial.
+1. **Confirme a procedência:** Certifique-se de que o arquivo foi obtido exclusivamente a partir do repositório oficial: `https://github.com/ArkanjoV2/BaixALL/releases/tag/v1.3.1`.
+2. **Confira o hash SHA-256:** Valide o arquivo contra o `checksums-1.3.1.txt` oficial.
 3. **Não execute o arquivo se tiver dúvidas:** Caso não tenha certeza da integridade do arquivo, não confirme a execução.
 4. **Nunca desabilite proteções:** Não desative o Windows Defender, o SmartScreen ou o antivírus do seu sistema operacional.
 5. Se você conferiu a origem oficial e o hash SHA-256 e deseja prosseguir com a instalação, clique em **"Mais informações"** na janela do alerta e selecione **"Executar assim mesmo"**.
@@ -91,14 +91,14 @@ Ao executar um executável novo no seu sistema, o **Windows Defender SmartScreen
 
 ## 5. Executar o Instalador ou Usar a Versão Portátil
 
-### Com o Instalador (`BaixALL-Setup-1.3.0.exe`):
+### Com o Instalador (`BaixALL-Setup-1.3.1.exe`):
 1. Dê um duplo clique no arquivo baixado.
 2. O assistente de instalação abrirá em Português do Brasil.
 3. Escolha se deseja criar atalhos na Área de Trabalho e no Menu Iniciar.
 4. O programa é instalado no perfil do usuário em `%LOCALAPPDATA%\Programs\BaixALL`, dispensando privilégios administrativos.
 5. Ao finalizar, clique em **Concluir** para abrir o aplicativo.
 
-### Com a Versão Portátil (`BaixALL-1.3.0-win-x64.zip`):
+### Com a Versão Portátil (`BaixALL-1.3.1-win-x64.zip`):
 1. Clique com o botão direito no arquivo `.zip` e selecione **"Extrair Tudo..."**.
 2. Abra a pasta resultante e dê um duplo clique no arquivo `BaixALL.exe`.
 
