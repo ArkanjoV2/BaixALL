@@ -5,22 +5,22 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/ArkanjoV2/BaixALL/releases/latest"><img src="https://img.shields.io/badge/Vers%C3%A3o-1.3.0_Est%C3%A1vel-blue.svg" alt="Versão Atual"></a>
+  <a href="https://github.com/ArkanjoV2/BaixALL/releases/latest"><img src="https://img.shields.io/badge/Vers%C3%A3o-1.3.1_Est%C3%A1vel-blue.svg" alt="Versão Atual"></a>
   <a href="https://github.com/ArkanjoV2/BaixALL/blob/main/LICENSE"><img src="https://img.shields.io/badge/Licen%C3%A7a-MIT-green.svg" alt="Licença"></a>
   <img src="https://img.shields.io/badge/Plataforma-Windows_10_%2F_11_(x64)-blue" alt="Plataforma">
   <img src="https://img.shields.io/badge/Tecnologia-.NET_10_%7C_WPF-purple" alt="Tecnologia">
 </p>
 
 <p align="center">
-  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.0/BaixALL-Setup-1.3.0.exe">
+  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-Setup-1.3.1.exe">
     <img src="https://img.shields.io/badge/Baixar_Instalador_Oficial_(Setup.exe)-2ea44f?style=for-the-badge&logo=windows&logoColor=white" alt="Baixar Instalador Oficial">
   </a>
   <br>
-  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.0/BaixALL-1.3.0-win-x64.zip">
+  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-1.3.1-win-x64.zip">
     <em>Ou baixe a Versão Portátil (.ZIP)</em>
   </a>
-  &nbsp;•&nbsp;
-  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.0/checksums-1.3.0.txt">
+  &nbsp; &nbsp;
+  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/checksums-1.3.1.txt">
     <em>Verificar Hashes SHA-256</em>
   </a>
 </p>
@@ -49,11 +49,11 @@
 
 ---
 
-## 💡 Visão Geral
+## 🌐 Visão Geral
 
 O **BaixALL** é um aplicativo desktop nativo desenvolvido em **C#** e **.NET 10** com interface gráfica moderna em **WPF** (padrão MVVM). Criado para oferecer um fluxo prático, transparente e unificado de arquivamento pessoal, ele integra os motores de código aberto **yt-dlp**, **FFmpeg** e **Deno** em um executável autônomo.
 
-A versão **1.3.0** introduz o suporte multiplataforma nativo a **Instagram** e **X/Twitter**, permitindo analisar e baixar conteúdos públicos das três principais plataformas em uma única interface, com identificação automática de links, fila integrada e histórico consolidado.
+A versão estável atual **1.3.1** consolida o suporte multiplataforma nativo a **YouTube**, **Instagram** e **X/Twitter** (introduzido na v1.3.0), trazendo aprimoramentos de resiliência e a correção da análise em carrosséis mistos do Instagram (fotos + vídeos). O aplicativo permite analisar e baixar conteúdos públicos das três plataformas em uma interface única, com identificação automática de links, fila global integrada, controle de concorrência e histórico consolidado.
 
 ---
 
@@ -61,7 +61,7 @@ A versão **1.3.0** introduz o suporte multiplataforma nativo a **Instagram** e 
 
 Interface projetada com foco em clareza, ergonomia visual e feedback operacional em tempo real:
 
-### Análise Multiplataforma (Novidade v1.3.0)
+### Análise Multiplataforma (YouTube, Instagram e X/Twitter)
 
 | Instagram Reel | X / Twitter Vídeo |
 | :---: | :---: |
@@ -117,25 +117,25 @@ Interface projetada com foco em clareza, ergonomia visual e feedback operacional
 
 Consulte o [Guia de Instalação](docs/GUIA_INSTALACAO.md) para o passo a passo ilustrado.
 
-### Pacotes Oficiais da Versão 1.3.0
+### Pacotes Oficiais da Versão 1.3.1
 
 | Pacote | Link de Download | Descrição |
 | :--- | :--- | :--- |
-| **Instalador Oficial (Setup)** | [Baixar BaixALL-Setup-1.3.0.exe](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.0/BaixALL-Setup-1.3.0.exe) | Assistente completo com atalhos e desinstalador |
-| **Versão Portátil (.ZIP)** | [Baixar BaixALL-1.3.0-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.0/BaixALL-1.3.0-win-x64.zip) | Execução direta sem necessidade de instalação |
-| **Manifesto de Hashes** | [Baixar checksums-1.3.0.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.0/checksums-1.3.0.txt) | Hashes criptográficos oficiais SHA-256 |
+| **Instalador Oficial (Setup)** | [Baixar BaixALL-Setup-1.3.1.exe](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-Setup-1.3.1.exe) | Assistente completo com atalhos e desinstalador |
+| **Versão Portátil (.ZIP)** | [Baixar BaixALL-1.3.1-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-1.3.1-win-x64.zip) | Execução direta sem necessidade de instalação |
+| **Manifesto de Hashes** | [Baixar checksums-1.3.1.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/checksums-1.3.1.txt) | Hashes criptográficos oficiais SHA-256 |
 
 ### Tabela de Integridade Criptográfica (SHA-256)
 
 | Arquivo | Tamanho Exato | Hash SHA-256 Oficial |
 | :--- | :---: | :--- |
-| `BaixALL-Setup-1.3.0.exe` | 45.890.001 bytes | `b434214ae7b121347f034d0e0bbc74d708688b48d2bcce5e6eeb879b999985c8` |
-| `BaixALL-1.3.0-win-x64.zip` | 65.504.526 bytes | `2310927586a61f8155944f5a2636399fdba7cf24c0f52e5fbd534c02699d6b01` |
-| `checksums-1.3.0.txt` | 185 bytes | `1823e861154b9197c5529d41b3cca61619c3d57c3e3041ab6e4a745cdb6eb0d7` |
+| `BaixALL-Setup-1.3.1.exe` | 45.895.608 bytes | `9a6e02f1584decb3310ad6f6e9154db07562b87b3313554b277aa393b4fc7a55` |
+| `BaixALL-1.3.1-win-x64.zip` | 65.505.206 bytes | `501cd5f67af74005eb676a11097f4ec5eabe5837ab61b15b73b51ef61563295f` |
+| `checksums-1.3.1.txt` | 182 bytes | `cc25adde56857a40dd05729347a11842cbc6166c8003f1bce0305e43da7b3df8` |
 
 > 🛡️ **Orientações de Segurança sobre o Windows SmartScreen:**  
 > Programas independentes de código aberto recém-lançados podem apresentar um aviso de reputação do Windows Defender SmartScreen (*"O Windows protegeu o seu computador"*).  
-> - **Recomendação:** Sempre confirme que você baixou o arquivo da [Release oficial v1.3.0](https://github.com/ArkanjoV2/BaixALL/releases/tag/v1.3.0) e compare o hash SHA-256 com os valores da tabela acima via PowerShell (`Get-FileHash <arquivo> -Algorithm SHA256`).  
+> - **Recomendação:** Sempre confirme que você baixou o arquivo da [Release oficial v1.3.1](https://github.com/ArkanjoV2/BaixALL/releases/tag/v1.3.1) e compare o hash SHA-256 com os valores da tabela acima via PowerShell (`Get-FileHash <arquivo> -Algorithm SHA256`).  
 > - Não desative defesas do sistema operacional. Consulte as orientações no [Guia de Instalação](docs/GUIA_INSTALACAO.md#4-avisos-de-reputação-do-windows-defender-smartscreen).
 
 ---
@@ -153,11 +153,11 @@ Consulte o [Guia de Instalação](docs/GUIA_INSTALACAO.md) para o passo a passo 
 2. Cole no campo de entrada e clique em **"Analisar"**. O BaixALL identifica a plataforma exibindo o badge rosa `Instagram`.
 3. Escolha a qualidade e o container desejados e clique em **"Baixar Agora"**.
 
-### 3. Baixar Carrosséis com Múltiplos Vídeos
-1. Cole a URL do post carrossel do Instagram contendo múltiplos vídeos.
-2. O BaixALL exibe o badge `CARROSSEL DO INSTAGRAM`, o número total de mídias e a lista dos vídeos encontrados.
+### 3. Baixar Carrosséis com Múltiplos Vídeos (Instagram)
+1. Cole a URL do post carrossel do Instagram contendo múltiplos vídeos (inclusive carrosséis mistos combinando fotos e vídeos, suportados na v1.3.1).
+2. O BaixALL exibe o badge `CARROSSEL DO INSTAGRAM`, a quantidade total de mídias e a lista dos vídeos encontrados, preservando seus índices originais de publicação.
 3. Marque ou desmarque os vídeos desejados individualmente ou use os botões **"Selecionar Todos"** / **"Desmarcar Todos"**.
-   - *Nota:* Imagens estáticas são automaticamente desabilitadas com aviso visual informativo.
+   - *Nota:* Imagens estáticas são desabilitadas com aviso visual explicativo, permitindo selecionar e baixar os vídeos presentes na publicação.
 4. Clique em **"Adicionar Vídeos Selecionados à Fila"**. Os arquivos serão organizados em uma subpasta automática com a legenda do post.
 
 ### 4. Baixar um Vídeo ou GIF do X/Twitter
