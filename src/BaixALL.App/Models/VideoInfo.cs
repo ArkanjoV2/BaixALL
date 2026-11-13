@@ -23,6 +23,7 @@ public class VideoInfo
 
     public bool HasCleanSource => WatermarkStatus == WatermarkStatus.NoWatermark;
     public bool HasOnlyWatermarkedSource => WatermarkStatus == WatermarkStatus.Watermarked;
+    public bool HasUnknownWatermarkSource => WatermarkStatus == WatermarkStatus.Unknown;
     public bool HasWatermarkBadge => Platform == PlatformType.TikTok && WatermarkStatus != WatermarkStatus.NotApplicable;
 
     public string WatermarkStatusText => WatermarkStatus switch

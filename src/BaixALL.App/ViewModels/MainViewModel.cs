@@ -46,6 +46,7 @@ public partial class MainViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(VideoPlatformBadgeColor))]
     [NotifyPropertyChangedFor(nameof(VideoPlatformBackgroundColor))]
     [NotifyPropertyChangedFor(nameof(ShowWatermarkWarning))]
+    [NotifyPropertyChangedFor(nameof(ShowUnknownWatermarkNotice))]
     private VideoInfo? _videoInfo;
 
     public string VideoPlatformDisplayName => VideoInfo?.Platform switch
@@ -118,6 +119,7 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowWatermarkWarning))]
+    [NotifyPropertyChangedFor(nameof(ShowUnknownWatermarkNotice))]
     private bool _isAudioOnlyMode;
 
     [ObservableProperty]
@@ -125,6 +127,11 @@ public partial class MainViewModel : ObservableObject
 
     public bool ShowWatermarkWarning =>
         (VideoInfo?.HasOnlyWatermarkedSource == true || SelectedFormat?.RequiresWatermarkConsent == true) && !IsAudioOnlyMode;
+
+    public bool ShowUnknownWatermarkNotice =>
+        VideoInfo?.Platform == PlatformType.TikTok &&
+        VideoInfo?.WatermarkStatus == WatermarkStatus.Unknown &&
+        !IsAudioOnlyMode;
 
     partial void OnAllowWatermarkedDownloadChanged(bool value)
     {
@@ -409,20 +416,24 @@ public partial class MainViewModel : ObservableObject
                     SelectedFormat = null;
                     HasVideoInfo = true;
                     OnPropertyChanged(nameof(ShowWatermarkWarning));
+                    OnPropertyChanged(nameof(ShowUnknownWatermarkNotice));
                     ShowNotification("Não foi encontrada fonte sem marca-d'água para este vídeo. Confirme explicitamente caso deseje baixar a versão com marca-d'água.", "Warning");
                 }
                 else if (VideoInfo.Platform == PlatformType.TikTok && VideoInfo.WatermarkStatus == WatermarkStatus.Unknown)
                 {
-                    SelectedFormat = FormatOptions.FirstOrDefault(x => x.IsBestQuality) ?? FormatOptions.FirstOrDefault();
+                    // Não seleciona automaticamente formato de estado desconhecido como se fosse fonte limpa
+                    SelectedFormat = null;
                     HasVideoInfo = true;
                     OnPropertyChanged(nameof(ShowWatermarkWarning));
-                    ShowNotification($"Vídeo encontrado: {VideoInfo.Title} (Estado da marca-d'água não confirmado pelo extrator)", "Info");
+                    OnPropertyChanged(nameof(ShowUnknownWatermarkNotice));
+                    ShowNotification("Não foi possível confirmar a ausência de marca-d'água nos metadados deste vídeo. Selecione manualmente uma qualidade caso deseje baixar.", "Warning");
                 }
                 else
                 {
                     SelectedFormat = FormatOptions.FirstOrDefault(x => x.IsBestQuality) ?? FormatOptions.FirstOrDefault();
                     HasVideoInfo = true;
                     OnPropertyChanged(nameof(ShowWatermarkWarning));
+                    OnPropertyChanged(nameof(ShowUnknownWatermarkNotice));
                     ShowNotification($"Vídeo encontrado: {VideoInfo.Title}", "Success");
                 }
             }
@@ -735,6 +746,12 @@ public partial class MainViewModel : ObservableObject
             if (VideoInfo.Platform == PlatformType.TikTok && VideoInfo.WatermarkStatus == WatermarkStatus.Watermarked)
             {
                 ShowNotification("Nenhuma fonte sem marca-d'água foi encontrada para este vídeo. Selecione e confirme explicitamente a opção com marca-d'água (ou baixe somente o áudio) para continuar.", "Warning");
+                return;
+            }
+
+            if (VideoInfo.Platform == PlatformType.TikTok && VideoInfo.WatermarkStatus == WatermarkStatus.Unknown)
+            {
+                ShowNotification("O estado da marca-d'água não pôde ser verificado nos metadados. Selecione manualmente uma opção de qualidade (ou baixe somente o áudio) para continuar.", "Warning");
                 return;
             }
 

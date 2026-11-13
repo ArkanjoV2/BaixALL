@@ -16,19 +16,49 @@ public class FormatSelectionService : IFormatSelectionService
         @"^(?:h264|h265|bytevc1|hevc|avc1)_\d+p_\d+(?:-\d+)?$",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-    private static readonly Regex TikTokPlayFormatIdRegex = new(
-        @"^play(?:_addr)?(?:_(?:h264|h265|bytevc1))?(?:-\d+)?$",
+    private static readonly Regex TikTokPlayAddrFormatIdRegex = new(
+        @"^play_?addr(?:_(?:h264|h265|bytevc1|hevc|avc1))?(?:-\d+)?$",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     public const string CleanTikTokBestSelector =
-        "best[format_id!=download][format_id!=download_addr][format_note!*=?watermark][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        "bestvideo[format_id!=download][format_id!=download_addr][format_note!*=?watermark][vcodec!=bytevc2]+bestaudio/" +
-        "best[format_id!=download][format_id!=download_addr][format_note!*=?watermark][vcodec!=bytevc2][vcodec!=none]";
+        "best[format_id^=bytevc1_1080p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        "best[format_id^=h264_1080p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        "best[format_id^=bytevc1_720p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        "best[format_id^=h264_720p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        "best[format_id^=bytevc1_540p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        "best[format_id^=h264_540p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        "best[format_id^=bytevc1_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        "best[format_id^=h264_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        "best[format_id^=h265_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        "best[format_id^=hevc_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        "best[format_id^=avc1_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        "best[format_id^=play_addr][format_note*=Direct video][format_note!*=watermark][format_note!*=Download][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        "best[format_id^=play_addr][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        "best[format_note*=Playback video][format_note!*=watermark][format_note!*=Download][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        "best[format_note*=Direct video][format_note!*=watermark][format_note!*=Download][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        "best[format_note*=no watermark][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        "best[format_note*=without watermark][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        "best[format_note*=unwatermarked][vcodec!=bytevc2][vcodec!=none][acodec!=none]";
 
     public static string BuildCleanTikTokResolutionSelector(int height) =>
-        $"best[height<={height}][format_id!=download][format_id!=download_addr][format_note!*=?watermark][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        $"bestvideo[height<={height}][format_id!=download][format_id!=download_addr][format_note!*=?watermark][vcodec!=bytevc2]+bestaudio/" +
-        $"best[height<={height}][format_id!=download][format_id!=download_addr][format_note!*=?watermark][vcodec!=bytevc2][vcodec!=none]";
+        $"best[height<={height}][format_id^=bytevc1_1080p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        $"best[height<={height}][format_id^=h264_1080p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        $"best[height<={height}][format_id^=bytevc1_720p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        $"best[height<={height}][format_id^=h264_720p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        $"best[height<={height}][format_id^=bytevc1_540p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        $"best[height<={height}][format_id^=h264_540p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        $"best[height<={height}][format_id^=bytevc1_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        $"best[height<={height}][format_id^=h264_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        $"best[height<={height}][format_id^=h265_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        $"best[height<={height}][format_id^=hevc_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        $"best[height<={height}][format_id^=avc1_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        $"best[height<={height}][format_id^=play_addr][format_note*=Direct video][format_note!*=watermark][format_note!*=Download][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        $"best[height<={height}][format_id^=play_addr][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        $"best[height<={height}][format_note*=Playback video][format_note!*=watermark][format_note!*=Download][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        $"best[height<={height}][format_note*=Direct video][format_note!*=watermark][format_note!*=Download][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        $"best[height<={height}][format_note*=no watermark][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        $"best[height<={height}][format_note*=without watermark][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
+        $"best[height<={height}][format_note*=unwatermarked][vcodec!=bytevc2][vcodec!=none][acodec!=none]";
 
     public FormatSelectionService(IPlatformService? platformService = null)
     {
@@ -45,30 +75,44 @@ public class FormatSelectionService : IFormatSelectionService
         var formatId = (format.FormatId ?? string.Empty).Trim();
         var formatNote = (format.FormatNote ?? string.Empty).Trim();
 
-        bool hasNoWatermarkNote =
+        bool hasExplicitNoWatermarkNote =
             formatNote.Contains("no watermark", StringComparison.OrdinalIgnoreCase) ||
             formatNote.Contains("without watermark", StringComparison.OrdinalIgnoreCase) ||
             formatNote.Contains("unwatermarked", StringComparison.OrdinalIgnoreCase) ||
             formatNote.Contains("nowm", StringComparison.OrdinalIgnoreCase);
 
-        if (!hasNoWatermarkNote &&
+        bool hasExplicitWatermarkIndicator =
+            !hasExplicitNoWatermarkNote &&
             (formatNote.Contains("watermark", StringComparison.OrdinalIgnoreCase) ||
-             formatId.Equals("download", StringComparison.OrdinalIgnoreCase) ||
-             formatId.Equals("download_addr", StringComparison.OrdinalIgnoreCase) ||
-             formatId.StartsWith("download_", StringComparison.OrdinalIgnoreCase) ||
-             formatId.StartsWith("download-", StringComparison.OrdinalIgnoreCase)))
+             formatId.Contains("watermark", StringComparison.OrdinalIgnoreCase));
+
+        if (hasExplicitWatermarkIndicator)
         {
             return WatermarkStatus.Watermarked;
         }
 
-        bool isKnownPlayAddrStream =
-            TikTokPlayBitrateFormatIdRegex.IsMatch(formatId) ||
-            TikTokPlayFormatIdRegex.IsMatch(formatId) ||
-            hasNoWatermarkNote ||
+        bool isDownloadEndpointFormat =
+            formatId.Equals("download", StringComparison.OrdinalIgnoreCase) ||
+            formatId.Equals("download_addr", StringComparison.OrdinalIgnoreCase) ||
+            formatId.StartsWith("download_", StringComparison.OrdinalIgnoreCase) ||
+            formatId.StartsWith("download-", StringComparison.OrdinalIgnoreCase) ||
+            formatNote.Contains("Download video", StringComparison.OrdinalIgnoreCase);
+
+        if (isDownloadEndpointFormat && !hasExplicitNoWatermarkNote)
+        {
+            // download / download_addr sem confirmação explícita de marca-d'água nem de ausência de marca
+            return WatermarkStatus.Unknown;
+        }
+
+        bool hasExplicitDirectPlaybackNote =
             formatNote.Contains("Direct video", StringComparison.OrdinalIgnoreCase) ||
             formatNote.Contains("Playback video", StringComparison.OrdinalIgnoreCase);
 
-        if (isKnownPlayAddrStream)
+        bool hasIdentifiedCleanPlaybackId =
+            TikTokPlayBitrateFormatIdRegex.IsMatch(formatId) ||
+            TikTokPlayAddrFormatIdRegex.IsMatch(formatId);
+
+        if (hasExplicitNoWatermarkNote || hasExplicitDirectPlaybackNote || hasIdentifiedCleanPlaybackId)
         {
             return WatermarkStatus.NoWatermark;
         }
@@ -869,7 +913,7 @@ public class FormatSelectionService : IFormatSelectionService
                 Label = bestLabel,
                 Height = bestHeight > 0 ? bestHeight : null,
                 Fps = bestFps > 0 ? bestFps : null,
-                FormatSelector = CleanTikTokBestSelector,
+                FormatSelector = BuildVerifiedCleanTikTokSelector(cleanFormats),
                 IsBestQuality = true,
                 IsAudioOnly = false,
                 WatermarkStatus = WatermarkStatus.NoWatermark,
@@ -901,7 +945,7 @@ public class FormatSelectionService : IFormatSelectionService
                     Label = label,
                     Height = height,
                     Fps = fps > 0 ? fps : null,
-                    FormatSelector = BuildCleanTikTokResolutionSelector(height),
+                    FormatSelector = BuildVerifiedCleanTikTokSelector(cleanFormats, height),
                     IsBestQuality = false,
                     IsAudioOnly = false,
                     WatermarkStatus = WatermarkStatus.NoWatermark,
@@ -927,19 +971,19 @@ public class FormatSelectionService : IFormatSelectionService
                 .Select(f => f.Width)
                 .FirstOrDefault();
 
-            var bestLabel = "Melhor qualidade disponível (Marca-d'água não verificada)";
+            var bestLabel = "Qualidade disponível (Marca-d'água não verificada)";
             if (bestHeight > 0)
             {
                 var resName = GetTikTokResolutionLabel(bestHeight, bestWidth);
-                bestLabel = $"Melhor qualidade disponível ({resName} • Marca-d'água não verificada)";
+                bestLabel = $"Qualidade até {resName} (Marca-d'água não verificada)";
             }
 
             options.Add(new FormatOption
             {
                 Label = bestLabel,
                 Height = bestHeight > 0 ? bestHeight : null,
-                FormatSelector = CleanTikTokBestSelector,
-                IsBestQuality = true,
+                FormatSelector = BuildUnknownTikTokSelector(unknownFormats),
+                IsBestQuality = false, // NUNCA seleciona automaticamente formato não verificado como fonte limpa
                 IsAudioOnly = false,
                 WatermarkStatus = WatermarkStatus.Unknown,
                 RequiresWatermarkConsent = false,
@@ -958,7 +1002,7 @@ public class FormatSelectionService : IFormatSelectionService
                 {
                     Label = $"{resName} • Marca-d'água não verificada",
                     Height = height,
-                    FormatSelector = BuildCleanTikTokResolutionSelector(height),
+                    FormatSelector = BuildUnknownTikTokSelector(unknownFormats, height),
                     IsBestQuality = false,
                     IsAudioOnly = false,
                     WatermarkStatus = WatermarkStatus.Unknown,
@@ -1003,6 +1047,78 @@ public class FormatSelectionService : IFormatSelectionService
         });
 
         return options;
+    }
+
+    private static string BuildVerifiedCleanTikTokSelector(IReadOnlyList<VideoFormatRaw> cleanFormats, int? maxHeight = null)
+    {
+        var candidates = cleanFormats
+            .Where(f => !string.IsNullOrWhiteSpace(f.FormatId) &&
+                        f.WatermarkStatus == WatermarkStatus.NoWatermark &&
+                        !f.IsUnplayable &&
+                        f.HasVideo &&
+                        (!maxHeight.HasValue || !f.Height.HasValue || f.Height.Value <= maxHeight.Value))
+            .OrderByDescending(f => f.Height ?? 0)
+            .ThenByDescending(f => f.Width ?? 0)
+            .ThenByDescending(f => f.Fps ?? 0)
+            .ThenByDescending(f => f.HasAudio)
+            .ThenByDescending(f => IsPreferredTikTokCodec(f.VCodec))
+            .ThenByDescending(f => f.Tbr ?? 0)
+            .ThenByDescending(f => f.FileSize ?? f.FileSizeApprox ?? 0)
+            .Select(f => f.HasAudio ? f.FormatId.Trim() : $"{f.FormatId.Trim()}+bestaudio")
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        var fallbackSelector = maxHeight.HasValue
+            ? BuildCleanTikTokResolutionSelector(maxHeight.Value)
+            : CleanTikTokBestSelector;
+
+        return candidates.Count > 0
+            ? $"{string.Join("/", candidates)}/{fallbackSelector}"
+            : fallbackSelector;
+    }
+
+    private static string BuildUnknownTikTokSelector(IReadOnlyList<VideoFormatRaw> unknownFormats, int? maxHeight = null)
+    {
+        var candidates = unknownFormats
+            .Where(f => !string.IsNullOrWhiteSpace(f.FormatId) &&
+                        f.WatermarkStatus == WatermarkStatus.Unknown &&
+                        !f.IsUnplayable &&
+                        f.HasVideo &&
+                        (!maxHeight.HasValue || !f.Height.HasValue || f.Height.Value <= maxHeight.Value))
+            .OrderByDescending(f => f.Height ?? 0)
+            .ThenByDescending(f => f.Width ?? 0)
+            .ThenByDescending(f => f.Fps ?? 0)
+            .ThenByDescending(f => f.HasAudio)
+            .ThenByDescending(f => f.Tbr ?? 0)
+            .Select(f => f.HasAudio ? f.FormatId.Trim() : $"{f.FormatId.Trim()}+bestaudio")
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        if (candidates.Count > 0)
+        {
+            return string.Join("/", candidates);
+        }
+
+        return maxHeight.HasValue
+            ? $"best[height<={maxHeight.Value}][format_id!=download][vcodec!=bytevc2][vcodec!=none]"
+            : "best[format_id!=download][vcodec!=bytevc2][vcodec!=none]";
+    }
+
+    private static int IsPreferredTikTokCodec(string? vcodec)
+    {
+        if (string.IsNullOrWhiteSpace(vcodec)) return 0;
+        if (vcodec.Contains("h265", StringComparison.OrdinalIgnoreCase) ||
+            vcodec.Contains("hevc", StringComparison.OrdinalIgnoreCase) ||
+            vcodec.Contains("bytevc1", StringComparison.OrdinalIgnoreCase))
+        {
+            return 2;
+        }
+        if (vcodec.Contains("h264", StringComparison.OrdinalIgnoreCase) ||
+            vcodec.Contains("avc", StringComparison.OrdinalIgnoreCase))
+        {
+            return 1;
+        }
+        return 0;
     }
 
     public static string GetTikTokResolutionLabel(int height, int? width = null)

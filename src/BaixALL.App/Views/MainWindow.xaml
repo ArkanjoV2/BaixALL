@@ -447,6 +447,18 @@
                                 </StackPanel>
                             </Border>
 
+                            <!-- AVISO CLARO QUANDO O ESTADO DA MARCA-D'ÁGUA É DESCONHECIDO (SEM PROMETER RESULTADO LIMPO) -->
+                            <Border Background="#1E293B" BorderBrush="#64748B" BorderThickness="1"
+                                    Padding="14,12" Margin="0,0,0,16"
+                                    Visibility="{Binding ShowUnknownWatermarkNotice, Converter={StaticResource BoolToVis}}">
+                                <StackPanel>
+                                    <TextBlock Text="• Estado de marca-d'água não verificado nos metadados"
+                                               FontWeight="Bold" FontSize="13" Foreground="#94A3B8" Margin="0,0,0,4" />
+                                    <TextBlock Text="Os metadados retornados pelo extrator não permitem confirmar se este fluxo está sem marca-d'água. O BaixALL não seleciona automaticamente fontes não verificadas como limpas — escolha manualmente a qualidade abaixo caso deseje baixar."
+                                               Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
                             <!-- Configuração de Download para este Vídeo -->
                             <Grid Margin="0,0,0,16">
                                 <Grid.ColumnDefinitions>
