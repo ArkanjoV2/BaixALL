@@ -100,6 +100,7 @@ public partial class PlaylistInfo : ObservableObject
     {
         PlatformType.Instagram => IsCarousel ? "CARROSSEL DO INSTAGRAM" : "INSTAGRAM",
         PlatformType.Twitter => "PUBLICAÇÃO DO X/TWITTER",
+        PlatformType.TikTok => "PUBLICAÇÃO DO TIKTOK",
         _ => "PLAYLIST DO YOUTUBE"
     };
 
@@ -107,6 +108,7 @@ public partial class PlaylistInfo : ObservableObject
     {
         PlatformType.Instagram => "#F472B6",
         PlatformType.Twitter => "#38BDF8",
+        PlatformType.TikTok => "#25F4EE",
         _ => "#FFFFFF"
     };
 
@@ -114,12 +116,13 @@ public partial class PlaylistInfo : ObservableObject
     {
         PlatformType.Instagram => "#331424",
         PlatformType.Twitter => "#0C2538",
+        PlatformType.TikTok => "#112A30",
         _ => "#0078D4"
     };
 
     public string AuthorOrChannelLabel => Platform switch
     {
-        PlatformType.Instagram or PlatformType.Twitter => string.IsNullOrWhiteSpace(Channel)
+        PlatformType.Instagram or PlatformType.Twitter or PlatformType.TikTok => string.IsNullOrWhiteSpace(Channel)
             ? "Autor desconhecido"
             : $"Autor: @{Channel.TrimStart('@')}",
         _ => string.IsNullOrWhiteSpace(Channel)

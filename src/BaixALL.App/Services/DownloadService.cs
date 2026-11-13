@@ -294,10 +294,7 @@ public class DownloadService : IDownloadService
                 }
             }
 
-            // Marca o item como concluído com mensagem positiva na UI Thread
-            _dispatcher.Invoke(() => item.MarkCompleted(completedFilePath));
-
-            // Salva no histórico de forma segura
+            // Salva no histórico de forma segura antes de sinalizar IsCompleted=true
             long fileSize = 0;
             try
             {
@@ -308,11 +305,23 @@ public class DownloadService : IDownloadService
             }
             catch { }
 
+            var finalFormat = item.Format;
+            if (!string.IsNullOrWhiteSpace(completedFilePath))
+            {
+                var ext = Path.GetExtension(completedFilePath).TrimStart('.').ToUpperInvariant();
+                if (!string.IsNullOrEmpty(ext))
+                {
+                    finalFormat = ext;
+                }
+            }
+
             _historyService.AddItem(new HistoryItem
             {
+                VideoId = item.Request.VideoId,
                 Title = item.Title,
+                Channel = item.Request.Channel,
                 Quality = item.Quality,
-                Format = item.Format,
+                Format = finalFormat,
                 FinalFilePath = completedFilePath,
                 FileSizeBytes = fileSize,
                 Status = "Concluído",
@@ -320,6 +329,9 @@ public class DownloadService : IDownloadService
                 Platform = item.PlatformDisplayName,
                 CanonicalKey = item.CanonicalKey
             });
+
+            // Marca o item como concluído com mensagem positiva na UI Thread
+            _dispatcher.Invoke(() => item.MarkCompleted(completedFilePath));
         }
         catch (OperationCanceledException)
         {

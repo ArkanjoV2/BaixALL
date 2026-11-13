@@ -42,7 +42,10 @@ public class MediaAnalysisService : IMediaAnalysisService, IYoutubeService
                 PlatformType.YouTube => "A URL informada não pertence ao YouTube ou possui formato inválido.",
                 PlatformType.Instagram => "A URL informada não pertence ao Instagram ou possui formato inválido.",
                 PlatformType.Twitter => "A URL informada não pertence ao X/Twitter ou possui formato inválido.",
-                _ => "A URL informada não pertence a uma plataforma suportada (YouTube, Instagram ou X/Twitter)."
+                PlatformType.TikTok => UrlValidator.IsTikTokPhotoUrl(url)
+                    ? "Publicações compostas apenas por fotos/slideshows do TikTok não são suportadas nesta versão."
+                    : "A URL informada do TikTok não aponta para um vídeo público individual suportado (perfis, lives e Stories não são suportados).",
+                _ => "A URL informada não pertence a uma plataforma suportada (YouTube, Instagram, X/Twitter ou TikTok)."
             };
             throw new ArgumentException(msg, nameof(url));
         }
@@ -65,6 +68,10 @@ public class MediaAnalysisService : IMediaAnalysisService, IYoutubeService
             if (platform == PlatformType.Instagram)
             {
                 throw new InvalidOperationException("Não foi possível encontrar fluxos de vídeo válidos nesta publicação do Instagram.");
+            }
+            if (platform == PlatformType.TikTok)
+            {
+                throw new InvalidOperationException("Esta publicação do TikTok não contém fluxos de vídeo disponíveis (publicações compostas apenas por fotos/slideshows não são suportadas).");
             }
         }
 
@@ -129,7 +136,10 @@ public class MediaAnalysisService : IMediaAnalysisService, IYoutubeService
                 PlatformType.YouTube => "A URL informada não pertence ao YouTube ou possui formato inválido.",
                 PlatformType.Instagram => "A URL informada não pertence ao Instagram ou possui formato inválido.",
                 PlatformType.Twitter => "A URL informada não pertence ao X/Twitter ou possui formato inválido.",
-                _ => "A URL informada não pertence a uma plataforma suportada (YouTube, Instagram ou X/Twitter)."
+                PlatformType.TikTok => UrlValidator.IsTikTokPhotoUrl(url)
+                    ? "Publicações compostas apenas por fotos/slideshows do TikTok não são suportadas nesta versão."
+                    : "A URL informada do TikTok não aponta para um vídeo público individual suportado (perfis, lives e Stories não são suportados).",
+                _ => "A URL informada não pertence a uma plataforma suportada (YouTube, Instagram, X/Twitter ou TikTok)."
             };
             throw new ArgumentException(msg, nameof(url));
         }
@@ -160,7 +170,7 @@ public class MediaAnalysisService : IMediaAnalysisService, IYoutubeService
             };
         }
 
-        // Para Instagram ou Twitter: obtemos o JSON de metadados
+        // Para Instagram, Twitter ou TikTok: obtemos o JSON de metadados
         using var jsonDoc = await _ytDlpService.GetMetadataJsonAsync(normalizedUrl, ct).ConfigureAwait(false);
         var root = jsonDoc.RootElement;
 
@@ -172,6 +182,11 @@ public class MediaAnalysisService : IMediaAnalysisService, IYoutubeService
 
         if (isPlaylistType)
         {
+            if (platform == PlatformType.TikTok)
+            {
+                throw new InvalidOperationException("Apenas vídeos públicos individuais do TikTok são suportados nesta versão (coleções, perfis ou slideshows de fotos não são suportados).");
+            }
+
             var collection = _formatSelectionService.ParsePlaylistInfo(jsonDoc, normalizedUrl);
             collection.Platform = platform;
             collection.IsCarousel = (platform != PlatformType.YouTube);
@@ -211,6 +226,10 @@ public class MediaAnalysisService : IMediaAnalysisService, IYoutubeService
                 if (platform == PlatformType.Instagram)
                 {
                     throw new InvalidOperationException("Não foi possível encontrar fluxos de vídeo válidos nesta publicação do Instagram.");
+                }
+                if (platform == PlatformType.TikTok)
+                {
+                    throw new InvalidOperationException("Esta publicação do TikTok não contém fluxos de vídeo disponíveis (publicações compostas apenas por fotos/slideshows não são suportadas).");
                 }
             }
 

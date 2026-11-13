@@ -1,0 +1,32 @@
+{
+  "id": "6742501081818877190",
+  "title": "TikTok video #6742501081818877190",
+  "description": "Vídeo clássico apenas com fonte watermarked disponível",
+  "uploader": "patroxofficial",
+  "channel": "Patrox",
+  "uploader_id": "6600001",
+  "duration": 13,
+  "upload_date": "20190930",
+  "webpage_url": "https://www.tiktok.com/@patroxofficial/video/6742501081818877190",
+  "extractor": "TikTok",
+  "extractor_key": "TikTok",
+  "thumbnail": "https://p16-common-sign.tiktokcdn.com/tos-maliva-p-0068/cover.image",
+  "formats": [
+    {
+      "format_id": "audio",
+      "format_note": "Default audio",
+      "ext": "mp3",
+      "vcodec": "none",
+      "acodec": "mp3"
+    },
+    {
+      "format_id": "download",
+      "format_note": "watermarked",
+      "ext": "mp4",
+      "vcodec": "h264",
+      "acodec": "aac",
+      "filesize": 1953953,
+      "preference": -2
+    }
+  ]
+}

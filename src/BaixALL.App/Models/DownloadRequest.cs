@@ -13,8 +13,10 @@ public class DownloadProgressReport
 
 public class DownloadRequest
 {
+    public string VideoId { get; set; } = string.Empty;
     public string VideoUrl { get; set; } = string.Empty;
     public string VideoTitle { get; set; } = string.Empty;
+    public string Channel { get; set; } = string.Empty;
     public string DestinationFolder { get; set; } = string.Empty;
     public FormatOption Format { get; set; } = new();
     public ContainerOption Container { get; set; } = ContainerOption.DefaultOptions[0];

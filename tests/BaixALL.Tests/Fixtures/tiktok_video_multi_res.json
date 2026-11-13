@@ -1,0 +1,108 @@
+{
+  "id": "7707063215498399006",
+  "title": "that song you just discovered on TikTok? someone's been singing it fo...",
+  "description": "that song you just discovered on TikTok? someone's been singing it for decades. we caught up with @Kenny Loggins and @Melissa Etheridge to talk about music.",
+  "uploader": "tiktok",
+  "channel": "TikTok",
+  "uploader_id": "107955",
+  "duration": 38,
+  "upload_date": "20261110",
+  "webpage_url": "https://www.tiktok.com/@tiktok/video/7707063215498399006",
+  "extractor": "TikTok",
+  "extractor_key": "TikTok",
+  "thumbnail": "https://p16-common-sign.tiktokcdn.com/tos-useast8-p-0068-tx2/originCover.image",
+  "thumbnails": [
+    {
+      "id": "cover",
+      "url": "https://p16-common-sign.tiktokcdn.com/tos-useast8-p-0068-tx2/cover.image"
+    },
+    {
+      "id": "originCover",
+      "url": "https://p16-common-sign.tiktokcdn.com/tos-useast8-p-0068-tx2/originCover.image"
+    }
+  ],
+  "formats": [
+    {
+      "format_id": "audio",
+      "format_note": "Default audio",
+      "ext": "m4a",
+      "vcodec": "none",
+      "acodec": "aac",
+      "quality": -1
+    },
+    {
+      "format_id": "download",
+      "format_note": "watermarked",
+      "ext": "mp4",
+      "vcodec": "h264",
+      "acodec": "aac",
+      "filesize": 7828343,
+      "preference": -2
+    },
+    {
+      "format_id": "h264_540p_1337673-0",
+      "format_note": "",
+      "ext": "mp4",
+      "width": 576,
+      "height": 1024,
+      "vcodec": "h264",
+      "acodec": "aac",
+      "tbr": 1337.673,
+      "filesize": 6493545,
+      "quality": 1,
+      "preference": -1
+    },
+    {
+      "format_id": "bytevc1_540p_587209-0",
+      "format_note": "",
+      "ext": "mp4",
+      "width": 576,
+      "height": 1024,
+      "vcodec": "h265",
+      "acodec": "aac",
+      "tbr": 587.209,
+      "filesize": 2850535,
+      "quality": 1,
+      "preference": -1
+    },
+    {
+      "format_id": "bytevc1_720p_770993-0",
+      "format_note": "",
+      "ext": "mp4",
+      "width": 720,
+      "height": 1280,
+      "vcodec": "h265",
+      "acodec": "aac",
+      "tbr": 770.993,
+      "filesize": 3742685,
+      "quality": 2,
+      "preference": -1
+    },
+    {
+      "format_id": "bytevc1_1080p_1360255-0",
+      "format_note": "",
+      "ext": "mp4",
+      "width": 1080,
+      "height": 1920,
+      "vcodec": "h265",
+      "acodec": "aac",
+      "tbr": 1360.255,
+      "filesize": 6602120,
+      "quality": 3,
+      "preference": -1
+    },
+    {
+      "format_id": "bytevc2_540p_412345-0",
+      "format_note": "UNPLAYABLE",
+      "ext": "mp4",
+      "width": 576,
+      "height": 1024,
+      "vcodec": "bytevc2",
+      "acodec": "aac",
+      "tbr": 412.345,
+      "filesize": 2001234,
+      "quality": 1,
+      "preference": -100
+    }
+  ]
+}

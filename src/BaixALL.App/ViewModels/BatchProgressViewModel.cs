@@ -19,6 +19,7 @@ public partial class BatchProgressViewModel : ObservableObject
         PlatformType.YouTube => "YouTube",
         PlatformType.Instagram => "Instagram",
         PlatformType.Twitter => "X / Twitter",
+        PlatformType.TikTok => "TikTok",
         _ => "Lote"
     };
 
@@ -27,6 +28,7 @@ public partial class BatchProgressViewModel : ObservableObject
         PlatformType.YouTube => "#FF4444",
         PlatformType.Instagram => "#F472B6",
         PlatformType.Twitter => "#38BDF8",
+        PlatformType.TikTok => "#25F4EE",
         _ => "#94A3B8"
     };
 
@@ -35,6 +37,7 @@ public partial class BatchProgressViewModel : ObservableObject
         PlatformType.YouTube => "#331414",
         PlatformType.Instagram => "#331424",
         PlatformType.Twitter => "#0C2538",
+        PlatformType.TikTok => "#112A30",
         _ => "#1E293B"
     };
 

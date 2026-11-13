@@ -26,6 +26,7 @@ public class HistoryItem
     {
         "Instagram" => "#F472B6",
         "X / Twitter" or "Twitter" => "#38BDF8",
+        "TikTok" => "#25F4EE",
         "YouTube" => "#FF4444",
         _ => "#94A3B8"
     };
@@ -34,6 +35,7 @@ public class HistoryItem
     {
         "Instagram" => "#331424",
         "X / Twitter" or "Twitter" => "#0C2538",
+        "TikTok" => "#112A30",
         "YouTube" => "#331414",
         _ => "#1E293B"
     };

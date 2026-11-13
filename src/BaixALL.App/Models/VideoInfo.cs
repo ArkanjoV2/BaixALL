@@ -16,8 +16,38 @@ public class VideoInfo
     public string OriginalUrl { get; set; } = string.Empty;
     public PlatformType Platform { get; set; } = PlatformType.YouTube;
     public string Author => Channel;
+    public string Description { get; set; } = string.Empty;
     public string CanonicalKey { get; set; } = string.Empty;
+    public WatermarkStatus WatermarkStatus { get; set; } = WatermarkStatus.NotApplicable;
     public List<VideoFormatRaw> Formats { get; set; } = new();
+
+    public bool HasCleanSource => WatermarkStatus == WatermarkStatus.NoWatermark;
+    public bool HasOnlyWatermarkedSource => WatermarkStatus == WatermarkStatus.Watermarked;
+    public bool HasWatermarkBadge => Platform == PlatformType.TikTok && WatermarkStatus != WatermarkStatus.NotApplicable;
+
+    public string WatermarkStatusText => WatermarkStatus switch
+    {
+        WatermarkStatus.NoWatermark => "✓ Sem marca-d'água",
+        WatermarkStatus.Watermarked => "⚠ Apenas com marca-d'água",
+        WatermarkStatus.Unknown => "• Marca-d'água não verificada",
+        _ => string.Empty
+    };
+
+    public string WatermarkBadgeColor => WatermarkStatus switch
+    {
+        WatermarkStatus.NoWatermark => "#34D399",
+        WatermarkStatus.Watermarked => "#FBBF24",
+        WatermarkStatus.Unknown => "#94A3B8",
+        _ => "#94A3B8"
+    };
+
+    public string WatermarkBackgroundColor => WatermarkStatus switch
+    {
+        WatermarkStatus.NoWatermark => "#0D2B22",
+        WatermarkStatus.Watermarked => "#33240C",
+        WatermarkStatus.Unknown => "#1E293B",
+        _ => "#1E293B"
+    };
 
     public string FormattedDuration
     {
@@ -55,6 +85,13 @@ public class VideoFormatRaw
     public double? Abr { get; set; }
     public int? Asr { get; set; }
     public int? AudioChannels { get; set; }
+    public int? Preference { get; set; }
+    public double? Quality { get; set; }
+    public WatermarkStatus WatermarkStatus { get; set; } = WatermarkStatus.NotApplicable;
+
+    public bool IsUnplayable =>
+        string.Equals(VCodec, "bytevc2", StringComparison.OrdinalIgnoreCase) ||
+        (!string.IsNullOrEmpty(FormatNote) && FormatNote.Contains("UNPLAYABLE", StringComparison.OrdinalIgnoreCase));
 
     private static readonly HashSet<string> StaticImageExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -65,6 +102,11 @@ public class VideoFormatRaw
     {
         get
         {
+            if (IsUnplayable)
+            {
+                return false;
+            }
+
             // Se possui codec de vídeo explícito (ex: avc1, vp9, gif animado), é um fluxo de vídeo
             if (!string.IsNullOrEmpty(VCodec))
             {

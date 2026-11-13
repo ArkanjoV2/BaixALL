@@ -50,6 +50,9 @@ public class PlatformService : IPlatformService
         if (TwitterDomainRegex.IsMatch(trimmed))
             return PlatformType.Twitter;
 
+        if (UrlValidator.IsTikTokDomain(trimmed))
+            return PlatformType.TikTok;
+
         return PlatformType.Unknown;
     }
 
@@ -66,6 +69,7 @@ public class PlatformService : IPlatformService
             PlatformType.YouTube => UrlValidator.IsValidYouTubeUrl(trimmed),
             PlatformType.Instagram => InstagramMediaRegex.IsMatch(trimmed),
             PlatformType.Twitter => TwitterStatusRegex.IsMatch(trimmed),
+            PlatformType.TikTok => UrlValidator.IsValidTikTokUrl(trimmed),
             _ => false
         };
     }
@@ -89,6 +93,9 @@ public class PlatformService : IPlatformService
             case PlatformType.Twitter:
                 var twMatch = TwitterStatusRegex.Match(trimmed);
                 return twMatch.Success && twMatch.Groups.Count > 1 ? twMatch.Groups[1].Value : null;
+
+            case PlatformType.TikTok:
+                return UrlValidator.ExtractTikTokVideoId(trimmed);
 
             default:
                 return null;
@@ -130,6 +137,9 @@ public class PlatformService : IPlatformService
                 }
                 return trimmed;
 
+            case PlatformType.TikTok:
+                return UrlValidator.NormalizeTikTokUrl(trimmed);
+
             default:
                 return trimmed;
         }
@@ -149,6 +159,7 @@ public class PlatformService : IPlatformService
                 PlatformType.YouTube => $"yt:{effectiveId}",
                 PlatformType.Instagram => $"ig:{effectiveId}",
                 PlatformType.Twitter => $"x:{effectiveId}",
+                PlatformType.TikTok => $"tt:{effectiveId}",
                 _ => $"raw:{effectiveId}"
             };
         }
@@ -174,6 +185,7 @@ public class PlatformService : IPlatformService
             PlatformType.YouTube => "YouTube",
             PlatformType.Instagram => "Instagram",
             PlatformType.Twitter => "X / Twitter",
+            PlatformType.TikTok => "TikTok",
             _ => "Desconhecido"
         };
     }
@@ -185,6 +197,7 @@ public class PlatformService : IPlatformService
             PlatformType.YouTube => "#FF4444",   // Vermelho YouTube
             PlatformType.Instagram => "#F472B6", // Rosa/Magenta Instagram
             PlatformType.Twitter => "#38BDF8",   // Azul Céu Twitter/X
+            PlatformType.TikTok => "#25F4EE",    // Ciano TikTok
             _ => "#94A3B8"
         };
     }
@@ -196,6 +209,7 @@ public class PlatformService : IPlatformService
             PlatformType.YouTube => "#331414",
             PlatformType.Instagram => "#331424",
             PlatformType.Twitter => "#0C2538",
+            PlatformType.TikTok => "#112A30",
             _ => "#1E293B"
         };
     }

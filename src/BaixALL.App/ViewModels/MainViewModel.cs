@@ -45,12 +45,14 @@ public partial class MainViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(VideoPlatformDisplayName))]
     [NotifyPropertyChangedFor(nameof(VideoPlatformBadgeColor))]
     [NotifyPropertyChangedFor(nameof(VideoPlatformBackgroundColor))]
+    [NotifyPropertyChangedFor(nameof(ShowWatermarkWarning))]
     private VideoInfo? _videoInfo;
 
     public string VideoPlatformDisplayName => VideoInfo?.Platform switch
     {
         PlatformType.Instagram => "Instagram",
         PlatformType.Twitter => "X / Twitter",
+        PlatformType.TikTok => "TikTok",
         _ => "YouTube"
     };
 
@@ -58,6 +60,7 @@ public partial class MainViewModel : ObservableObject
     {
         PlatformType.Instagram => "#F472B6",
         PlatformType.Twitter => "#38BDF8",
+        PlatformType.TikTok => "#25F4EE",
         _ => "#FF4444"
     };
 
@@ -65,6 +68,7 @@ public partial class MainViewModel : ObservableObject
     {
         PlatformType.Instagram => "#331424",
         PlatformType.Twitter => "#0C2538",
+        PlatformType.TikTok => "#112A30",
         _ => "#331414"
     };
 
@@ -99,6 +103,7 @@ public partial class MainViewModel : ObservableObject
     public ObservableCollection<FormatOption> FormatOptions { get; } = new();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowWatermarkWarning))]
     private FormatOption? _selectedFormat;
 
     public ObservableCollection<ContainerOption> ContainerOptions { get; } = new();
@@ -112,7 +117,22 @@ public partial class MainViewModel : ObservableObject
     private AudioFormatOption? _selectedAudioFormat;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowWatermarkWarning))]
     private bool _isAudioOnlyMode;
+
+    [ObservableProperty]
+    private bool _allowWatermarkedDownload;
+
+    public bool ShowWatermarkWarning =>
+        (VideoInfo?.HasOnlyWatermarkedSource == true || SelectedFormat?.RequiresWatermarkConsent == true) && !IsAudioOnlyMode;
+
+    partial void OnAllowWatermarkedDownloadChanged(bool value)
+    {
+        if (value && SelectedFormat == null && VideoInfo?.HasOnlyWatermarkedSource == true)
+        {
+            SelectedFormat = FormatOptions.FirstOrDefault(x => x.RequiresWatermarkConsent);
+        }
+    }
 
     [ObservableProperty]
     private string _destinationFolder = string.Empty;
@@ -271,7 +291,7 @@ public partial class MainViewModel : ObservableObject
             if (Clipboard.ContainsText())
             {
                 var text = Clipboard.GetText()?.Trim();
-                if (!string.IsNullOrWhiteSpace(text) && UrlValidator.IsValidYouTubeUrl(text) && string.IsNullOrWhiteSpace(UrlInput))
+                if (!string.IsNullOrWhiteSpace(text) && _platformService.IsSupportedUrl(text) && string.IsNullOrWhiteSpace(UrlInput))
                 {
                     UrlInput = text;
                     _ = AnalyzeAsync();
@@ -286,13 +306,21 @@ public partial class MainViewModel : ObservableObject
     {
         if (string.IsNullOrWhiteSpace(UrlInput))
         {
-            ShowNotification("Por favor, cole a URL de um conteúdo do YouTube, Instagram ou X/Twitter.", "Warning");
+            ShowNotification("Por favor, cole a URL de um conteúdo do YouTube, Instagram, X/Twitter ou TikTok.", "Warning");
             return;
         }
 
+        var detectedPlatform = _platformService.DetectPlatform(UrlInput);
         if (!_platformService.IsSupportedUrl(UrlInput))
         {
-            ShowNotification("A URL informada não pertence a uma plataforma suportada (YouTube, Instagram ou X/Twitter).", "Error");
+            var unsupportedMsg = detectedPlatform switch
+            {
+                PlatformType.TikTok => UrlValidator.IsTikTokPhotoUrl(UrlInput)
+                    ? "Publicações compostas apenas por fotos/slideshows do TikTok não são suportadas nesta versão."
+                    : "A URL informada do TikTok não aponta para um vídeo público individual suportado (perfis, lives e Stories não são suportados).",
+                _ => "A URL informada não pertence a uma plataforma suportada (YouTube, Instagram, X/Twitter ou TikTok)."
+            };
+            ShowNotification(unsupportedMsg, "Error");
             return;
         }
 
@@ -303,7 +331,7 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        var platform = _platformService.DetectPlatform(UrlInput);
+        var platform = detectedPlatform;
 
         // Se for URL pura de playlist do YouTube, analisa a playlist diretamente
         if (platform == PlatformType.YouTube && UrlValidator.IsPurePlaylistUrl(UrlInput))
@@ -320,6 +348,7 @@ public partial class MainViewModel : ObservableObject
         HasVideoInfo = false;
         HasPlaylistInfo = false;
         CanRetryAnalysis = false;
+        AllowWatermarkedDownload = false;
         ClearNotification();
 
         _analysisCts?.Cancel();
@@ -374,10 +403,28 @@ public partial class MainViewModel : ObservableObject
                     FormatOptions.Add(opt);
                 }
 
-                SelectedFormat = FormatOptions.FirstOrDefault(x => x.IsBestQuality) ?? FormatOptions.FirstOrDefault();
-                HasVideoInfo = true;
-
-                ShowNotification($"Vídeo encontrado: {VideoInfo.Title}", "Success");
+                if (VideoInfo.Platform == PlatformType.TikTok && VideoInfo.WatermarkStatus == WatermarkStatus.Watermarked)
+                {
+                    // Não seleciona automaticamente formato com marca-d'água
+                    SelectedFormat = null;
+                    HasVideoInfo = true;
+                    OnPropertyChanged(nameof(ShowWatermarkWarning));
+                    ShowNotification("Não foi encontrada fonte sem marca-d'água para este vídeo. Confirme explicitamente caso deseje baixar a versão com marca-d'água.", "Warning");
+                }
+                else if (VideoInfo.Platform == PlatformType.TikTok && VideoInfo.WatermarkStatus == WatermarkStatus.Unknown)
+                {
+                    SelectedFormat = FormatOptions.FirstOrDefault(x => x.IsBestQuality) ?? FormatOptions.FirstOrDefault();
+                    HasVideoInfo = true;
+                    OnPropertyChanged(nameof(ShowWatermarkWarning));
+                    ShowNotification($"Vídeo encontrado: {VideoInfo.Title} (Estado da marca-d'água não confirmado pelo extrator)", "Info");
+                }
+                else
+                {
+                    SelectedFormat = FormatOptions.FirstOrDefault(x => x.IsBestQuality) ?? FormatOptions.FirstOrDefault();
+                    HasVideoInfo = true;
+                    OnPropertyChanged(nameof(ShowWatermarkWarning));
+                    ShowNotification($"Vídeo encontrado: {VideoInfo.Title}", "Success");
+                }
             }
         }
         catch (OperationCanceledException)
@@ -617,8 +664,10 @@ public partial class MainViewModel : ObservableObject
             var item = itemsToEnqueue[i];
             var request = new DownloadRequest
             {
+                VideoId = item.Id,
                 VideoUrl = item.VideoUrl,
                 VideoTitle = item.Title,
+                Channel = item.Channel,
                 DestinationFolder = targetFolder,
                 Format = SelectedBatchFormat,
                 Container = SelectedContainer ?? ContainerOption.DefaultOptions[0],
@@ -669,9 +718,34 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void StartDownload()
     {
-        if (VideoInfo == null || SelectedFormat == null)
+        if (VideoInfo == null)
         {
             ShowNotification("Por favor, analise um vídeo antes de iniciar o download.", "Warning");
+            return;
+        }
+
+        var selectedFmt = SelectedFormat;
+        if (IsAudioOnlyMode && selectedFmt == null)
+        {
+            selectedFmt = FormatOptions.FirstOrDefault(x => x.IsAudioOnly) ?? FormatOptions.FirstOrDefault();
+        }
+
+        if (selectedFmt == null)
+        {
+            if (VideoInfo.Platform == PlatformType.TikTok && VideoInfo.WatermarkStatus == WatermarkStatus.Watermarked)
+            {
+                ShowNotification("Nenhuma fonte sem marca-d'água foi encontrada para este vídeo. Selecione e confirme explicitamente a opção com marca-d'água (ou baixe somente o áudio) para continuar.", "Warning");
+                return;
+            }
+
+            ShowNotification("Por favor, analise um vídeo antes de iniciar o download.", "Warning");
+            return;
+        }
+
+        var isAudioOnly = IsAudioOnlyMode || selectedFmt.IsAudioOnly;
+        if (!isAudioOnly && selectedFmt.RequiresWatermarkConsent && !AllowWatermarkedDownload)
+        {
+            ShowNotification("Confirme explicitamente a caixa de autorização para baixar a versão com marca-d'água.", "Warning");
             return;
         }
 
@@ -697,14 +771,14 @@ public partial class MainViewModel : ObservableObject
 
         FileHelper.EnsureDirectoryExists(DestinationFolder);
 
-        var isAudioOnly = IsAudioOnlyMode || SelectedFormat.IsAudioOnly;
-
         var request = new DownloadRequest
         {
+            VideoId = VideoInfo.Id,
             VideoUrl = VideoInfo.OriginalUrl,
             VideoTitle = VideoInfo.Title,
+            Channel = VideoInfo.Channel,
             DestinationFolder = DestinationFolder,
-            Format = SelectedFormat,
+            Format = selectedFmt,
             Container = SelectedContainer ?? ContainerOption.DefaultOptions[0],
             AudioFormat = SelectedAudioFormat ?? AudioFormatOption.DefaultOptions[0],
             IsAudioOnly = isAudioOnly,

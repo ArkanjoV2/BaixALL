@@ -9,6 +9,8 @@ public class FormatOption
     public bool IsBestQuality { get; set; }
     public bool IsAudioOnly { get; set; }
     public string Description { get; set; } = string.Empty;
+    public WatermarkStatus WatermarkStatus { get; set; } = WatermarkStatus.NotApplicable;
+    public bool RequiresWatermarkConsent { get; set; }
 
     public override string ToString() => Label;
 }
