@@ -178,23 +178,45 @@ public class TikTokSupportTests
         Assert.Contains("Sem marca-d'água", bestOpt.Label);
         Assert.Contains("1080x1920", bestOpt.Label);
 
-        // Verifica que todas as opções de vídeo usam seletores restritos a fontes limpas, sem '?watermark' e sem '/best' genérico
+        // Verifica que todas as opções de vídeo usam exclusivamente os format_id exatos classificados como NoWatermark, sem seletores genéricos ou fallbacks
+        var expectedCleanIds = info.Formats
+            .Where(f => f.WatermarkStatus == WatermarkStatus.NoWatermark)
+            .Select(f => f.FormatId)
+            .ToHashSet(StringComparer.Ordinal);
+
         var videoOptions = options.Where(o => !o.IsAudioOnly).ToList();
         Assert.Equal(4, videoOptions.Count);
         foreach (var opt in videoOptions)
         {
             Assert.Equal(WatermarkStatus.NoWatermark, opt.WatermarkStatus);
-            Assert.DoesNotContain("format_note!*=?watermark", opt.FormatSelector);
-            Assert.Contains("vcodec!=bytevc2", opt.FormatSelector);
-            Assert.Contains("acodec!=none", opt.FormatSelector);
-            Assert.DoesNotContain("download/", opt.FormatSelector);
-            Assert.DoesNotContain("/best", opt.FormatSelector.Replace("/bestvideo", "").Replace("/best[", ""));
+            Assert.DoesNotContain("best[", opt.FormatSelector, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("format_id^=", opt.FormatSelector, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("format_note", opt.FormatSelector, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("download", opt.FormatSelector, StringComparison.OrdinalIgnoreCase);
+
+            var selectorTokens = opt.FormatSelector.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            Assert.NotEmpty(selectorTokens);
+            foreach (var token in selectorTokens)
+            {
+                var videoFormatId = token.EndsWith("+bestaudio", StringComparison.Ordinal)
+                    ? token.Substring(0, token.Length - "+bestaudio".Length)
+                    : token;
+                Assert.Contains(videoFormatId, expectedCleanIds);
+            }
         }
 
-        // Verifica ordem decrescente de resoluções (1080x1920 -> 720x1280 -> 576x1024)
+        // Verifica ordem decrescente de resoluções (1080x1920 -> 720x1280 -> 576x1024) e respeito estrito ao limite de altura
         Assert.Equal(1920, videoOptions[1].Height);
+        Assert.Equal("bytevc1_1080p_1360255-0/bytevc1_720p_770993-0/bytevc1_540p_587209-0/h264_540p_1337673-0", videoOptions[1].FormatSelector);
+
         Assert.Equal(1280, videoOptions[2].Height);
+        Assert.Equal("bytevc1_720p_770993-0/bytevc1_540p_587209-0/h264_540p_1337673-0", videoOptions[2].FormatSelector);
+        Assert.DoesNotContain("bytevc1_1080p_1360255-0", videoOptions[2].FormatSelector);
+
         Assert.Equal(1024, videoOptions[3].Height);
+        Assert.Equal("bytevc1_540p_587209-0/h264_540p_1337673-0", videoOptions[3].FormatSelector);
+        Assert.DoesNotContain("bytevc1_1080p_1360255-0", videoOptions[3].FormatSelector);
+        Assert.DoesNotContain("bytevc1_720p_770993-0", videoOptions[3].FormatSelector);
     }
 
     // 8. Comportamento quando não existe fonte limpa (apenas watermarked disponível)
@@ -312,7 +334,6 @@ public class TikTokSupportTests
             Assert.False(opt.RequiresWatermarkConsent); // Não confunde Unknown com Watermarked
             Assert.Contains("Marca-d'água não verificada", opt.Label);
             Assert.DoesNotContain("Sem marca-d'água", opt.Label, StringComparison.OrdinalIgnoreCase);
-            Assert.DoesNotContain(FormatSelectionService.CleanTikTokBestSelector, opt.FormatSelector);
         }
 
         // Valida comportamento na MainViewModel: não seleciona automaticamente como fonte limpa, exibe aviso claro e permite seleção manual
@@ -457,8 +478,8 @@ public class TikTokSupportTests
         };
 
         Assert.Equal(WatermarkStatus.Unknown, FormatSelectionService.ClassifyTikTokFormatWatermark(fmtWithoutNote));
-        Assert.DoesNotContain("format_note!*=?watermark", FormatSelectionService.CleanTikTokBestSelector);
-        Assert.DoesNotContain("?watermark", FormatSelectionService.BuildCleanTikTokResolutionSelector(1080));
+        Assert.Throws<InvalidOperationException>(() =>
+            FormatSelectionService.BuildVerifiedCleanTikTokSelector(new[] { fmtWithoutNote }));
     }
 
     [Theory]
@@ -563,10 +584,10 @@ public class TikTokSupportTests
         Assert.Equal(WatermarkStatus.NoWatermark, bestOpt.WatermarkStatus);
         Assert.Equal(1280, bestOpt.Height);
         Assert.Contains("720p (HD) Vertical (720x1280) • Sem marca-d'água", bestOpt.Label);
-        Assert.StartsWith("bytevc1_720p_770993-0/", bestOpt.FormatSelector);
+        Assert.Equal("bytevc1_720p_770993-0", bestOpt.FormatSelector);
         Assert.DoesNotContain("unknown_1080p", bestOpt.FormatSelector);
         Assert.DoesNotContain("download_addr", bestOpt.FormatSelector);
-        Assert.DoesNotContain("format_note!*=?watermark", bestOpt.FormatSelector);
+        Assert.DoesNotContain("best[", bestOpt.FormatSelector);
 
         // Nenhuma opção de vídeo 1080p (Unknown ou Watermarked) deve aparecer quando há fonte limpa
         var videoOptions = options.Where(o => !o.IsAudioOnly).ToList();
@@ -754,10 +775,594 @@ public class TikTokSupportTests
     [InlineData("ERROR: [TikTok] 123456: This video is requiring login", "login")]
     [InlineData("ERROR: [TikTok] 123456: Video not available (status code 10202)", "removido ou não está mais disponível")]
     [InlineData("ERROR: Unsupported URL: https://www.tiktok.com/?_r=1", "link curto do TikTok expirou")]
+    [InlineData("ERROR: [TikTok] 7707063215498399006: Requested format is not available", "fonte sem marca-d'água selecionada deixou de estar disponível")]
     public void ParseYtDlpError_MapsTikTokErrorsToFriendlyPortugueseMessages(string rawStderr, string expectedSubstring)
     {
         var friendly = YtDlpService.ParseYtDlpError(rawStderr);
         Assert.Contains(expectedSubstring, friendly, StringComparison.OrdinalIgnoreCase);
+    }
+
+    // Revisão Final (Seção 2): Testes de regressão de segurança na seleção de formatos
+    [Fact]
+    public void BuildVerifiedCleanTikTokSelector_UsesOnlyExactVerifiedCleanIds_AndNeverIncludesPrefixOrGenericFallback()
+    {
+        var formats = new List<VideoFormatRaw>
+        {
+            new()
+            {
+                FormatId = "bytevc1_1080p_1423099-0",
+                FormatNote = "",
+                Ext = "mp4",
+                Width = 1080,
+                Height = 1920,
+                VCodec = "h265",
+                ACodec = "aac",
+                Tbr = 1423.099,
+                Preference = -1,
+                WatermarkStatus = WatermarkStatus.NoWatermark
+            },
+            new()
+            {
+                FormatId = "h264_720p_1173641-0",
+                FormatNote = "",
+                Ext = "mp4",
+                Width = 720,
+                Height = 1280,
+                VCodec = "h264",
+                ACodec = "aac",
+                Tbr = 1173.641,
+                Preference = -1,
+                WatermarkStatus = WatermarkStatus.NoWatermark
+            },
+            // Formato Unknown cujo ID começa com h264_ (mas não segue o padrão de reprodução limpa)
+            new()
+            {
+                FormatId = "h264_unverified_custom",
+                FormatNote = "",
+                Ext = "mp4",
+                Width = 1080,
+                Height = 1920,
+                VCodec = "h264",
+                ACodec = "aac",
+                Tbr = 3000.0,
+                Preference = -1,
+                WatermarkStatus = FormatSelectionService.ClassifyTikTokFormatWatermark(new VideoFormatRaw
+                {
+                    FormatId = "h264_unverified_custom",
+                    VCodec = "h264",
+                    ACodec = "aac",
+                    Width = 1080,
+                    Height = 1920
+                })
+            },
+            // Formato Watermarked
+            new()
+            {
+                FormatId = "download",
+                FormatNote = "watermarked",
+                Ext = "mp4",
+                Width = 1080,
+                Height = 1920,
+                VCodec = "h264",
+                ACodec = "aac",
+                Tbr = 2500.0,
+                Preference = -2,
+                WatermarkStatus = WatermarkStatus.Watermarked
+            }
+        };
+
+        Assert.Equal(WatermarkStatus.Unknown, formats[2].WatermarkStatus);
+
+        var selector = FormatSelectionService.BuildVerifiedCleanTikTokSelector(formats);
+
+        Assert.Equal("bytevc1_1080p_1423099-0/h264_720p_1173641-0", selector);
+        Assert.DoesNotContain("h264_unverified_custom", selector, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("download", selector, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("best[", selector, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("format_id^=", selector, StringComparison.OrdinalIgnoreCase);
+
+        var selector720 = FormatSelectionService.BuildCleanTikTokResolutionSelector(formats, 1280);
+        Assert.Equal("h264_720p_1173641-0", selector720);
+        Assert.DoesNotContain("bytevc1_1080p_1423099-0", selector720);
+    }
+
+    [Fact]
+    public void BuildVerifiedCleanTikTokSelector_EnforcesResolutionLimitsAndCombinesAudioForVideoOnlyStreams()
+    {
+        var cleanFormats = new List<VideoFormatRaw>
+        {
+            // 1080p sem áudio próprio (requer combinação +bestaudio sem ampliar faixa de vídeo)
+            new()
+            {
+                FormatId = "bytevc1_1080p_1423099-0",
+                Ext = "mp4",
+                Width = 1080,
+                Height = 1920,
+                VCodec = "h265",
+                ACodec = "none",
+                Tbr = 1423.099,
+                WatermarkStatus = WatermarkStatus.NoWatermark
+            },
+            // 720p com áudio integrado
+            new()
+            {
+                FormatId = "h264_720p_1173641-0",
+                Ext = "mp4",
+                Width = 720,
+                Height = 1280,
+                VCodec = "h264",
+                ACodec = "aac",
+                Tbr = 1173.641,
+                WatermarkStatus = WatermarkStatus.NoWatermark
+            },
+            // 540p sem áudio próprio
+            new()
+            {
+                FormatId = "h264_540p_608633-0",
+                Ext = "mp4",
+                Width = 576,
+                Height = 1024,
+                VCodec = "h264",
+                ACodec = "none",
+                Tbr = 608.633,
+                WatermarkStatus = WatermarkStatus.NoWatermark
+            },
+            // Formato limpo sem altura conhecida (não deve entrar em opções limitadas por resolução)
+            new()
+            {
+                FormatId = "play_addr",
+                FormatNote = "Direct video",
+                Ext = "mp4",
+                Width = null,
+                Height = null,
+                VCodec = "h264",
+                ACodec = "aac",
+                WatermarkStatus = WatermarkStatus.NoWatermark
+            }
+        };
+
+        var bestSelector = FormatSelectionService.BuildVerifiedCleanTikTokSelector(cleanFormats);
+        Assert.Equal("bytevc1_1080p_1423099-0+bestaudio/h264_720p_1173641-0/h264_540p_608633-0+bestaudio/play_addr", bestSelector);
+
+        var max1280Selector = FormatSelectionService.BuildCleanTikTokResolutionSelector(cleanFormats, 1280);
+        Assert.Equal("h264_720p_1173641-0/h264_540p_608633-0+bestaudio", max1280Selector);
+        Assert.DoesNotContain("bytevc1_1080p_1423099-0", max1280Selector);
+        Assert.DoesNotContain("play_addr", max1280Selector);
+
+        var max1024Selector = FormatSelectionService.BuildCleanTikTokResolutionSelector(cleanFormats, 1024);
+        Assert.Equal("h264_540p_608633-0+bestaudio", max1024Selector);
+    }
+
+    [Fact]
+    public async Task WhenCleanFormatDisappearsAtDownloadTime_NeverFallsBackToUnknownOrWatermarked_AndFailsFriendlily()
+    {
+        const string analysisJson = """
+        {
+          "id": "7707063215498399006",
+          "title": "Vídeo onde a fonte limpa desaparece no momento do download",
+          "uploader": "tiktok",
+          "channel": "TikTok",
+          "duration": 25,
+          "webpage_url": "https://www.tiktok.com/@tiktok/video/7707063215498399006",
+          "extractor": "TikTok",
+          "extractor_key": "TikTok",
+          "formats": [
+            {
+              "format_id": "bytevc1_720p_770993-0",
+              "format_note": "",
+              "ext": "mp4",
+              "width": 720,
+              "height": 1280,
+              "vcodec": "h265",
+              "acodec": "aac",
+              "tbr": 770.993,
+              "preference": -1
+            },
+            {
+              "format_id": "h264_unverified_1080p",
+              "format_note": "",
+              "ext": "mp4",
+              "width": 1080,
+              "height": 1920,
+              "vcodec": "h264",
+              "acodec": "aac",
+              "tbr": 2500.0,
+              "preference": -1
+            },
+            {
+              "format_id": "download",
+              "format_note": "watermarked",
+              "ext": "mp4",
+              "width": 1080,
+              "height": 1920,
+              "vcodec": "h264",
+              "acodec": "aac",
+              "tbr": 2100.0,
+              "preference": -2
+            }
+          ]
+        }
+        """;
+
+        // Na execução do download, o formato limpo bytevc1_720p_770993-0 desapareceu; restam apenas Unknown e Watermarked
+        var downloadTimeAvailableFormats = new List<VideoFormatRaw>
+        {
+            new()
+            {
+                FormatId = "h264_unverified_1080p",
+                Ext = "mp4",
+                Width = 1080,
+                Height = 1920,
+                VCodec = "h264",
+                ACodec = "aac",
+                WatermarkStatus = WatermarkStatus.Unknown
+            },
+            new()
+            {
+                FormatId = "download",
+                FormatNote = "watermarked",
+                Ext = "mp4",
+                Width = 1080,
+                Height = 1920,
+                VCodec = "h264",
+                ACodec = "aac",
+                WatermarkStatus = WatermarkStatus.Watermarked
+            }
+        };
+
+        using var doc = JsonDocument.Parse(analysisJson);
+        var info = _formatService.ParseVideoInfo(doc, "https://www.tiktok.com/@tiktok/video/7707063215498399006");
+        var bestCleanOption = _formatService.BuildFormatOptions(info).Single(o => o.IsBestQuality);
+
+        Assert.Equal("bytevc1_720p_770993-0", bestCleanOption.FormatSelector);
+
+        var tempDir = Path.Combine(Path.GetTempPath(), $"baixall_tt_missing_clean_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(tempDir);
+
+        try
+        {
+            var mockYtDlp = new StrictSelectorTikTokYtDlpService(analysisJson, downloadTimeAvailableFormats, tempDir);
+            var settingsSvc = new FakeTikTokSettingsService(tempDir);
+            var historySvc = new HistoryService(null, Path.Combine(tempDir, "history.json"));
+            var dispatcher = new SyncDispatcherService();
+            var downloadSvc = new DownloadService(mockYtDlp, historySvc, settingsSvc, dispatcher);
+
+            var item = downloadSvc.EnqueueDownload(new DownloadRequest
+            {
+                VideoId = info.Id,
+                VideoUrl = info.OriginalUrl,
+                VideoTitle = info.Title,
+                Channel = info.Channel,
+                DestinationFolder = tempDir,
+                Format = bestCleanOption,
+                Platform = PlatformType.TikTok,
+                CanonicalKey = info.CanonicalKey
+            }, info.ThumbnailUrl);
+
+            var timeout = DateTime.Now.AddSeconds(5);
+            while (DateTime.Now < timeout && item.IsActive)
+            {
+                await Task.Delay(20);
+            }
+
+            Assert.False(item.IsActive);
+            Assert.False(item.IsCompleted);
+            Assert.True(item.IsFailed);
+            Assert.Contains("fonte sem marca-d'água selecionada deixou de estar disponível", item.StatusMessage, StringComparison.OrdinalIgnoreCase);
+            Assert.Empty(historySvc.GetHistory());
+            Assert.Empty(Directory.GetFiles(tempDir, "*.mp4"));
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public async Task YtDlpInfoJsonSimulation_ValidatesExactSelectorResolutionAudioMergeAndNoFallbackOnMissingCleanFormat()
+    {
+        const string fullJson = """
+        {
+          "id": "7707063215498399006",
+          "title": "Simulação offline de seletores com info-json",
+          "uploader": "tiktok",
+          "channel": "TikTok",
+          "duration": 20,
+          "webpage_url": "https://www.tiktok.com/@tiktok/video/7707063215498399006",
+          "extractor": "TikTok",
+          "extractor_key": "TikTok",
+          "formats": [
+            {
+              "format_id": "audio",
+              "format_note": "Audio",
+              "ext": "m4a",
+              "vcodec": "none",
+              "acodec": "aac",
+              "abr": 128.0,
+              "url": "https://example.invalid/audio.m4a"
+            },
+            {
+              "format_id": "bytevc1_1080p_1423099-0",
+              "format_note": "",
+              "ext": "mp4",
+              "width": 1080,
+              "height": 1920,
+              "vcodec": "h265",
+              "acodec": "none",
+              "tbr": 1423.099,
+              "preference": -1,
+              "url": "https://example.invalid/clean1080_videoonly.mp4"
+            },
+            {
+              "format_id": "h264_720p_1173641-0",
+              "format_note": "",
+              "ext": "mp4",
+              "width": 720,
+              "height": 1280,
+              "vcodec": "h264",
+              "acodec": "aac",
+              "tbr": 1173.641,
+              "preference": -1,
+              "url": "https://example.invalid/clean720_muxed.mp4"
+            },
+            {
+              "format_id": "h264_unverified_1080p",
+              "format_note": "",
+              "ext": "mp4",
+              "width": 1080,
+              "height": 1920,
+              "vcodec": "h264",
+              "acodec": "aac",
+              "tbr": 2800.0,
+              "preference": -1,
+              "url": "https://example.invalid/unknown1080.mp4"
+            },
+            {
+              "format_id": "download",
+              "format_note": "watermarked",
+              "ext": "mp4",
+              "width": 1080,
+              "height": 1920,
+              "vcodec": "h264",
+              "acodec": "aac",
+              "tbr": 2400.0,
+              "preference": -2,
+              "url": "https://example.invalid/watermarked1080.mp4"
+            }
+          ]
+        }
+        """;
+
+        const string missingCleanFormatsJson = """
+        {
+          "id": "7707063215498399006",
+          "title": "Simulação offline quando formatos limpos desaparecem",
+          "uploader": "tiktok",
+          "channel": "TikTok",
+          "duration": 20,
+          "webpage_url": "https://www.tiktok.com/@tiktok/video/7707063215498399006",
+          "extractor": "TikTok",
+          "extractor_key": "TikTok",
+          "formats": [
+            {
+              "format_id": "h264_unverified_1080p",
+              "format_note": "",
+              "ext": "mp4",
+              "width": 1080,
+              "height": 1920,
+              "vcodec": "h264",
+              "acodec": "aac",
+              "tbr": 2800.0,
+              "preference": -1,
+              "url": "https://example.invalid/unknown1080.mp4"
+            },
+            {
+              "format_id": "download",
+              "format_note": "watermarked",
+              "ext": "mp4",
+              "width": 1080,
+              "height": 1920,
+              "vcodec": "h264",
+              "acodec": "aac",
+              "tbr": 2400.0,
+              "preference": -2,
+              "url": "https://example.invalid/watermarked1080.mp4"
+            }
+          ]
+        }
+        """;
+
+        using var doc = JsonDocument.Parse(fullJson);
+        var info = _formatService.ParseVideoInfo(doc, "https://www.tiktok.com/@tiktok/video/7707063215498399006");
+        var options = _formatService.BuildFormatOptions(info);
+
+        var bestOpt = options.Single(o => o.IsBestQuality);
+        var opt720 = options.Single(o => !o.IsBestQuality && !o.IsAudioOnly && o.Height == 1280);
+
+        Assert.Equal("bytevc1_1080p_1423099-0+bestaudio/h264_720p_1173641-0", bestOpt.FormatSelector);
+        Assert.Equal("h264_720p_1173641-0", opt720.FormatSelector);
+
+        // Avaliação determinística em memória e, quando yt-dlp estiver instalado localmente, validação real com --load-info-json
+        var ytDlpExe = TryResolveLocalYtDlpExecutable();
+        if (ytDlpExe != null)
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), $"baixall_infojson_{Guid.NewGuid():N}");
+            Directory.CreateDirectory(tempDir);
+            try
+            {
+                var fullJsonFile = Path.Combine(tempDir, "full.json");
+                var missingJsonFile = Path.Combine(tempDir, "missing.json");
+                await File.WriteAllTextAsync(fullJsonFile, fullJson);
+                await File.WriteAllTextAsync(missingJsonFile, missingCleanFormatsJson);
+
+                // 1. Melhor opção (1080p sem áudio próprio -> deve combinar bytevc1_1080p_1423099-0+audio)
+                var resBest = await ProcessRunner.RunAsync(
+                    ytDlpExe,
+                    new[] { "--load-info-json", fullJsonFile, "--simulate", "-f", bestOpt.FormatSelector, "-O", "%(format_id)s" });
+                Assert.True(resBest.IsSuccess, resBest.StandardError);
+                Assert.Equal("bytevc1_1080p_1423099-0+audio", resBest.StandardOutput.Trim());
+
+                // 2. Opção 720p limitada -> deve escolher h264_720p_1173641-0
+                var res720 = await ProcessRunner.RunAsync(
+                    ytDlpExe,
+                    new[] { "--load-info-json", fullJsonFile, "--simulate", "-f", opt720.FormatSelector, "-O", "%(format_id)s" });
+                Assert.True(res720.IsSuccess, res720.StandardError);
+                Assert.Equal("h264_720p_1173641-0", res720.StandardOutput.Trim());
+
+                // 3. Se os formatos limpos desaparecerem na hora do download -> yt-dlp deve falhar sem escolher h264_unverified_1080p nem download
+                var resMissing = await ProcessRunner.RunAsync(
+                    ytDlpExe,
+                    new[] { "--load-info-json", missingJsonFile, "--simulate", "-f", bestOpt.FormatSelector, "-O", "%(format_id)s" });
+                Assert.False(resMissing.IsSuccess);
+                Assert.Contains("Requested format is not available", resMissing.StandardError, StringComparison.OrdinalIgnoreCase);
+                Assert.DoesNotContain("h264_unverified_1080p", resMissing.StandardOutput, StringComparison.OrdinalIgnoreCase);
+                Assert.DoesNotContain("download", resMissing.StandardOutput, StringComparison.OrdinalIgnoreCase);
+            }
+            finally
+            {
+                if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
+            }
+        }
+    }
+
+    // Revisão Final (Seção 4): Garante que o histórico já está persistido no instante em que IsCompleted se torna true
+    [Fact]
+    public async Task DownloadService_RecordsHistoryBeforeSignalingIsCompleted_EliminatingCompletionRaceCondition()
+    {
+        var tempDir = Path.Combine(Path.GetTempPath(), $"baixall_tt_hist_order_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(tempDir);
+
+        try
+        {
+            var jsonPath = GetFixturePath("tiktok_video_multi_res.json");
+            var rawJson = File.ReadAllText(jsonPath);
+
+            var mockYtDlp = new FakeTikTokYtDlpService(rawJson, tempDir);
+            var settingsSvc = new FakeTikTokSettingsService(tempDir);
+            var historySvc = new HistoryService(null, Path.Combine(tempDir, "history.json"));
+            var dispatcher = new SyncDispatcherService();
+            var downloadSvc = new DownloadService(mockYtDlp, historySvc, settingsSvc, dispatcher);
+
+            using var doc = JsonDocument.Parse(rawJson);
+            var info = _formatService.ParseVideoInfo(doc, "https://www.tiktok.com/@tiktok/video/7707063215498399006");
+            var bestFormat = _formatService.BuildFormatOptions(info).First(o => o.IsBestQuality);
+
+            HistoryItem? snapshotAtCompletionInstant = null;
+
+            var item = downloadSvc.EnqueueDownload(new DownloadRequest
+            {
+                VideoId = info.Id,
+                VideoUrl = info.OriginalUrl,
+                VideoTitle = info.Title,
+                Channel = info.Channel,
+                DestinationFolder = tempDir,
+                Format = bestFormat,
+                Platform = PlatformType.TikTok,
+                CanonicalKey = info.CanonicalKey
+            }, info.ThumbnailUrl);
+
+            item.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(DownloadItemViewModel.IsCompleted) && item.IsCompleted)
+                {
+                    snapshotAtCompletionInstant = historySvc.GetHistory().FirstOrDefault();
+                }
+            };
+
+            var timeout = DateTime.Now.AddSeconds(5);
+            while (DateTime.Now < timeout && !item.IsCompleted)
+            {
+                await Task.Delay(20);
+            }
+
+            Assert.True(item.IsCompleted);
+            Assert.NotNull(snapshotAtCompletionInstant);
+            Assert.Equal("7707063215498399006", snapshotAtCompletionInstant!.VideoId);
+            Assert.Equal("@tiktok", snapshotAtCompletionInstant.Channel);
+            Assert.Equal("TikTok", snapshotAtCompletionInstant.Platform);
+            Assert.Equal("tt:7707063215498399006", snapshotAtCompletionInstant.CanonicalKey);
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
+        }
+    }
+
+    private static string? TryResolveLocalYtDlpExecutable()
+    {
+        var managedPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "BaixALL", "tools", "yt-dlp", "yt-dlp.exe");
+
+        if (File.Exists(managedPath))
+        {
+            return managedPath;
+        }
+
+        var pathEnv = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+        foreach (var dir in pathEnv.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
+        {
+            try
+            {
+                var candidate = Path.Combine(dir.Trim(), "yt-dlp.exe");
+                if (File.Exists(candidate)) return candidate;
+            }
+            catch { }
+        }
+
+        return null;
+    }
+
+    private sealed class StrictSelectorTikTokYtDlpService : IYtDlpService
+    {
+        private readonly string _analysisJson;
+        private readonly IReadOnlyList<VideoFormatRaw> _downloadTimeFormats;
+        private readonly string _outputFolder;
+
+        public StrictSelectorTikTokYtDlpService(
+            string analysisJson,
+            IReadOnlyList<VideoFormatRaw> downloadTimeFormats,
+            string outputFolder)
+        {
+            _analysisJson = analysisJson;
+            _downloadTimeFormats = downloadTimeFormats;
+            _outputFolder = outputFolder;
+        }
+
+        public Task<JsonDocument> GetMetadataJsonAsync(string url, CancellationToken ct = default) =>
+            Task.FromResult(JsonDocument.Parse(_analysisJson));
+
+        public Task<JsonDocument> GetPlaylistMetadataJsonAsync(string playlistUrl, CancellationToken ct = default) =>
+            Task.FromResult(JsonDocument.Parse(_analysisJson));
+
+        public async Task<string> DownloadAsync(DownloadRequest request, IProgress<DownloadProgressReport> progress, CancellationToken ct = default)
+        {
+            await Task.Delay(10, ct);
+
+            var selectorTokens = (request.Format?.FormatSelector ?? string.Empty)
+                .Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+            var matched = selectorTokens
+                .Select(t => t.EndsWith("+bestaudio", StringComparison.Ordinal)
+                    ? t.Substring(0, t.Length - "+bestaudio".Length)
+                    : t)
+                .FirstOrDefault(id => _downloadTimeFormats.Any(f => string.Equals(f.FormatId, id, StringComparison.Ordinal)));
+
+            if (matched == null)
+            {
+                bool isCleanTikTok =
+                    request.Platform == PlatformType.TikTok &&
+                    !request.IsAudioOnly &&
+                    request.Format?.WatermarkStatus == WatermarkStatus.NoWatermark;
+
+                var rawError = $"ERROR: [TikTok] {request.VideoId}: Requested format is not available";
+                throw new InvalidOperationException(YtDlpService.ParseYtDlpError(rawError, isCleanTikTok));
+            }
+
+            var outPath = FileHelper.GetUniqueFilePath(_outputFolder, request.VideoTitle, "mp4");
+            await File.WriteAllBytesAsync(outPath, new byte[] { 0x00, 0x01, 0x02, 0x03 }, ct);
+            return outPath;
+        }
     }
 
     private sealed class FakeTikTokYtDlpService : IYtDlpService

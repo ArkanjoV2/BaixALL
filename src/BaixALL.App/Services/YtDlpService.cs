@@ -291,7 +291,13 @@ public class YtDlpService : IYtDlpService
                 {
                     throw new OperationCanceledException(ct);
                 }
-                var friendlyError = ParseYtDlpError(result.StandardError);
+
+                bool isCleanTikTokRequest =
+                    request.Platform == PlatformType.TikTok &&
+                    !request.IsAudioOnly &&
+                    request.Format?.WatermarkStatus == WatermarkStatus.NoWatermark;
+
+                var friendlyError = ParseYtDlpError(result.StandardError, isCleanTikTokRequest);
                 _logger?.Error($"Falha no download. Erro: {result.StandardError}");
                 throw new InvalidOperationException(friendlyError);
             }
@@ -535,7 +541,7 @@ public class YtDlpService : IYtDlpService
         return env;
     }
 
-    public static string ParseYtDlpError(string? rawError)
+    public static string ParseYtDlpError(string? rawError, bool isCleanTikTokRequest = false)
     {
         if (string.IsNullOrWhiteSpace(rawError))
             return "Ocorreu um erro desconhecido durante a operação.";
@@ -564,7 +570,14 @@ public class YtDlpService : IYtDlpService
             return "O link curto do TikTok expirou, é inválido ou não redirecionou para um vídeo público.";
 
         if (lower.Contains("requested format is not available"))
+        {
+            if (isCleanTikTokRequest || lower.Contains("[tiktok]"))
+            {
+                return "A fonte sem marca-d'água selecionada deixou de estar disponível para este vídeo. O download foi encerrado sem utilizar outra fonte não verificada.";
+            }
+
             return "O formato de vídeo solicitado não está disponível nesta publicação.";
+        }
 
         if (lower.Contains("no video could be found in this tweet"))
             return "Esta publicação do X/Twitter não contém nenhum vídeo.";

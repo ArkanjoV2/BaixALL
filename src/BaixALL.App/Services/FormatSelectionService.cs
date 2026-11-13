@@ -20,46 +20,6 @@ public class FormatSelectionService : IFormatSelectionService
         @"^play_?addr(?:_(?:h264|h265|bytevc1|hevc|avc1))?(?:-\d+)?$",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-    public const string CleanTikTokBestSelector =
-        "best[format_id^=bytevc1_1080p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        "best[format_id^=h264_1080p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        "best[format_id^=bytevc1_720p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        "best[format_id^=h264_720p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        "best[format_id^=bytevc1_540p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        "best[format_id^=h264_540p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        "best[format_id^=bytevc1_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        "best[format_id^=h264_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        "best[format_id^=h265_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        "best[format_id^=hevc_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        "best[format_id^=avc1_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        "best[format_id^=play_addr][format_note*=Direct video][format_note!*=watermark][format_note!*=Download][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        "best[format_id^=play_addr][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        "best[format_note*=Playback video][format_note!*=watermark][format_note!*=Download][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        "best[format_note*=Direct video][format_note!*=watermark][format_note!*=Download][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        "best[format_note*=no watermark][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        "best[format_note*=without watermark][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        "best[format_note*=unwatermarked][vcodec!=bytevc2][vcodec!=none][acodec!=none]";
-
-    public static string BuildCleanTikTokResolutionSelector(int height) =>
-        $"best[height<={height}][format_id^=bytevc1_1080p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        $"best[height<={height}][format_id^=h264_1080p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        $"best[height<={height}][format_id^=bytevc1_720p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        $"best[height<={height}][format_id^=h264_720p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        $"best[height<={height}][format_id^=bytevc1_540p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        $"best[height<={height}][format_id^=h264_540p_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        $"best[height<={height}][format_id^=bytevc1_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        $"best[height<={height}][format_id^=h264_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        $"best[height<={height}][format_id^=h265_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        $"best[height<={height}][format_id^=hevc_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        $"best[height<={height}][format_id^=avc1_][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        $"best[height<={height}][format_id^=play_addr][format_note*=Direct video][format_note!*=watermark][format_note!*=Download][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        $"best[height<={height}][format_id^=play_addr][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        $"best[height<={height}][format_note*=Playback video][format_note!*=watermark][format_note!*=Download][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        $"best[height<={height}][format_note*=Direct video][format_note!*=watermark][format_note!*=Download][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        $"best[height<={height}][format_note*=no watermark][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        $"best[height<={height}][format_note*=without watermark][vcodec!=bytevc2][vcodec!=none][acodec!=none]/" +
-        $"best[height<={height}][format_note*=unwatermarked][vcodec!=bytevc2][vcodec!=none][acodec!=none]";
-
     public FormatSelectionService(IPlatformService? platformService = null)
     {
         _platformService = platformService ?? new PlatformService();
@@ -865,7 +825,11 @@ public class FormatSelectionService : IFormatSelectionService
         }
 
         var cleanFormats = info.Formats
-            .Where(f => f.HasVideo && !f.IsUnplayable && f.WatermarkStatus == WatermarkStatus.NoWatermark)
+            .Where(f => f.HasVideo &&
+                        !f.IsUnplayable &&
+                        !string.IsNullOrWhiteSpace(f.FormatId) &&
+                        f.WatermarkStatus == WatermarkStatus.NoWatermark &&
+                        ClassifyTikTokFormatWatermark(f) == WatermarkStatus.NoWatermark)
             .ToList();
 
         var unknownFormats = info.Formats
@@ -945,7 +909,7 @@ public class FormatSelectionService : IFormatSelectionService
                     Label = label,
                     Height = height,
                     Fps = fps > 0 ? fps : null,
-                    FormatSelector = BuildVerifiedCleanTikTokSelector(cleanFormats, height),
+                    FormatSelector = BuildCleanTikTokResolutionSelector(cleanFormats, height),
                     IsBestQuality = false,
                     IsAudioOnly = false,
                     WatermarkStatus = WatermarkStatus.NoWatermark,
@@ -1049,14 +1013,20 @@ public class FormatSelectionService : IFormatSelectionService
         return options;
     }
 
-    private static string BuildVerifiedCleanTikTokSelector(IReadOnlyList<VideoFormatRaw> cleanFormats, int? maxHeight = null)
+    public static string BuildVerifiedCleanTikTokSelector(IReadOnlyList<VideoFormatRaw> cleanFormats, int? maxHeight = null)
     {
+        if (cleanFormats == null)
+        {
+            throw new ArgumentNullException(nameof(cleanFormats));
+        }
+
         var candidates = cleanFormats
             .Where(f => !string.IsNullOrWhiteSpace(f.FormatId) &&
                         f.WatermarkStatus == WatermarkStatus.NoWatermark &&
+                        ClassifyTikTokFormatWatermark(f) == WatermarkStatus.NoWatermark &&
                         !f.IsUnplayable &&
                         f.HasVideo &&
-                        (!maxHeight.HasValue || !f.Height.HasValue || f.Height.Value <= maxHeight.Value))
+                        (!maxHeight.HasValue || (f.Height.HasValue && f.Height.Value > 0 && f.Height.Value <= maxHeight.Value)))
             .OrderByDescending(f => f.Height ?? 0)
             .ThenByDescending(f => f.Width ?? 0)
             .ThenByDescending(f => f.Fps ?? 0)
@@ -1068,14 +1038,16 @@ public class FormatSelectionService : IFormatSelectionService
             .Distinct(StringComparer.Ordinal)
             .ToList();
 
-        var fallbackSelector = maxHeight.HasValue
-            ? BuildCleanTikTokResolutionSelector(maxHeight.Value)
-            : CleanTikTokBestSelector;
+        if (candidates.Count == 0)
+        {
+            throw new InvalidOperationException("Nenhum formato comprovadamente sem marca-d'água está disponível para construir o seletor.");
+        }
 
-        return candidates.Count > 0
-            ? $"{string.Join("/", candidates)}/{fallbackSelector}"
-            : fallbackSelector;
+        return string.Join("/", candidates);
     }
+
+    public static string BuildCleanTikTokResolutionSelector(IReadOnlyList<VideoFormatRaw> cleanFormats, int maxHeight) =>
+        BuildVerifiedCleanTikTokSelector(cleanFormats, maxHeight);
 
     private static string BuildUnknownTikTokSelector(IReadOnlyList<VideoFormatRaw> unknownFormats, int? maxHeight = null)
     {
@@ -1084,7 +1056,7 @@ public class FormatSelectionService : IFormatSelectionService
                         f.WatermarkStatus == WatermarkStatus.Unknown &&
                         !f.IsUnplayable &&
                         f.HasVideo &&
-                        (!maxHeight.HasValue || !f.Height.HasValue || f.Height.Value <= maxHeight.Value))
+                        (!maxHeight.HasValue || (f.Height.HasValue && f.Height.Value > 0 && f.Height.Value <= maxHeight.Value)))
             .OrderByDescending(f => f.Height ?? 0)
             .ThenByDescending(f => f.Width ?? 0)
             .ThenByDescending(f => f.Fps ?? 0)
