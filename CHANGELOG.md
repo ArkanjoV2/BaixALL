@@ -7,6 +7,29 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ---
 
+## [1.4.0] - 2026-11-13
+
+### Integração de Suporte ao TikTok com Verificação de Marca-d'Água
+
+Adiciona suporte nativo à análise e ao download de vídeos públicos do **TikTok**, priorizando fontes diretas de reprodução sem marca-d'água disponibilizadas pela plataforma e garantindo transparência total sobre o estado de cada formato:
+
+### ✨ Funcionalidades Adicionadas
+- **Reconhecimento e Normalização de URLs do TikTok:** Suporte a links canônicos (`tiktok.com/@usuario/video/ID`, `m.tiktok.com/v/ID.html`, `tiktok.com/share/video/ID`, `tiktok.com/embed/v2/ID`) e links curtos compartilhados (`vm.tiktok.com`, `vt.tiktok.com`, `tiktok.com/t/`), com resolução para chave canônica única (`tt:<videoId>`) sem colisão com YouTube (`yt:`), Instagram (`ig:`) e X/Twitter (`x:`).
+- **Identificação Visual da Plataforma:** Badge turquesa `TikTok` (`#25F4EE` sobre `#112A30`) integrado à tela de análise, à fila de downloads e ao histórico persistente, com inferência retrocompatível para itens de histórico.
+- **Classificação Estrita de Marca-d'Água (`WatermarkStatus`):**
+  - `NoWatermark` (`✓ Sem marca-d'água`): atribuído exclusivamente quando há evidência positiva nos metadados do extrator (`play_addr`, nota `Direct video` / `Playback video` ou padrão de fluxo de reprodução `bytevc1_<res>_<bitrate>-<idx>` / `h264_<res>_<bitrate>-<idx>` sem marcador `watermark`).
+  - `Unknown` (`• Marca-d'água não verificada`): atribuído quando os metadados não permitem confirmar ausência nem presença de sobreposição; não promete vídeo limpo e exige seleção manual explícita pelo usuário.
+  - `Watermarked` (`⚠ Apenas com marca-d'água`): atribuído a formatos explicitamente identificados com marca-d'água (`download` / `download_addr` com nota `watermarked`); nunca é selecionado automaticamente e exige consentimento explícito na interface (`AllowWatermarkedDownload`).
+- **Seletores Determinísticos por `format_id` Exatos:** Opções `NoWatermark` e `Unknown` utilizam exclusivamente os `format_id` exatos validados na análise (combinando `+bestaudio` apenas quando a faixa de vídeo limpa não possui áudio embutido), sem seletores genéricos por prefixo ou fallback `best[...]`, descartando fluxos `bytevc2` incompatíveis (`UNPLAYABLE`) e respeitando rigorosamente os limites de resolução (`height <= maxHeight`).
+- **Proteção contra Fallback Silencioso em Tempo de Download:** Caso uma fonte limpa selecionada deixe de estar disponível no momento da execução do download, o processo falha de forma segura e informa o usuário, sem baixar silenciosamente formatos `Unknown` ou `Watermarked`.
+- **Rejeição Amigável de Escopos Não Suportados:** Publicações de fotos/slideshows (`/photo/` ou entradas apenas de áudio de slideshow), transmissões ao vivo (`/live`), Stories (`/story/`), perfis inteiros (`/@usuario`), vídeos privados (`10216`), removidos (`10202`), bloqueados por IP (`10204`) e links curtos expirados retornam mensagens claras em português.
+
+### 🛡️ Qualidade, Concorrência e Testes
+- **Persistência Determinística no Histórico:** O registro no `HistoryService` ocorre antes da sinalização de `IsCompleted = true` no item da fila, eliminando condição de corrida na leitura imediata do histórico após conclusão.
+- **Suíte de Testes Expandida:** Adicionados 65 testes dedicados ao TikTok (incluindo simulação real e obrigatória do `yt-dlp` com `--load-info-json` local e no GitHub Actions), totalizando **307 testes automatizados** 100% aprovados.
+
+---
+
 ## [1.0.0] - 2026-09-07
 
 ### Versão Estável Oficial (Definitiva)

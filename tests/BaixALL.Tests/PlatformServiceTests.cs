@@ -135,8 +135,8 @@ public class PlatformServiceTests
     }
 
     [Fact]
-    public void AppConstants_AppVersion_MatchesExpectedRelease_1_3_1()
+    public void AppConstants_AppVersion_MatchesExpectedRelease_1_4_0()
     {
-        Assert.Equal("1.3.1", AppConstants.AppVersion);
+        Assert.Equal("1.4.0", AppConstants.AppVersion);
     }
 }

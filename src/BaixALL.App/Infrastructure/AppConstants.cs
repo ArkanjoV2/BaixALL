@@ -10,8 +10,8 @@ namespace BaixALL.App.Infrastructure;
 public static class AppConstants
 {
     public const string AppName = "BaixALL";
-    public const string AppVersion = "1.3.1";
-    public const string AppTitle = "BaixALL - Baixar Vídeos do YouTube, Instagram e X/Twitter";
+    public const string AppVersion = "1.4.0";
+    public const string AppTitle = "BaixALL - Baixar Vídeos do YouTube, Instagram, X/Twitter e TikTok";
     public const string AppTagline = "Baixe seus vídeos na melhor qualidade disponível";
 
     public static readonly string LocalAppDataFolder = Path.Combine(

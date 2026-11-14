@@ -1,27 +1,32 @@
 # BaixALL
 
 <p align="center">
-  <strong>Aplicativo desktop para Windows para baixar vídeos e áudios de YouTube, Instagram e X/Twitter, com seleção de qualidade, suporte a playlists e carrosséis, fila global com downloads concorrentes e gerenciamento automático de ferramentas.</strong>
+  <strong>Aplicativo desktop para Windows para baixar vídeos e áudios de YouTube, Instagram, X/Twitter e TikTok, com seleção de qualidade, suporte a playlists e carrosséis, fila global com downloads concorrentes e gerenciamento automático de ferramentas.</strong>
 </p>
 
 <p align="center">
-  <a href="https://github.com/ArkanjoV2/BaixALL/releases/latest"><img src="https://img.shields.io/badge/Vers%C3%A3o-1.3.1_Est%C3%A1vel-blue.svg" alt="Versão Atual"></a>
+  <a href="https://github.com/ArkanjoV2/BaixALL/releases/latest"><img src="https://img.shields.io/badge/Vers%C3%A3o_Publicada-1.3.1_Est%C3%A1vel-blue.svg" alt="Versão Estável Publicada"></a>
+  <img src="https://img.shields.io/badge/Pr%C3%B3xima_Vers%C3%A3o-1.4.0_(Em_Prepara%C3%A7%C3%A3o)-00b4d8.svg" alt="Versão 1.4.0 em Preparação">
   <a href="https://github.com/ArkanjoV2/BaixALL/blob/main/LICENSE"><img src="https://img.shields.io/badge/Licen%C3%A7a-MIT-green.svg" alt="Licença"></a>
   <img src="https://img.shields.io/badge/Plataforma-Windows_10_%2F_11_(x64)-blue" alt="Plataforma">
   <img src="https://img.shields.io/badge/Tecnologia-.NET_10_%7C_WPF-purple" alt="Tecnologia">
 </p>
 
 <p align="center">
-  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-Setup-1.3.1.exe">
-    <img src="https://img.shields.io/badge/Baixar_Instalador_Oficial_(Setup.exe)-2ea44f?style=for-the-badge&logo=windows&logoColor=white" alt="Baixar Instalador Oficial">
+  <a href="https://github.com/ArkanjoV2/BaixALL/releases/latest">
+    <img src="https://img.shields.io/badge/Baixar_Vers%C3%A3o_Est%C3%A1vel_Oficial_(Releases)-2ea44f?style=for-the-badge&logo=windows&logoColor=white" alt="Baixar Versão Estável Oficial">
   </a>
   <br>
-  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-1.3.1-win-x64.zip">
-    <em>Ou baixe a Versão Portátil (.ZIP)</em>
+  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-Setup-1.3.1.exe">
+    <em>Instalador Estável Atual (v1.3.1 Setup.exe)</em>
   </a>
-  &nbsp; &nbsp;
+  &nbsp; &bull; &nbsp;
+  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-1.3.1-win-x64.zip">
+    <em>Versão Portátil Atual (v1.3.1 .ZIP)</em>
+  </a>
+  &nbsp; &bull; &nbsp;
   <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/checksums-1.3.1.txt">
-    <em>Verificar Hashes SHA-256</em>
+    <em>Hashes SHA-256 (v1.3.1)</em>
   </a>
 </p>
 
@@ -37,12 +42,13 @@
 - [Como Utilizar](#-como-utilizar)
   - [1. Analisar e Baixar um Vídeo do YouTube](#1-analisar-e-baixar-um-vídeo-do-youtube)
   - [2. Baixar um Reel ou Vídeo do Instagram](#2-baixar-um-reel-ou-vídeo-do-instagram)
-  - [3. Baixar Carrosséis com Múltiplos Vídeos](#3-baixar-carrosséis-com-múltiplos-vídeos)
+  - [3. Baixar Carrosséis com Múltiplos Vídeos (Instagram)](#3-baixar-carrosséis-com-múltiplos-vídeos-instagram)
   - [4. Baixar um Vídeo ou GIF do X/Twitter](#4-baixar-um-vídeo-ou-gif-do-xtwitter)
-  - [5. Fila Global e Controle de Concorrência](#5-fila-global-e-controle-de-concorrência)
-  - [6. Playlists do YouTube e Downloads em Lote](#6-playlists-do-youtube-e-downloads-em-lote)
-  - [7. Histórico e Gerenciamento de Arquivos](#7-histórico-e-gerenciamento-de-arquivos)
-  - [8. Atualização das Ferramentas Auxiliares](#8-atualização-das-ferramentas-auxiliares)
+  - [5. Analisar e Baixar um Vídeo do TikTok](#5-analisar-e-baixar-um-vídeo-do-tiktok)
+  - [6. Fila Global e Controle de Concorrência](#6-fila-global-e-controle-de-concorrência)
+  - [7. Playlists do YouTube e Downloads em Lote](#7-playlists-do-youtube-e-downloads-em-lote)
+  - [8. Histórico e Gerenciamento de Arquivos](#8-histórico-e-gerenciamento-de-arquivos)
+  - [9. Atualização das Ferramentas Auxiliares](#9-atualização-das-ferramentas-auxiliares)
 - [Limitações Conhecidas](#-limitações-conhecidas)
 - [Como Relatar Problemas e Obter Suporte](#-como-relatar-problemas-e-obter-suporte)
 - [Licença e Créditos](#-licença-e-créditos)
@@ -53,7 +59,9 @@
 
 O **BaixALL** é um aplicativo desktop nativo desenvolvido em **C#** e **.NET 10** com interface gráfica moderna em **WPF** (padrão MVVM). Criado para oferecer um fluxo prático, transparente e unificado de arquivamento pessoal, ele integra os motores de código aberto **yt-dlp**, **FFmpeg** e **Deno** em um executável autônomo.
 
-A versão estável atual **1.3.1** consolida o suporte multiplataforma nativo a **YouTube**, **Instagram** e **X/Twitter** (introduzido na v1.3.0), trazendo aprimoramentos de resiliência e a correção da análise em carrosséis mistos do Instagram (fotos + vídeos). O aplicativo permite analisar e baixar conteúdos públicos das três plataformas em uma interface única, com identificação automática de links, fila global integrada, controle de concorrência e histórico consolidado.
+A versão **1.4.0** (em preparação para lançamento) adiciona suporte nativo ao **TikTok**, somando-se às plataformas já suportadas (**YouTube**, **Instagram** e **X/Twitter**). O aplicativo permite analisar e baixar vídeos públicos das quatro plataformas em uma interface única, com identificação automática de links, classificação rigorosa e transparente do estado de marca-d'água no TikTok, fila global integrada, controle de concorrência e histórico consolidado.
+
+> **Nota sobre as versões:** A versão publicada atualmente na página de [Releases do GitHub](https://github.com/ArkanjoV2/BaixALL/releases/latest) é a **1.3.1** (com suporte a YouTube, Instagram e X/Twitter). O suporte ao TikTok integra a versão **1.4.0**, cujos pacotes estão em fase final de validação antes da publicação oficial.
 
 ---
 
@@ -61,13 +69,13 @@ A versão estável atual **1.3.1** consolida o suporte multiplataforma nativo a 
 
 Interface projetada com foco em clareza, ergonomia visual e feedback operacional em tempo real:
 
-### Análise Multiplataforma (YouTube, Instagram e X/Twitter)
+### Análise Multiplataforma (YouTube, Instagram, X/Twitter e TikTok)
 
 | Instagram Reel | X / Twitter Vídeo |
 | :---: | :---: |
 | [![Análise de Reel do Instagram](docs/screenshots/09-instagram-reel.png)](docs/screenshots/09-instagram-reel.png)<br><sub>Identificação automática com badge rosa `Instagram`, miniatura real e opções de container</sub> | [![Análise de Vídeo do X/Twitter](docs/screenshots/10-twitter-video.png)](docs/screenshots/10-twitter-video.png)<br><sub>Detecção automática com badge ciano `X / Twitter`, resolução máxima e download em MP4</sub> |
 | **Carrosséis com Múltiplos Vídeos (Instagram)** | **Fila Multiplataforma Integrada** |
-| [![Seleção de Carrossel](docs/screenshots/11-carrossel-selecao.png)](docs/screenshots/11-carrossel-selecao.png)<br><sub>Seleção individual por vídeo, contadores de mídia e aviso informativo para fotos estáticas</sub> | [![Fila Multiplataforma](docs/screenshots/12-fila-multiplataforma.png)](docs/screenshots/12-fila-multiplataforma.png)<br><sub>Downloads de Instagram, YouTube e X convivendo na mesma fila com ações individuais</sub> |
+| [![Seleção de Carrossel](docs/screenshots/11-carrossel-selecao.png)](docs/screenshots/11-carrossel-selecao.png)<br><sub>Seleção individual por vídeo, contadores de mídia e aviso informativo para fotos estáticas</sub> | [![Fila Multiplataforma](docs/screenshots/12-fila-multiplataforma.png)](docs/screenshots/12-fila-multiplataforma.png)<br><sub>Downloads de múltiplas plataformas convivendo na mesma fila com ações individuais</sub> |
 
 <br>
 
@@ -85,15 +93,16 @@ Interface projetada com foco em clareza, ergonomia visual e feedback operacional
 
 ## 📚 Recursos Principais
 
-- **Suporte Multiplataforma:** Baixe vídeos públicos do **YouTube**, **Instagram** (Reels, posts e carrosséis) e **X/Twitter** (vídeos e GIFs animados).
-- **Identificação Automática de Plataforma:** Ao colar qualquer URL suportada, o BaixALL identifica a plataforma e aplica badges coloridos (`YouTube`, `Instagram`, `X / Twitter`) na análise, na fila e no histórico.
+- **Suporte Multiplataforma:** Baixe vídeos públicos do **YouTube**, **Instagram** (Reels, posts e carrosséis), **X/Twitter** (vídeos e GIFs animados) e **TikTok** (vídeos públicos por links canônicos e links curtos compartilhados).
+- **Identificação Automática de Plataforma:** Ao colar qualquer URL suportada, o BaixALL identifica a plataforma e aplica badges coloridos (`YouTube`, `Instagram`, `X / Twitter`, `TikTok`) na análise, na fila e no histórico.
+- **Verificação Transparente de Marca-d'Água no TikTok:** Classifica individualmente cada fluxo do TikTok em três estados (`NoWatermark`, `Unknown` e `Watermarked`), priorizando fontes limpas de reprodução verificadas e impedindo qualquer fallback silencioso para formatos não verificados ou com marca-d'água.
 - **Carrosséis e Coleções Granulares:** Em publicações com múltiplas mídias (Instagram) ou playlists (YouTube), escolha exatamente quais vídeos deseja baixar por meio de caixas de seleção, com botões para **Selecionar Todos**, **Desmarcar Todos** e **Inverter Seleção**.
 - **Mesclagem Automática com FFmpeg:** Combina automaticamente as melhores faixas de vídeo e áudio em containers universais (**MP4** ou **MKV**).
 - **Modo Somente Áudio:** Extraia o áudio original (M4A/AAC ou Opus) ou realize a conversão direta para **MP3** (320 kbps estéreo).
 - **Fila Global com Concorrência Configurável:** Controle a taxa de downloads concorrentes (1, 2 ou 3 simultâneos na aba Configurações).
 - **Cancelamento Preciso:** Botão **Cancelar** por item individual e **Cancelar Lote** por coleção, garantindo a exclusão imediata de arquivos temporários parciais (`.part`, `.ytdl`).
 - **Diálogo de Fechamento Preventivo:** Ao tentar fechar a aplicação com downloads ativos ou pendentes, um aviso de confirmação oferece as opções **Não** (mantém o download em execução) e **Sim** (cancela e fecha de forma limpa, sem processos órfãos).
-- **Histórico Local e Rastreabilidade:** Histórico salvo localmente em `%LOCALAPPDATA%\BaixALL\history.json` com chaves canônicas exclusivas (`yt:ID`, `ig:ID`, `x:ID`) e atalhos para abrir o arquivo ou localizá-lo no Explorer.
+- **Histórico Local e Rastreabilidade:** Histórico salvo localmente em `%LOCALAPPDATA%\BaixALL\history.json` com chaves canônicas exclusivas (`yt:ID`, `ig:ID`, `x:ID`, `tt:ID`) e atalhos para abrir o arquivo ou localizá-lo no Explorer.
 - **Gerenciador Integrado de Ferramentas:** Detecta, instala e atualiza `yt-dlp`, `FFmpeg`, `ffprobe` e `Deno` em pasta isolada do usuário (`%LOCALAPPDATA%\BaixALL\tools`), sem alterar o `PATH` do sistema.
 - **Interface Fluent Design:** Temas Escuro (Dark) e Claro (Light) nativos, com suporte completo ao idioma Português do Brasil.
 - **Distribuição Autônoma (Self-Contained):** O runtime .NET 10 LTS já está embutido. Não requer .NET SDK, Python, Node.js ou Visual Studio pré-instalados.
@@ -115,17 +124,21 @@ Interface projetada com foco em clareza, ergonomia visual e feedback operacional
 
 ## 🚀 Instalação e Download Oficial
 
-Consulte o [Guia de Instalação](docs/GUIA_INSTALACAO.md) para o passo a passo ilustrado.
+Consulte o [Guia de Instalação](docs/GUIA_INSTALACAO.md) para o passo a passo completo.
 
-### Pacotes Oficiais da Versão 1.3.1
+> ⚠️ **Aviso importante sobre a versão disponível para download:**  
+> Os pacotes da versão **1.4.0** (que introduz o suporte ao **TikTok**) encontram-se em preparação e validação final. Enquanto a Release `v1.4.0` não for publicada oficialmente na [página de Releases](https://github.com/ArkanjoV2/BaixALL/releases/latest), os links diretos abaixo apontam para a versão estável publicada **1.3.1** (que suporta YouTube, Instagram e X/Twitter, mas **ainda não inclui o suporte ao TikTok**).
 
-| Pacote | Link de Download | Descrição |
+### Pacotes Publicados Atualmente — Versão Estável 1.3.1
+
+| Pacote | Link de Download (v1.3.1) | Descrição |
 | :--- | :--- | :--- |
-| **Instalador Oficial (Setup)** | [Baixar BaixALL-Setup-1.3.1.exe](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-Setup-1.3.1.exe) | Assistente completo com atalhos e desinstalador |
-| **Versão Portátil (.ZIP)** | [Baixar BaixALL-1.3.1-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-1.3.1-win-x64.zip) | Execução direta sem necessidade de instalação |
-| **Manifesto de Hashes** | [Baixar checksums-1.3.1.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/checksums-1.3.1.txt) | Hashes criptográficos oficiais SHA-256 |
+| **Página Oficial de Releases** | [Acessar Última Release Estável](https://github.com/ArkanjoV2/BaixALL/releases/latest) | Página oficial de lançamentos do repositório |
+| **Instalador Oficial (Setup)** | [Baixar BaixALL-Setup-1.3.1.exe](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-Setup-1.3.1.exe) | Assistente completo com atalhos e desinstalador (v1.3.1) |
+| **Versão Portátil (.ZIP)** | [Baixar BaixALL-1.3.1-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-1.3.1-win-x64.zip) | Execução direta sem necessidade de instalação (v1.3.1) |
+| **Manifesto de Hashes** | [Baixar checksums-1.3.1.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/checksums-1.3.1.txt) | Hashes criptográficos oficiais SHA-256 (v1.3.1) |
 
-### Tabela de Integridade Criptográfica (SHA-256)
+### Tabela de Integridade Criptográfica Publicada (v1.3.1 — SHA-256)
 
 | Arquivo | Tamanho Exato | Hash SHA-256 Oficial |
 | :--- | :---: | :--- |
@@ -135,7 +148,7 @@ Consulte o [Guia de Instalação](docs/GUIA_INSTALACAO.md) para o passo a passo 
 
 > 🛡️ **Orientações de Segurança sobre o Windows SmartScreen:**  
 > Programas independentes de código aberto recém-lançados podem apresentar um aviso de reputação do Windows Defender SmartScreen (*"O Windows protegeu o seu computador"*).  
-> - **Recomendação:** Sempre confirme que você baixou o arquivo da [Release oficial v1.3.1](https://github.com/ArkanjoV2/BaixALL/releases/tag/v1.3.1) e compare o hash SHA-256 com os valores da tabela acima via PowerShell (`Get-FileHash <arquivo> -Algorithm SHA256`).  
+> - **Recomendação:** Sempre confirme que você baixou o arquivo da [página oficial de Releases](https://github.com/ArkanjoV2/BaixALL/releases/latest) e compare o hash SHA-256 com os valores oficiais publicados via PowerShell (`Get-FileHash <arquivo> -Algorithm SHA256`).  
 > - Não desative defesas do sistema operacional. Consulte as orientações no [Guia de Instalação](docs/GUIA_INSTALACAO.md#4-avisos-de-reputação-do-windows-defender-smartscreen).
 
 ---
@@ -154,7 +167,7 @@ Consulte o [Guia de Instalação](docs/GUIA_INSTALACAO.md) para o passo a passo 
 3. Escolha a qualidade e o container desejados e clique em **"Baixar Agora"**.
 
 ### 3. Baixar Carrosséis com Múltiplos Vídeos (Instagram)
-1. Cole a URL do post carrossel do Instagram contendo múltiplos vídeos (inclusive carrosséis mistos combinando fotos e vídeos, suportados na v1.3.1).
+1. Cole a URL do post carrossel do Instagram contendo múltiplos vídeos (inclusive carrosséis mistos combinando fotos e vídeos).
 2. O BaixALL exibe o badge `CARROSSEL DO INSTAGRAM`, a quantidade total de mídias e a lista dos vídeos encontrados, preservando seus índices originais de publicação.
 3. Marque ou desmarque os vídeos desejados individualmente ou use os botões **"Selecionar Todos"** / **"Desmarcar Todos"**.
    - *Nota:* Imagens estáticas são desabilitadas com aviso visual explicativo, permitindo selecionar e baixar os vídeos presentes na publicação.
@@ -167,23 +180,33 @@ Consulte o [Guia de Instalação](docs/GUIA_INSTALACAO.md) para o passo a passo 
 4. Clique em **"Baixar Agora"**.
    - *Nota:* Publicações que contenham apenas texto ou imagens estáticas exibem uma mensagem informativa em português.
 
-### 5. Fila Global e Controle de Concorrência
+### 5. Analisar e Baixar um Vídeo do TikTok
+1. Copie a URL pública do vídeo do TikTok — são aceitos links canônicos (`tiktok.com/@usuario/video/ID`, `m.tiktok.com/v/ID.html`) e links curtos de compartilhamento (`vm.tiktok.com/...`, `vt.tiktok.com/...`, `tiktok.com/t/...`).
+2. Cole o link no campo de entrada do BaixALL e clique em **"Analisar"**. O aplicativo identifica a plataforma com o badge turquesa `TikTok`, resolve links curtos para o identificador canônico (`tt:ID`) e exibe o criador (`@usuario`), duração, resolução máxima e o estado de verificação da marca-d'água.
+3. **Como o BaixALL trata a marca-d'água do TikTok (3 estados distintos):**
+   - **`NoWatermark` (`✓ Sem marca-d'água`):** Ocorre somente quando há evidência positiva nos metadados de que o formato é uma fonte direta de reprodução limpa disponibilizada pela plataforma (`play_addr`, fluxos de playback `bytevc1_*` / `h264_*` verificados). Nessa condição, o BaixALL seleciona automaticamente a melhor qualidade limpa disponível e constrói o seletor usando exclusivamente os `format_id` exatos verificados, descartando fluxos `bytevc2` incompatíveis e combinando áudio quando necessário.
+   - **`Unknown` (`• Marca-d'água não verificada`):** Ocorre quando os metadados retornados pelo extrator não permitem confirmar nem a ausência nem a presença de sobreposição. O BaixALL **não promete vídeo limpo** e **não seleciona o formato automaticamente**: exibe um aviso claro e exige que o usuário escolha manualmente a qualidade desejada na lista caso queira prosseguir.
+   - **`Watermarked` (`⚠ Apenas com marca-d'água`):** Ocorre quando nenhuma fonte limpa está disponível e restam apenas fluxos explicitamente marcados com marca-d'água (`download` / `download_addr` com nota `watermarked`). O aplicativo **nunca baixa essa versão silenciosamente**: nenhuma opção vem pré-selecionada e o download permanece bloqueado até que o usuário marque explicitamente a caixa de consentimento (*"Autorizo baixar a versão com marca-d'água"*).
+4. Clique em **"Baixar Agora"** (ou selecione **"Baixar somente o áudio do vídeo"** para extrair MP3, M4A ou Opus).
+   - *Importante:* O BaixALL **não realiza remoção artificial, corte, desfoque ou pós-processamento de imagem** sobre vídeos e **não garante que 100% dos vídeos do TikTok terão fonte sem marca-d'água disponível**. Caso uma fonte limpa selecionada deixe de estar disponível no instante do download, a tarefa falha de forma segura e transparente, sem recorrer silenciosamente a formatos não verificados ou com marca-d'água.
+
+### 6. Fila Global e Controle de Concorrência
 - A aba **Fila de Downloads** centraliza itens de todas as plataformas com seus respectivos badges.
 - Acompanhe em tempo real a velocidade, o percentual, o tempo estimado (ETA) e o tamanho baixado.
 - Na aba **Configurações**, ajuste o limite de downloads simultâneos (1, 2 ou 3).
 - Utilize o botão **"Cancelar"** para interromper um item específico ou **"Cancelar Lote"** para interromper uma coleção inteira.
 
-### 6. Playlists do YouTube e Downloads em Lote
+### 7. Playlists do YouTube e Downloads em Lote
 1. Cole a URL de uma playlist do YouTube (`playlist?list=...`) ou um link híbrido.
 2. Em links híbridos, escolha entre baixar apenas o vídeo avulso ou carregar a playlist inteira.
 3. Selecione os itens desejados e clique em **"Adicionar à Fila"**. O progresso será acompanhado pelo painel de lote superior.
 
-### 7. Histórico e Gerenciamento de Arquivos
-- Acesse a aba **Histórico** para visualizar todas as conclusões com badges coloridos por plataforma.
+### 8. Histórico e Gerenciamento de Arquivos
+- Acesse a aba **Histórico** para visualizar todas as conclusões com badges coloridos por plataforma (`YouTube`, `Instagram`, `X / Twitter`, `TikTok`).
 - Utilize os botões **"Abrir"** para reproduzir a mídia no aplicativo padrão do Windows ou **"Pasta"** para abri-la no Explorer.
 - O botão **"Limpar Histórico"** remove os registros visuais sem apagar os arquivos físicos do computador.
 
-### 8. Atualização das Ferramentas Auxiliares
+### 9. Atualização das Ferramentas Auxiliares
 As plataformas frequentemente ajustam seus mecanismos de entrega de vídeo.
 - Na aba **Ferramentas**, visualize o status e a versão de cada componente.
 - Clique em **"Verificar Atualizações"** para atualizar `yt-dlp`, `FFmpeg` ou `Deno` de forma atômica e segura.
@@ -193,14 +216,18 @@ As plataformas frequentemente ajustam seus mecanismos de entrega de vídeo.
 ## ⚠️ Limitações Conhecidas
 
 1. **Dependência de Extratores Upstream e Disponibilidade das Plataformas:**  
-   O BaixALL baseia sua extração no projeto de código aberto `yt-dlp`. Alterações na infraestrutura das plataformas, restrições geográficas de IP ou medidas anti-scraping podem impactar temporariamente a análise até que novas versões dos componentes sejam atualizadas na aba *Ferramentas*. **Não há garantia de compatibilidade universal com toda e qualquer publicação.**
-2. **Autenticação e Conteúdos Privados:**  
+   O BaixALL baseia sua extração no projeto de código aberto `yt-dlp`. Alterações na infraestrutura das plataformas (YouTube, Instagram, X/Twitter e TikTok), restrições geográficas de IP ou medidas anti-scraping podem impactar temporariamente a análise até que novas versões dos componentes sejam atualizadas na aba *Ferramentas*. **Não há garantia de compatibilidade universal com toda e qualquer publicação.**
+2. **Limitações Específicas da Integração TikTok:**  
+   - **Disponibilidade de Fonte Sem Marca-d'Água:** Nem toda publicação do TikTok disponibiliza um fluxo direto de reprodução sem marca-d'água nos metadados públicos. Quando não houver confirmação positiva (`Unknown`) ou quando houver apenas versão com marca-d'água (`Watermarked`), o BaixALL informa o estado real na interface e jamais promete ausência de marca-d'água sem evidência.
+   - **Escopos Não Suportados no TikTok:** Publicações de fotos/slideshows (`/photo/`), transmissões ao vivo (`/live`), Stories (`/story/`), páginas de perfil inteiro (`/@usuario`), tags e páginas de áudio/música não fazem parte do escopo e são recusadas com mensagem explicativa em português.
+   - **Bloqueios de IP e Links Expirados:** O TikTok pode bloquear temporariamente requisições de determinados endereços IP (`status code 10204`) ou invalidar links curtos expirados; nesses casos, o aplicativo apresenta uma mensagem amigável orientando o usuário.
+3. **Autenticação e Conteúdos Privados:**  
    Stories, contas privadas, conteúdos com restrição de idade, Spaces e perfis inteiros estão fora do escopo. Qualquer mídia que exija login retorna uma mensagem informativa; o aplicativo não solicita, não armazena e não utiliza credenciais ou cookies locais de navegadores.
-3. **Fotos em Carrosséis:**  
-   O BaixALL é projetado para download de mídia audiovisual. Fotos estáticas e imagens presentes em carrosséis são desabilitadas com aviso visual.
-4. **Persistência da Fila entre Reinicializações:**  
+4. **Fotos em Carrosséis e Publicações Estáticas:**  
+   O BaixALL é projetado para download de mídia audiovisual. Fotos estáticas em carrosséis do Instagram são desabilitadas com aviso visual, e posts sem vídeo no X/Twitter ou slideshows de fotos no TikTok são rejeitados de forma informativa.
+5. **Persistência da Fila entre Reinicializações:**  
    Itens pendentes ou downloads em andamento na fila não são persistidos caso o aplicativo seja fechado. Ao tentar encerrar com itens ativos, o diálogo de confirmação previne cancelamentos acidentais. O histórico de itens já concluídos e as configurações permanecem preservados no disco.
-5. **Estabilidade de Conexão:**  
+6. **Estabilidade de Conexão:**  
    Instabilidades de rede prolongadas durante downloads pesados podem exigir que o item correspondente seja enfileirado novamente.
 
 ---
