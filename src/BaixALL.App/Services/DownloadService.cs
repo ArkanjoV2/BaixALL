@@ -294,10 +294,7 @@ public class DownloadService : IDownloadService
                 }
             }
 
-            // Marca o item como concluído com mensagem positiva na UI Thread
-            _dispatcher.Invoke(() => item.MarkCompleted(completedFilePath));
-
-            // Salva no histórico de forma segura
+            // Salva no histórico de forma segura antes de sinalizar IsCompleted=true
             long fileSize = 0;
             try
             {
@@ -308,11 +305,23 @@ public class DownloadService : IDownloadService
             }
             catch { }
 
+            var finalFormat = item.Format;
+            if (!string.IsNullOrWhiteSpace(completedFilePath))
+            {
+                var ext = Path.GetExtension(completedFilePath).TrimStart('.').ToUpperInvariant();
+                if (!string.IsNullOrEmpty(ext))
+                {
+                    finalFormat = ext;
+                }
+            }
+
             _historyService.AddItem(new HistoryItem
             {
+                VideoId = item.Request.VideoId,
                 Title = item.Title,
+                Channel = item.Request.Channel,
                 Quality = item.Quality,
-                Format = item.Format,
+                Format = finalFormat,
                 FinalFilePath = completedFilePath,
                 FileSizeBytes = fileSize,
                 Status = "Concluído",
@@ -320,6 +329,9 @@ public class DownloadService : IDownloadService
                 Platform = item.PlatformDisplayName,
                 CanonicalKey = item.CanonicalKey
             });
+
+            // Marca o item como concluído com mensagem positiva na UI Thread
+            _dispatcher.Invoke(() => item.MarkCompleted(completedFilePath));
         }
         catch (OperationCanceledException)
         {
@@ -337,6 +349,7 @@ public class DownloadService : IDownloadService
             string friendlyMessage = ex switch
             {
                 FileNotFoundException => "O arquivo resultante não foi localizado após o download.",
+                InvalidOperationException ioe when IsUserFacingDownloadError(ioe.Message) => ioe.Message,
                 _ => "O download não pôde ser concluído."
             };
             _dispatcher.Invoke(() => item.MarkError(friendlyMessage));
@@ -350,5 +363,29 @@ public class DownloadService : IDownloadService
             }
             TryStartNextDownloads();
         }
+    }
+
+    private static bool IsUserFacingDownloadError(string? message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return false;
+        }
+
+        if (message.Contains("Exception", StringComparison.OrdinalIgnoreCase) ||
+            message.Contains("Process exited", StringComparison.OrdinalIgnoreCase) ||
+            message.Contains("StackTrace", StringComparison.OrdinalIgnoreCase) ||
+            message.Contains("ERROR:", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        return message.Contains("marca-d'água", StringComparison.OrdinalIgnoreCase) ||
+               message.Contains("disponível", StringComparison.OrdinalIgnoreCase) ||
+               message.Contains("bloqueou", StringComparison.OrdinalIgnoreCase) ||
+               message.Contains("privado", StringComparison.OrdinalIgnoreCase) ||
+               message.Contains("removido", StringComparison.OrdinalIgnoreCase) ||
+               message.Contains("expirou", StringComparison.OrdinalIgnoreCase) ||
+               message.Contains("espaço em disco", StringComparison.OrdinalIgnoreCase);
     }
 }

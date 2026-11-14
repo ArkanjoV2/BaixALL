@@ -133,6 +133,8 @@ public class HistoryService : IHistoryService
             if (item.CanonicalKey.StartsWith("yt:", StringComparison.OrdinalIgnoreCase)) return "YouTube";
             if (item.CanonicalKey.StartsWith("ig:", StringComparison.OrdinalIgnoreCase)) return "Instagram";
             if (item.CanonicalKey.StartsWith("x:", StringComparison.OrdinalIgnoreCase)) return "X / Twitter";
+            if (item.CanonicalKey.StartsWith("tt:", StringComparison.OrdinalIgnoreCase) ||
+                item.CanonicalKey.StartsWith("tiktok:", StringComparison.OrdinalIgnoreCase)) return "TikTok";
         }
 
         if (!string.IsNullOrEmpty(item.ThumbnailUrl))
@@ -150,6 +152,10 @@ public class HistoryService : IHistoryService
                 item.ThumbnailUrl.Contains("twitter.com", StringComparison.OrdinalIgnoreCase) ||
                 item.ThumbnailUrl.Contains("x.com", StringComparison.OrdinalIgnoreCase))
                 return "X / Twitter";
+
+            if (item.ThumbnailUrl.Contains("tiktokcdn", StringComparison.OrdinalIgnoreCase) ||
+                item.ThumbnailUrl.Contains("tiktok.com", StringComparison.OrdinalIgnoreCase))
+                return "TikTok";
         }
 
         // Histórico legado da v1.2.0: se possuir VideoId típico do YouTube (11 chars), é comprovadamente YouTube

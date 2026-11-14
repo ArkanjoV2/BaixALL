@@ -35,6 +35,25 @@ jobs:
       - name: Compilar solução (Release)
         run: dotnet build BaixALL.sln -c Release --no-restore
 
+      - name: Garantir yt-dlp disponível para simulação offline de seletores (--load-info-json)
+        shell: pwsh
+        run: |
+          $ciToolsDir = Join-Path $env:RUNNER_TEMP "baixall-ci-ytdlp"
+          $ytdlpExe = Join-Path $ciToolsDir "yt-dlp.exe"
+          New-Item -ItemType Directory -Path $ciToolsDir -Force | Out-Null
+          $existing = Get-Command yt-dlp -ErrorAction SilentlyContinue
+          if ($existing -and (Test-Path $existing.Source)) {
+            Copy-Item $existing.Source $ytdlpExe -Force
+          } elseif (-not (Test-Path $ytdlpExe)) {
+            Invoke-WebRequest -Uri "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe" -OutFile $ytdlpExe -UseBasicParsing
+          }
+          if (-not (Test-Path $ytdlpExe)) {
+            throw "Falha ao disponibilizar yt-dlp.exe no ambiente de CI."
+          }
+          & $ytdlpExe --version
+          Add-Content -Path $env:GITHUB_PATH -Value $ciToolsDir
+          Add-Content -Path $env:GITHUB_ENV -Value "BAIXALL_TEST_YTDLP_EXE=$ytdlpExe"
+
       - name: Executar testes com diagnóstico de travamento
         run: >-
           dotnet test BaixALL.sln -c Release --no-build

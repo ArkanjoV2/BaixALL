@@ -1,0 +1,20 @@
+{
+  "id": "7200000000000000001",
+  "title": "Slideshow de fotos com trilha sonora",
+  "description": "Publicação de fotos apenas com áudio",
+  "uploader": "photo_user",
+  "channel": "Photo User",
+  "duration": 15,
+  "webpage_url": "https://www.tiktok.com/@photo_user/video/7200000000000000001",
+  "extractor": "TikTok",
+  "extractor_key": "TikTok",
+  "formats": [
+    {
+      "format_id": "audio",
+      "format_note": "Default audio",
+      "ext": "mp3",
+      "vcodec": "none",
+      "acodec": "mp3"
+    }
+  ]
+}

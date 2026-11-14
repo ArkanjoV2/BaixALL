@@ -293,7 +293,7 @@
                     <!-- Seção Hero -->
                     <StackPanel HorizontalAlignment="Center" Margin="0,16,0,28">
                         <TextBlock Text="Baixe seus vídeos" FontSize="32" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,6" />
-                        <TextBlock Text="Na melhor qualidade disponível do YouTube, Instagram e X"
+                        <TextBlock Text="Na melhor qualidade disponível do YouTube, Instagram, X e TikTok"
                                    FontSize="16" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" />
                     </StackPanel>
 
@@ -328,7 +328,7 @@
                                     Command="{Binding AnalyzeCommand}"
                                     IsEnabled="{Binding CanAnalyze}"
                                     Padding="24,10"
-                                    ToolTip="Cole o link do YouTube, Instagram ou X/Twitter para analisar as qualidades disponíveis">
+                                    ToolTip="Cole o link do YouTube, Instagram, X/Twitter ou TikTok para analisar as qualidades disponíveis">
                                 <TextBlock Text="Analisar" Foreground="White" FontWeight="SemiBold" />
                             </Button>
                         </Grid>
@@ -410,7 +410,7 @@
                                         <TextBlock Text="{Binding VideoInfo.UploadDate, StringFormat='📅 {0}'}" Foreground="{DynamicResource TextMutedBrush}" FontSize="13" />
                                     </StackPanel>
 
-                                    <!-- Tags de Plataforma, Qualidade Máxima e FPS -->
+                                    <!-- Tags de Plataforma, Qualidade Máxima, FPS e Estado de Marca-d'Água -->
                                     <StackPanel Orientation="Horizontal">
                                         <Border Background="{Binding VideoPlatformBackgroundColor}" Padding="8,3" Margin="0,0,8,0">
                                             <TextBlock Text="{Binding VideoPlatformDisplayName}" FontWeight="Bold" FontSize="11" Foreground="{Binding VideoPlatformBadgeColor}" />
@@ -418,15 +418,46 @@
                                         <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3" Margin="0,0,8,0">
                                             <TextBlock Text="{Binding VideoInfo.MaxResolution, StringFormat='Máx: {0}'}" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource AccentBrush}" />
                                         </Border>
-                                        <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3"
+                                        <Border Background="{DynamicResource SurfaceHoverBrush}" Padding="8,3" Margin="0,0,8,0"
                                                 Visibility="{Binding VideoInfo.FormattedFps, Converter={StaticResource NullToVis}}">
                                             <TextBlock Text="{Binding VideoInfo.FormattedFps}" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        </Border>
+                                        <Border Background="{Binding VideoInfo.WatermarkBackgroundColor}" Padding="8,3"
+                                                Visibility="{Binding VideoInfo.HasWatermarkBadge, Converter={StaticResource BoolToVis}}">
+                                            <TextBlock Text="{Binding VideoInfo.WatermarkStatusText}" FontWeight="Bold" FontSize="11" Foreground="{Binding VideoInfo.WatermarkBadgeColor}" />
                                         </Border>
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>
 
                             <Separator Background="{DynamicResource SurfaceBorderBrush}" Margin="0,0,0,20" />
+
+                            <!-- AVISO E CONFIRMAÇÃO EXPLÍCITA QUANDO NÃO HÁ FONTE SEM MARCA-D'ÁGUA -->
+                            <Border Background="#22D97706" BorderBrush="{DynamicResource WarningBrush}" BorderThickness="1"
+                                    Padding="14,12" Margin="0,0,0,16"
+                                    Visibility="{Binding ShowWatermarkWarning, Converter={StaticResource BoolToVis}}">
+                                <StackPanel>
+                                    <TextBlock Text="⚠ Fonte sem marca-d'água não disponível para este vídeo"
+                                               FontWeight="Bold" FontSize="13" Foreground="{DynamicResource WarningBrush}" Margin="0,0,0,4" />
+                                    <TextBlock Text="O TikTok não disponibilizou um fluxo de reprodução limpo para esta publicação. O BaixALL não faz fallback silencioso nem remove marcas por edição de vídeo."
+                                               Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,8" />
+                                    <CheckBox Content="Autorizo baixar explicitamente a versão com marca-d'água disponibilizada pela plataforma"
+                                              IsChecked="{Binding AllowWatermarkedDownload, Mode=TwoWay}"
+                                              FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- AVISO CLARO QUANDO O ESTADO DA MARCA-D'ÁGUA É DESCONHECIDO (SEM PROMETER RESULTADO LIMPO) -->
+                            <Border Background="#1E293B" BorderBrush="#64748B" BorderThickness="1"
+                                    Padding="14,12" Margin="0,0,0,16"
+                                    Visibility="{Binding ShowUnknownWatermarkNotice, Converter={StaticResource BoolToVis}}">
+                                <StackPanel>
+                                    <TextBlock Text="• Estado de marca-d'água não verificado nos metadados"
+                                               FontWeight="Bold" FontSize="13" Foreground="#94A3B8" Margin="0,0,0,4" />
+                                    <TextBlock Text="Os metadados retornados pelo extrator não permitem confirmar se este fluxo está sem marca-d'água. O BaixALL não seleciona automaticamente fontes não verificadas como limpas — escolha manualmente a qualidade abaixo caso deseje baixar."
+                                               Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
 
                             <!-- Configuração de Download para este Vídeo -->
                             <Grid Margin="0,0,0,16">

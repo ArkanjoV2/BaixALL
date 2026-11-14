@@ -291,7 +291,13 @@ public class YtDlpService : IYtDlpService
                 {
                     throw new OperationCanceledException(ct);
                 }
-                var friendlyError = ParseYtDlpError(result.StandardError);
+
+                bool isCleanTikTokRequest =
+                    request.Platform == PlatformType.TikTok &&
+                    !request.IsAudioOnly &&
+                    request.Format?.WatermarkStatus == WatermarkStatus.NoWatermark;
+
+                var friendlyError = ParseYtDlpError(result.StandardError, isCleanTikTokRequest);
                 _logger?.Error($"Falha no download. Erro: {result.StandardError}");
                 throw new InvalidOperationException(friendlyError);
             }
@@ -535,12 +541,43 @@ public class YtDlpService : IYtDlpService
         return env;
     }
 
-    public static string ParseYtDlpError(string? rawError)
+    public static string ParseYtDlpError(string? rawError, bool isCleanTikTokRequest = false)
     {
         if (string.IsNullOrWhiteSpace(rawError))
             return "Ocorreu um erro desconhecido durante a operação.";
 
         var lower = rawError.ToLowerInvariant();
+
+        if (lower.Contains("your ip address is blocked from accessing this post") || lower.Contains("status code 10204"))
+            return "O TikTok bloqueou o acesso a esta publicação a partir da sua conexão ou região.";
+
+        if (lower.Contains("you do not have permission to view this post") ||
+            lower.Contains("status code 10216") ||
+            lower.Contains("status code 10222") ||
+            lower.Contains("tiktok is requiring login") ||
+            lower.Contains("not be comfortable for some audiences"))
+            return "Este vídeo do TikTok é privado, possui restrição de idade ou exige login na plataforma. O BaixALL opera apenas com vídeos públicos.";
+
+        if (lower.Contains("status code 10202") ||
+            lower.Contains("status code 10221") ||
+            lower.Contains("status code 10203") ||
+            lower.Contains("status code 10215") ||
+            (lower.Contains("tiktok") && (lower.Contains("video not available") || lower.Contains("unable to find video"))))
+            return "Este vídeo do TikTok foi removido ou não está mais disponível.";
+
+        if (lower.Contains("unsupported url: https://www.tiktok.com/?_r=1") ||
+            lower.Contains("unsupported url: https://www.tiktok.com/"))
+            return "O link curto do TikTok expirou, é inválido ou não redirecionou para um vídeo público.";
+
+        if (lower.Contains("requested format is not available"))
+        {
+            if (isCleanTikTokRequest)
+            {
+                return "A fonte sem marca-d'água selecionada deixou de estar disponível para este vídeo. O download foi encerrado sem utilizar outra fonte não verificada.";
+            }
+
+            return "O formato de vídeo solicitado não está disponível nesta publicação.";
+        }
 
         if (lower.Contains("no video could be found in this tweet"))
             return "Esta publicação do X/Twitter não contém nenhum vídeo.";
