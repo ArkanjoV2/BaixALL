@@ -1,6 +1,6 @@
 # Guia de Instalação e Uso do BaixALL
 
-Este guia foi elaborado para orientar usuários no download, verificação, instalação e operação do **BaixALL 1.3.1** no Windows 10 e Windows 11 com segurança, conformidade e transparência.
+Este guia foi elaborado para orientar usuários no download, verificação, instalação e operação do **BaixALL** (incluindo as novidades da versão **1.4.0** em preparação e os pacotes publicados da versão estável **1.3.1**) no Windows 10 e Windows 11 com segurança, conformidade e transparência.
 
 ---
 
@@ -15,11 +15,12 @@ Este guia foi elaborado para orientar usuários no download, verificação, inst
 8. [Como Baixar Reels e Vídeos do Instagram](#8-como-baixar-reels-e-vídeos-do-instagram)
 9. [Como Selecionar Vídeos em Carrosséis do Instagram](#9-como-selecionar-vídeos-em-carrosséis-do-instagram)
 10. [Como Baixar Vídeos e GIFs do X/Twitter](#10-como-baixar-vídeos-e-gifs-do-xtwitter)
-11. [Como Utilizar a Fila e Acompanhar o Progresso](#11-como-utilizar-a-fila-e-acompanhar-o-progresso)
-12. [Como Verificar os Arquivos Baixados e Acessar o Histórico](#12-como-verificar-os-arquivos-baixados-e-acessar-o-histórico)
-13. [Onde os Arquivos São Salvos e Como Alterar](#13-onde-os-arquivos-são-salvos-e-como-alterar)
-14. [Fechamento do Aplicativo e Gerenciamento da Fila](#14-fechamento-do-aplicativo-e-gerenciamento-da-fila)
-15. [Como Desinstalar com Preservação dos seus Arquivos](#15-como-desinstalar-com-preservação-dos-seus-arquivos)
+11. [Como Analisar e Baixar Vídeos do TikTok (v1.4.0)](#11-como-analisar-e-baixar-vídeos-do-tiktok-v140)
+12. [Como Utilizar a Fila e Acompanhar o Progresso](#12-como-utilizar-a-fila-e-acompanhar-o-progresso)
+13. [Como Verificar os Arquivos Baixados e Acessar o Histórico](#13-como-verificar-os-arquivos-baixados-e-acessar-o-histórico)
+14. [Onde os Arquivos São Salvos e Como Alterar](#14-onde-os-arquivos-são-salvos-e-como-alterar)
+15. [Fechamento do Aplicativo e Gerenciamento da Fila](#15-fechamento-do-aplicativo-e-gerenciamento-da-fila)
+16. [Como Desinstalar com Preservação dos seus Arquivos](#16-como-desinstalar-com-preservação-dos-seus-arquivos)
 
 ---
 
@@ -37,37 +38,45 @@ Este guia foi elaborado para orientar usuários no download, verificação, inst
 
 ## 2. Baixar o Aplicativo Oficial
 
-Obtenha sempre os arquivos a partir da página oficial de lançamentos no GitHub:
+Obtenha sempre os arquivos exclusivamente a partir da [página oficial de Releases no GitHub](https://github.com/ArkanjoV2/BaixALL/releases/latest).
 
-- **Instalador Oficial (Recomendado):**  
+> ⚠️ **Nota sobre as versões 1.4.0 e 1.3.1:**  
+> A versão **1.4.0** (que adiciona suporte ao **TikTok**) está em fase final de preparação e validação. Enquanto a Release `v1.4.0` ainda não estiver publicada no GitHub Releases, os links diretos de download abaixo referem-se à última versão estável publicada (**1.3.1**, compatível com YouTube, Instagram e X/Twitter, sem suporte ao TikTok). Assim que a Release `v1.4.0` for publicada oficialmente, seus pacotes (`BaixALL-Setup-1.4.0.exe`, `BaixALL-1.4.0-win-x64.zip` e `checksums-1.4.0.txt`) ficarão disponíveis em `https://github.com/ArkanjoV2/BaixALL/releases/latest`.
+
+### Pacotes da Última Versão Estável Publicada (v1.3.1):
+
+- **Página Oficial da Última Release:**  
+  [Acessar Releases Oficiais do BaixALL](https://github.com/ArkanjoV2/BaixALL/releases/latest)
+
+- **Instalador Oficial Publicado (v1.3.1 — Recomendado):**  
   [Baixar BaixALL-Setup-1.3.1.exe](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-Setup-1.3.1.exe)  
-  *Assistente de instalação completo que cria atalhos no Menu Iniciar e na Área de Trabalho e registra desinstalador seguro no painel do Windows.*
+  *Assistente de instalação completo que cria atalhos no Menu Iniciar e na Área de Trabalho e registra desinstalador seguro no painel do Windows (versão 1.3.1).*
 
-- **Pacote Portátil (.ZIP):**  
+- **Pacote Portátil Publicado (v1.3.1 — .ZIP):**  
   [Baixar BaixALL-1.3.1-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-1.3.1-win-x64.zip)  
-  *Não requer instalação no sistema. Basta descompactar o arquivo `.zip` e executar diretamente o arquivo `BaixALL.exe`.*
+  *Não requer instalação no sistema. Basta descompactar o arquivo `.zip` e executar diretamente o arquivo `BaixALL.exe` (versão 1.3.1).*
 
-- **Manifesto de Hashes:**  
+- **Manifesto de Hashes Publicado (v1.3.1):**  
   [Baixar checksums-1.3.1.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/checksums-1.3.1.txt)
 
 ---
 
 ## 3. Verificação de Integridade e Hashes SHA-256
 
-Antes de abrir qualquer executável baixado da internet, é uma boa prática de segurança verificar sua integridade criptográfica.
+Antes de abrir qualquer executável baixado da internet, é uma boa prática de segurança verificar sua integridade criptográfica contra o manifesto oficial da respectiva versão.
 
-1. Baixe o arquivo oficial de hashes: [checksums-1.3.1.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/checksums-1.3.1.txt).
-2. Abra o **PowerShell** na pasta onde o arquivo foi baixado e execute:
+1. Baixe o arquivo oficial de hashes correspondente à release publicada (atualmente: [checksums-1.3.1.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/checksums-1.3.1.txt)).
+2. Abra o **PowerShell** na pasta onde o arquivo foi baixado e execute (substituindo pelo nome do pacote baixado, como `BaixALL-Setup-1.3.1.exe` ou, quando publicado, `BaixALL-Setup-1.4.0.exe`):
    ```powershell
    Get-FileHash BaixALL-Setup-1.3.1.exe -Algorithm SHA256
    ```
-3. Compare o valor retornado com os hashes oficiais da versão 1.3.1:
+3. Para a versão estável publicada **1.3.1**, compare o valor retornado com os hashes oficiais:
    ```text
    9a6e02f1584decb3310ad6f6e9154db07562b87b3313554b277aa393b4fc7a55  BaixALL-Setup-1.3.1.exe
    501cd5f67af74005eb676a11097f4ec5eabe5837ab61b15b73b51ef61563295f  BaixALL-1.3.1-win-x64.zip
    cc25adde56857a40dd05729347a11842cbc6166c8003f1bce0305e43da7b3df8  checksums-1.3.1.txt
    ```
-4. Se o hash calculado for idêntico, o arquivo está íntegro e não sofreu alterações durante a transferência.
+4. Se o hash calculado for idêntico ao publicado na Release oficial, o arquivo está íntegro e não sofreu alterações durante a transferência.
 
 ---
 
@@ -81,8 +90,8 @@ Ao executar um executável novo no seu sistema, o **Windows Defender SmartScreen
 - Softwares de código aberto independentes recém-lançados ainda não acumularam histórico estatístico nos servidores da Microsoft, acionando o alerta preventivo.
 
 ### Recomendações de segurança:
-1. **Confirme a procedência:** Certifique-se de que o arquivo foi obtido exclusivamente a partir do repositório oficial: `https://github.com/ArkanjoV2/BaixALL/releases/tag/v1.3.1`.
-2. **Confira o hash SHA-256:** Valide o arquivo contra o `checksums-1.3.1.txt` oficial.
+1. **Confirme a procedência:** Certifique-se de que o arquivo foi obtido exclusivamente a partir do repositório oficial: `https://github.com/ArkanjoV2/BaixALL/releases`.
+2. **Confira o hash SHA-256:** Valide o arquivo contra o manifesto `checksums-<versão>.txt` oficial anexado à Release.
 3. **Não execute o arquivo se tiver dúvidas:** Caso não tenha certeza da integridade do arquivo, não confirme a execução.
 4. **Nunca desabilite proteções:** Não desative o Windows Defender, o SmartScreen ou o antivírus do seu sistema operacional.
 5. Se você conferiu a origem oficial e o hash SHA-256 e deseja prosseguir com a instalação, clique em **"Mais informações"** na janela do alerta e selecione **"Executar assim mesmo"**.
@@ -91,14 +100,14 @@ Ao executar um executável novo no seu sistema, o **Windows Defender SmartScreen
 
 ## 5. Executar o Instalador ou Usar a Versão Portátil
 
-### Com o Instalador (`BaixALL-Setup-1.3.1.exe`):
-1. Dê um duplo clique no arquivo baixado.
+### Com o Instalador (`BaixALL-Setup-<versão>.exe`):
+1. Dê um duplo clique no arquivo do instalador baixado (`BaixALL-Setup-1.3.1.exe` na versão publicada atual ou `BaixALL-Setup-1.4.0.exe` na versão 1.4.0).
 2. O assistente de instalação abrirá em Português do Brasil.
 3. Escolha se deseja criar atalhos na Área de Trabalho e no Menu Iniciar.
 4. O programa é instalado no perfil do usuário em `%LOCALAPPDATA%\Programs\BaixALL`, dispensando privilégios administrativos.
 5. Ao finalizar, clique em **Concluir** para abrir o aplicativo.
 
-### Com a Versão Portátil (`BaixALL-1.3.1-win-x64.zip`):
+### Com a Versão Portátil (`BaixALL-<versão>-win-x64.zip`):
 1. Clique com o botão direito no arquivo `.zip` e selecione **"Extrair Tudo..."**.
 2. Abra a pasta resultante e dê um duplo clique no arquivo `BaixALL.exe`.
 
@@ -166,7 +175,25 @@ Publicações do Instagram que combinam múltiplos vídeos e fotos em uma única
 
 ---
 
-## 11. Como Utilizar a Fila e Acompanhar o Progresso
+## 11. Como Analisar e Baixar Vídeos do TikTok (v1.4.0)
+
+> **Nota:** Esta funcionalidade integra o **BaixALL 1.4.0**. Certifique-se de estar executando a versão `1.4.0` (visível em *Configurações > Sobre*) e com o `yt-dlp` atualizado na aba *Ferramentas*.
+
+1. Copie a URL de um vídeo público do TikTok:
+   - Links canônicos: `https://www.tiktok.com/@usuario/video/ID` ou `https://m.tiktok.com/v/ID.html`
+   - Links curtos compartilhados: `https://vm.tiktok.com/...`, `https://vt.tiktok.com/...` ou `https://www.tiktok.com/t/...`
+2. Cole no campo de entrada do BaixALL e clique em **"Analisar"**. O aplicativo identifica automaticamente a plataforma exibindo o badge turquesa `TikTok`, resolve links curtos para o identificador único do vídeo (`tt:ID`) e apresenta o criador (`@usuario`), duração, resolução máxima e o indicador de marca-d'água.
+3. **Verifique a classificação de marca-d'água exibida pelo aplicativo:**
+   - **`NoWatermark` (`✓ Sem marca-d'água`):** Fonte de reprodução identificada positivamente como limpa (`play_addr`, fluxos de playback `bytevc1_*` / `h264_*` verificados). A melhor opção sem marca-d'água vem selecionada por padrão e o download utiliza exclusivamente os `format_id` exatos classificados como limpos.
+   - **`Unknown` (`• Marca-d'água não verificada`):** Os metadados do vídeo não permitem confirmar se o fluxo contém ou não marca-d'água. O BaixALL não promete vídeo limpo e não seleciona a qualidade automaticamente; selecione manualmente a opção desejada no menu caso queira baixar.
+   - **`Watermarked` (`⚠ Apenas com marca-d'água`):** Nenhuma fonte limpa foi disponibilizada pela plataforma, existindo apenas fluxos explicitamente identificados com marca-d'água. Nenhuma opção é selecionada automaticamente e o download exige que você marque a caixa **"Autorizo baixar a versão com marca-d'água"**.
+4. Clique em **"Baixar Agora"** (ou marque **"Baixar somente o áudio do vídeo"** para extrair MP3, M4A ou Opus).
+5. **Proteção contra fallback silencioso:** Se uma fonte limpa selecionada deixar de estar disponível no momento da execução do download, o BaixALL interrompe a tarefa com aviso claro e **jamais** baixa silenciosamente um formato não verificado ou com marca-d'água no lugar.
+6. *Escopos não suportados:* Publicações de fotos/slideshows (`/photo/`), transmissões ao vivo (`/live`), Stories (`/story/`) e perfis inteiros não são suportados e exibem aviso em português.
+
+---
+
+## 12. Como Utilizar a Fila e Acompanhar o Progresso
 
 - Acesse a aba **Fila de Downloads** no topo da janela.
 - Acompanhe a barra de progresso, a velocidade de transferência (em MB/s), o tempo restante estimado (ETA) e o tamanho total do arquivo.
@@ -178,9 +205,9 @@ Publicações do Instagram que combinam múltiplos vídeos e fotos em uma única
 
 ---
 
-## 12. Como Verificar os Arquivos Baixados e Acessar o Histórico
+## 13. Como Verificar os Arquivos Baixados e Acessar o Histórico
 
-- Na aba **Histórico**, visualize o registro unificado das mídias concluídas, identificadas com seus respectivos badges coloridos (`YouTube`, `Instagram`, `X / Twitter`).
+- Na aba **Histórico**, visualize o registro unificado das mídias concluídas, identificadas com seus respectivos badges coloridos (`YouTube`, `Instagram`, `X / Twitter`, `TikTok`).
 - Utilize os botões de ação:
   - **Abrir:** Reproduz a mídia no reprodutor padrão do Windows.
   - **Pasta:** Abre o Windows Explorer diretamente na pasta onde o arquivo foi gravado, com o item já em destaque.
@@ -189,7 +216,7 @@ Publicações do Instagram que combinam múltiplos vídeos e fotos em uma única
 
 ---
 
-## 13. Onde os Arquivos São Salvos e Como Alterar
+## 14. Onde os Arquivos São Salvos e Como Alterar
 
 - **Pasta Padrão:** Os arquivos são salvos na pasta de Downloads do usuário:  
   `C:\Users\<SeuUsuario>\Downloads`
@@ -200,7 +227,7 @@ Publicações do Instagram que combinam múltiplos vídeos e fotos em uma única
 
 ---
 
-## 14. Fechamento do Aplicativo e Gerenciamento da Fila
+## 15. Fechamento do Aplicativo e Gerenciamento da Fila
 
 O BaixALL protege o usuário contra o encerramento acidental de tarefas ativas:
 
@@ -213,7 +240,7 @@ O BaixALL protege o usuário contra o encerramento acidental de tarefas ativas:
 
 ---
 
-## 15. Como Desinstalar com Preservação dos seus Arquivos
+## 16. Como Desinstalar com Preservação dos seus Arquivos
 
 1. Acesse **Configurações do Windows** > **Aplicativos** > **Aplicativos Instalados**.
 2. Localize **BaixALL** e clique em **Desinstalar** (ou utilize o atalho de desinstalação no Menu Iniciar).

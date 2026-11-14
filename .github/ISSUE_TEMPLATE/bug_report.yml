@@ -17,8 +17,11 @@ body:
       label: Versão do BaixALL
       description: Qual versão do BaixALL você está utilizando? (Visível na aba Configurações > Sobre).
       options:
-        - "1.0.0 (Instalador Setup)"
-        - "1.0.0 (Pacote Portátil ZIP)"
+        - "1.4.0 (Instalador Setup)"
+        - "1.4.0 (Pacote Portátil ZIP)"
+        - "1.3.1 (Instalador Setup)"
+        - "1.3.1 (Pacote Portátil ZIP)"
+        - "1.3.0 / Anterior"
         - "Outra / Compilação a partir do código-fonte"
     validations:
       required: true

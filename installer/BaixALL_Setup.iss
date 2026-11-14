@@ -3,9 +3,9 @@
 ; Aplicativo Self-Contained para Windows x64 (Nao exige .NET instalado)
 
 #define MyAppName "BaixALL"
-#define MyAppVersion "1.3.1"
+#define MyAppVersion "1.4.0"
 #define MyAppPublisher "BaixALL"
-#define MyAppURL "https://github.com/BaixALL/BaixALL"
+#define MyAppURL "https://github.com/ArkanjoV2/BaixALL"
 #define MyAppExeName "BaixALL.exe"
 
 [Setup]
@@ -14,6 +14,8 @@ AppId={{C272C15E-55AE-48F7-9CD1-8C5874251B5A}}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName} {#MyAppVersion}
+VersionInfoVersion={#MyAppVersion}.0
+VersionInfoDescription=Instalador Oficial do {#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
