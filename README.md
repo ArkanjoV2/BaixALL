@@ -5,8 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/ArkanjoV2/BaixALL/releases/latest"><img src="https://img.shields.io/badge/Vers%C3%A3o_Publicada-1.3.1_Est%C3%A1vel-blue.svg" alt="Versão Estável Publicada"></a>
-  <img src="https://img.shields.io/badge/Pr%C3%B3xima_Vers%C3%A3o-1.4.0_(Em_Prepara%C3%A7%C3%A3o)-00b4d8.svg" alt="Versão 1.4.0 em Preparação">
+  <a href="https://github.com/ArkanjoV2/BaixALL/releases/latest"><img src="https://img.shields.io/badge/Vers%C3%A3o-1.4.0_Est%C3%A1vel-blue.svg" alt="Versão Estável"></a>
   <a href="https://github.com/ArkanjoV2/BaixALL/blob/main/LICENSE"><img src="https://img.shields.io/badge/Licen%C3%A7a-MIT-green.svg" alt="Licença"></a>
   <img src="https://img.shields.io/badge/Plataforma-Windows_10_%2F_11_(x64)-blue" alt="Plataforma">
   <img src="https://img.shields.io/badge/Tecnologia-.NET_10_%7C_WPF-purple" alt="Tecnologia">
@@ -14,19 +13,19 @@
 
 <p align="center">
   <a href="https://github.com/ArkanjoV2/BaixALL/releases/latest">
-    <img src="https://img.shields.io/badge/Baixar_Vers%C3%A3o_Est%C3%A1vel_Oficial_(Releases)-2ea44f?style=for-the-badge&logo=windows&logoColor=white" alt="Baixar Versão Estável Oficial">
+    <img src="https://img.shields.io/badge/Baixar_Vers%C3%A3o_Est%C3%A1vel_Oficial_(v1.4.0)-2ea44f?style=for-the-badge&logo=windows&logoColor=white" alt="Baixar Versão Estável Oficial">
   </a>
   <br>
-  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-Setup-1.3.1.exe">
-    <em>Instalador Estável Atual (v1.3.1 Setup.exe)</em>
+  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.4.0/BaixALL-Setup-1.4.0.exe">
+    <em>Instalador Oficial (Setup.exe)</em>
   </a>
   &nbsp; &bull; &nbsp;
-  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-1.3.1-win-x64.zip">
-    <em>Versão Portátil Atual (v1.3.1 .ZIP)</em>
+  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.4.0/BaixALL-1.4.0-win-x64.zip">
+    <em>Versão Portátil (.ZIP)</em>
   </a>
   &nbsp; &bull; &nbsp;
-  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/checksums-1.3.1.txt">
-    <em>Hashes SHA-256 (v1.3.1)</em>
+  <a href="https://github.com/ArkanjoV2/BaixALL/releases/download/v1.4.0/checksums-1.4.0.txt">
+    <em>Hashes SHA-256</em>
   </a>
 </p>
 
@@ -59,9 +58,7 @@
 
 O **BaixALL** é um aplicativo desktop nativo desenvolvido em **C#** e **.NET 10** com interface gráfica moderna em **WPF** (padrão MVVM). Criado para oferecer um fluxo prático, transparente e unificado de arquivamento pessoal, ele integra os motores de código aberto **yt-dlp**, **FFmpeg** e **Deno** em um executável autônomo.
 
-A versão **1.4.0** (em preparação para lançamento) adiciona suporte nativo ao **TikTok**, somando-se às plataformas já suportadas (**YouTube**, **Instagram** e **X/Twitter**). O aplicativo permite analisar e baixar vídeos públicos das quatro plataformas em uma interface única, com identificação automática de links, classificação rigorosa e transparente do estado de marca-d'água no TikTok, fila global integrada, controle de concorrência e histórico consolidado.
-
-> **Nota sobre as versões:** A versão publicada atualmente na página de [Releases do GitHub](https://github.com/ArkanjoV2/BaixALL/releases/latest) é a **1.3.1** (com suporte a YouTube, Instagram e X/Twitter). O suporte ao TikTok integra a versão **1.4.0**, cujos pacotes estão em fase final de validação antes da publicação oficial.
+A versão estável **1.4.0** adiciona suporte oficial ao **TikTok**, somando-se às plataformas **YouTube**, **Instagram** e **X/Twitter**. O aplicativo permite analisar e baixar vídeos públicos das quatro plataformas em uma interface única, com identificação automática de links, classificação rigorosa e transparente do estado de marca-d'água no TikTok, fila global integrada, controle de concorrência e histórico consolidado.
 
 ---
 
@@ -126,29 +123,23 @@ Interface projetada com foco em clareza, ergonomia visual e feedback operacional
 
 Consulte o [Guia de Instalação](docs/GUIA_INSTALACAO.md) para o passo a passo completo.
 
-> ⚠️ **Aviso importante sobre a versão disponível para download:**  
-> Os pacotes da versão **1.4.0** (que introduz o suporte ao **TikTok**) encontram-se em preparação e validação final. Enquanto a Release `v1.4.0` não for publicada oficialmente na [página de Releases](https://github.com/ArkanjoV2/BaixALL/releases/latest), os links diretos abaixo apontam para a versão estável publicada **1.3.1** (que suporta YouTube, Instagram e X/Twitter, mas **ainda não inclui o suporte ao TikTok**).
-
-### Pacotes Publicados Atualmente — Versão Estável 1.3.1
-
-| Pacote | Link de Download (v1.3.1) | Descrição |
+| Pacote | Link Direto (v1.4.0) | Descrição |
 | :--- | :--- | :--- |
-| **Página Oficial de Releases** | [Acessar Última Release Estável](https://github.com/ArkanjoV2/BaixALL/releases/latest) | Página oficial de lançamentos do repositório |
-| **Instalador Oficial (Setup)** | [Baixar BaixALL-Setup-1.3.1.exe](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-Setup-1.3.1.exe) | Assistente completo com atalhos e desinstalador (v1.3.1) |
-| **Versão Portátil (.ZIP)** | [Baixar BaixALL-1.3.1-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-1.3.1-win-x64.zip) | Execução direta sem necessidade de instalação (v1.3.1) |
-| **Manifesto de Hashes** | [Baixar checksums-1.3.1.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/checksums-1.3.1.txt) | Hashes criptográficos oficiais SHA-256 (v1.3.1) |
+| **Instalador Oficial (Setup)** | [Baixar BaixALL-Setup-1.4.0.exe](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.4.0/BaixALL-Setup-1.4.0.exe) | Assistente completo com atalhos e desinstalador (Recomendado) |
+| **Versão Portátil (.ZIP)** | [Baixar BaixALL-1.4.0-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.4.0/BaixALL-1.4.0-win-x64.zip) | Execução direta sem necessidade de instalação |
+| **Manifesto de Hashes** | [Baixar checksums-1.4.0.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.4.0/checksums-1.4.0.txt) | Hashes criptográficos oficiais SHA-256 |
 
-### Tabela de Integridade Criptográfica Publicada (v1.3.1 — SHA-256)
+### Tabela de Integridade Criptográfica (v1.4.0 — SHA-256)
 
 | Arquivo | Tamanho Exato | Hash SHA-256 Oficial |
 | :--- | :---: | :--- |
-| `BaixALL-Setup-1.3.1.exe` | 45.895.608 bytes | `9a6e02f1584decb3310ad6f6e9154db07562b87b3313554b277aa393b4fc7a55` |
-| `BaixALL-1.3.1-win-x64.zip` | 65.505.206 bytes | `501cd5f67af74005eb676a11097f4ec5eabe5837ab61b15b73b51ef61563295f` |
-| `checksums-1.3.1.txt` | 182 bytes | `cc25adde56857a40dd05729347a11842cbc6166c8003f1bce0305e43da7b3df8` |
+| `BaixALL-Setup-1.4.0.exe` | 45.904.840 bytes | `3ee7be401ba46d0a47793cf738b99c2fd1dc864658a48ebf9478c55d1752ac36` |
+| `BaixALL-1.4.0-win-x64.zip` | 63.459.198 bytes | `6be0502566550efb45948699ba76a44d59dc9e18471df3980128d8102072169a` |
+| `checksums-1.4.0.txt` | 182 bytes | `0f12d288b53778972b9c0ee41f5215cebb36a1349e0075c7f216238fbb3cdeb3` |
 
 > 🛡️ **Orientações de Segurança sobre o Windows SmartScreen:**  
 > Programas independentes de código aberto recém-lançados podem apresentar um aviso de reputação do Windows Defender SmartScreen (*"O Windows protegeu o seu computador"*).  
-> - **Recomendação:** Sempre confirme que você baixou o arquivo da [página oficial de Releases](https://github.com/ArkanjoV2/BaixALL/releases/latest) e compare o hash SHA-256 com os valores oficiais publicados via PowerShell (`Get-FileHash <arquivo> -Algorithm SHA256`).  
+> - **Recomendação:** Sempre confirme que você baixou o arquivo da [Release oficial v1.4.0](https://github.com/ArkanjoV2/BaixALL/releases/tag/v1.4.0) e compare o hash SHA-256 com os valores acima via PowerShell (`Get-FileHash <arquivo> -Algorithm SHA256`).  
 > - Não desative defesas do sistema operacional. Consulte as orientações no [Guia de Instalação](docs/GUIA_INSTALACAO.md#4-avisos-de-reputação-do-windows-defender-smartscreen).
 
 ---

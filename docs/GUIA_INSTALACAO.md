@@ -1,6 +1,6 @@
 # Guia de Instalação e Uso do BaixALL
 
-Este guia foi elaborado para orientar usuários no download, verificação, instalação e operação do **BaixALL** (incluindo as novidades da versão **1.4.0** em preparação e os pacotes publicados da versão estável **1.3.1**) no Windows 10 e Windows 11 com segurança, conformidade e transparência.
+Este guia foi elaborado para orientar usuários no download, verificação, instalação e operação do **BaixALL 1.4.0** no Windows 10 e Windows 11 com segurança, conformidade e transparência.
 
 ---
 
@@ -38,43 +38,36 @@ Este guia foi elaborado para orientar usuários no download, verificação, inst
 
 ## 2. Baixar o Aplicativo Oficial
 
-Obtenha sempre os arquivos exclusivamente a partir da [página oficial de Releases no GitHub](https://github.com/ArkanjoV2/BaixALL/releases/latest).
+Obtenha sempre os arquivos exclusivamente a partir da [página oficial de Releases no GitHub](https://github.com/ArkanjoV2/BaixALL/releases/latest):
 
-> ⚠️ **Nota sobre as versões 1.4.0 e 1.3.1:**  
-> A versão **1.4.0** (que adiciona suporte ao **TikTok**) está em fase final de preparação e validação. Enquanto a Release `v1.4.0` ainda não estiver publicada no GitHub Releases, os links diretos de download abaixo referem-se à última versão estável publicada (**1.3.1**, compatível com YouTube, Instagram e X/Twitter, sem suporte ao TikTok). Assim que a Release `v1.4.0` for publicada oficialmente, seus pacotes (`BaixALL-Setup-1.4.0.exe`, `BaixALL-1.4.0-win-x64.zip` e `checksums-1.4.0.txt`) ficarão disponíveis em `https://github.com/ArkanjoV2/BaixALL/releases/latest`.
+- **Instalador Oficial (Recomendado):**  
+  [Baixar BaixALL-Setup-1.4.0.exe](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.4.0/BaixALL-Setup-1.4.0.exe)  
+  *Assistente de instalação completo que cria atalhos no Menu Iniciar e na Área de Trabalho e registra desinstalador seguro no painel do Windows.*
 
-### Pacotes da Última Versão Estável Publicada (v1.3.1):
+- **Pacote Portátil (.ZIP):**  
+  [Baixar BaixALL-1.4.0-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.4.0/BaixALL-1.4.0-win-x64.zip)  
+  *Não requer instalação no sistema. Basta descompactar o arquivo `.zip` e executar diretamente o arquivo `BaixALL.exe`.*
 
-- **Página Oficial da Última Release:**  
-  [Acessar Releases Oficiais do BaixALL](https://github.com/ArkanjoV2/BaixALL/releases/latest)
-
-- **Instalador Oficial Publicado (v1.3.1 — Recomendado):**  
-  [Baixar BaixALL-Setup-1.3.1.exe](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-Setup-1.3.1.exe)  
-  *Assistente de instalação completo que cria atalhos no Menu Iniciar e na Área de Trabalho e registra desinstalador seguro no painel do Windows (versão 1.3.1).*
-
-- **Pacote Portátil Publicado (v1.3.1 — .ZIP):**  
-  [Baixar BaixALL-1.3.1-win-x64.zip](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/BaixALL-1.3.1-win-x64.zip)  
-  *Não requer instalação no sistema. Basta descompactar o arquivo `.zip` e executar diretamente o arquivo `BaixALL.exe` (versão 1.3.1).*
-
-- **Manifesto de Hashes Publicado (v1.3.1):**  
-  [Baixar checksums-1.3.1.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/checksums-1.3.1.txt)
+- **Manifesto de Hashes (Verificação de Integridade):**  
+  [Baixar checksums-1.4.0.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.4.0/checksums-1.4.0.txt)
 
 ---
 
 ## 3. Verificação de Integridade e Hashes SHA-256
 
-Antes de abrir qualquer executável baixado da internet, é uma boa prática de segurança verificar sua integridade criptográfica contra o manifesto oficial da respectiva versão.
+Antes de abrir qualquer executável baixado da internet, é uma boa prática de segurança verificar sua integridade criptográfica contra o manifesto oficial da versão **1.4.0**.
 
-1. Baixe o arquivo oficial de hashes correspondente à release publicada (atualmente: [checksums-1.3.1.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.3.1/checksums-1.3.1.txt)).
-2. Abra o **PowerShell** na pasta onde o arquivo foi baixado e execute (substituindo pelo nome do pacote baixado, como `BaixALL-Setup-1.3.1.exe` ou, quando publicado, `BaixALL-Setup-1.4.0.exe`):
+1. Baixe o arquivo oficial [checksums-1.4.0.txt](https://github.com/ArkanjoV2/BaixALL/releases/download/v1.4.0/checksums-1.4.0.txt).
+2. Abra o **PowerShell** na pasta onde o arquivo foi baixado e execute:
    ```powershell
-   Get-FileHash BaixALL-Setup-1.3.1.exe -Algorithm SHA256
+   Get-FileHash BaixALL-Setup-1.4.0.exe -Algorithm SHA256
    ```
-3. Para a versão estável publicada **1.3.1**, compare o valor retornado com os hashes oficiais:
+   *(Ou substitua por `BaixALL-1.4.0-win-x64.zip` caso tenha baixado o pacote portátil).*
+3. Compare o valor retornado com os hashes oficiais da versão **1.4.0**:
    ```text
-   9a6e02f1584decb3310ad6f6e9154db07562b87b3313554b277aa393b4fc7a55  BaixALL-Setup-1.3.1.exe
-   501cd5f67af74005eb676a11097f4ec5eabe5837ab61b15b73b51ef61563295f  BaixALL-1.3.1-win-x64.zip
-   cc25adde56857a40dd05729347a11842cbc6166c8003f1bce0305e43da7b3df8  checksums-1.3.1.txt
+   3ee7be401ba46d0a47793cf738b99c2fd1dc864658a48ebf9478c55d1752ac36  BaixALL-Setup-1.4.0.exe
+   6be0502566550efb45948699ba76a44d59dc9e18471df3980128d8102072169a  BaixALL-1.4.0-win-x64.zip
+   0f12d288b53778972b9c0ee41f5215cebb36a1349e0075c7f216238fbb3cdeb3  checksums-1.4.0.txt
    ```
 4. Se o hash calculado for idêntico ao publicado na Release oficial, o arquivo está íntegro e não sofreu alterações durante a transferência.
 
@@ -90,8 +83,8 @@ Ao executar um executável novo no seu sistema, o **Windows Defender SmartScreen
 - Softwares de código aberto independentes recém-lançados ainda não acumularam histórico estatístico nos servidores da Microsoft, acionando o alerta preventivo.
 
 ### Recomendações de segurança:
-1. **Confirme a procedência:** Certifique-se de que o arquivo foi obtido exclusivamente a partir do repositório oficial: `https://github.com/ArkanjoV2/BaixALL/releases`.
-2. **Confira o hash SHA-256:** Valide o arquivo contra o manifesto `checksums-<versão>.txt` oficial anexado à Release.
+1. **Confirme a procedência:** Certifique-se de que o arquivo foi obtido exclusivamente a partir do repositório oficial: `https://github.com/ArkanjoV2/BaixALL/releases/tag/v1.4.0`.
+2. **Confira o hash SHA-256:** Valide o arquivo contra o manifesto `checksums-1.4.0.txt` oficial anexado à Release.
 3. **Não execute o arquivo se tiver dúvidas:** Caso não tenha certeza da integridade do arquivo, não confirme a execução.
 4. **Nunca desabilite proteções:** Não desative o Windows Defender, o SmartScreen ou o antivírus do seu sistema operacional.
 5. Se você conferiu a origem oficial e o hash SHA-256 e deseja prosseguir com a instalação, clique em **"Mais informações"** na janela do alerta e selecione **"Executar assim mesmo"**.
@@ -100,14 +93,14 @@ Ao executar um executável novo no seu sistema, o **Windows Defender SmartScreen
 
 ## 5. Executar o Instalador ou Usar a Versão Portátil
 
-### Com o Instalador (`BaixALL-Setup-<versão>.exe`):
-1. Dê um duplo clique no arquivo do instalador baixado (`BaixALL-Setup-1.3.1.exe` na versão publicada atual ou `BaixALL-Setup-1.4.0.exe` na versão 1.4.0).
+### Com o Instalador (`BaixALL-Setup-1.4.0.exe`):
+1. Dê um duplo clique em `BaixALL-Setup-1.4.0.exe`.
 2. O assistente de instalação abrirá em Português do Brasil.
 3. Escolha se deseja criar atalhos na Área de Trabalho e no Menu Iniciar.
 4. O programa é instalado no perfil do usuário em `%LOCALAPPDATA%\Programs\BaixALL`, dispensando privilégios administrativos.
 5. Ao finalizar, clique em **Concluir** para abrir o aplicativo.
 
-### Com a Versão Portátil (`BaixALL-<versão>-win-x64.zip`):
+### Com a Versão Portátil (`BaixALL-1.4.0-win-x64.zip`):
 1. Clique com o botão direito no arquivo `.zip` e selecione **"Extrair Tudo..."**.
 2. Abra a pasta resultante e dê um duplo clique no arquivo `BaixALL.exe`.
 
