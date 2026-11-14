@@ -1504,13 +1504,10 @@ public class TikTokSupportTests
 
     private static string? TryResolveLocalYtDlpExecutable()
     {
-        var managedPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "BaixALL", "tools", "yt-dlp", "yt-dlp.exe");
-
-        if (File.Exists(managedPath))
+        var explicitTestExe = Environment.GetEnvironmentVariable("BAIXALL_TEST_YTDLP_EXE");
+        if (!string.IsNullOrWhiteSpace(explicitTestExe) && File.Exists(explicitTestExe))
         {
-            return managedPath;
+            return explicitTestExe;
         }
 
         var pathEnv = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
@@ -1522,6 +1519,15 @@ public class TikTokSupportTests
                 if (File.Exists(candidate)) return candidate;
             }
             catch { }
+        }
+
+        var managedPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "BaixALL", "tools", "yt-dlp", "yt-dlp.exe");
+
+        if (File.Exists(managedPath))
+        {
+            return managedPath;
         }
 
         return null;

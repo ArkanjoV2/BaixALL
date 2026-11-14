@@ -38,9 +38,9 @@ jobs:
       - name: Garantir yt-dlp disponível para simulação offline de seletores (--load-info-json)
         shell: pwsh
         run: |
-          $ytdlpDir = Join-Path $env:LOCALAPPDATA "BaixALL\tools\yt-dlp"
-          $ytdlpExe = Join-Path $ytdlpDir "yt-dlp.exe"
-          New-Item -ItemType Directory -Path $ytdlpDir -Force | Out-Null
+          $ciToolsDir = Join-Path $env:RUNNER_TEMP "baixall-ci-ytdlp"
+          $ytdlpExe = Join-Path $ciToolsDir "yt-dlp.exe"
+          New-Item -ItemType Directory -Path $ciToolsDir -Force | Out-Null
           $existing = Get-Command yt-dlp -ErrorAction SilentlyContinue
           if ($existing -and (Test-Path $existing.Source)) {
             Copy-Item $existing.Source $ytdlpExe -Force
@@ -51,6 +51,8 @@ jobs:
             throw "Falha ao disponibilizar yt-dlp.exe no ambiente de CI."
           }
           & $ytdlpExe --version
+          Add-Content -Path $env:GITHUB_PATH -Value $ciToolsDir
+          Add-Content -Path $env:GITHUB_ENV -Value "BAIXALL_TEST_YTDLP_EXE=$ytdlpExe"
 
       - name: Executar testes com diagnóstico de travamento
         run: >-
