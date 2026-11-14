@@ -10,7 +10,7 @@ Atualmente, apenas as seguintes versões recebem atualizações de segurança:
 
 | Versão | Suporte a Correções de Segurança |
 | :--- | :--- |
-| **1.3.x (Última versão estável)** | :white_check_mark: Ativo |
+| **1.4.x (Última versão estável)** | :white_check_mark: Ativo |
 | Versões Anteriores / Release Candidates | :x: Encerrado (atualize para a versão estável mais recente) |
 
 ---

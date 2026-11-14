@@ -30,7 +30,7 @@ Para manter o suporte organizado e acessível a toda a comunidade:
 
 Ao relatar uma dificuldade, incluir as seguintes informações ajuda enormemente na identificação rápida do problema:
 
-- **Versão do BaixALL:** (Exemplo: `1.0.0`, visível na aba *Configurações*).
+- **Versão do BaixALL:** (Exemplo: `1.4.0`, visível na aba *Configurações*).
 - **Tipo de Distribuição:** Instalador (`Setup.exe`) ou Versão Portátil (`.zip`).
 - **Versão do Windows:** (Exemplo: Windows 11 23H2 x64, Windows 10 x64).
 - **Passos para Reproduzir:** O que você fez imediatamente antes do problema acontecer.
