@@ -571,7 +571,7 @@ public class YtDlpService : IYtDlpService
 
         if (lower.Contains("requested format is not available"))
         {
-            if (isCleanTikTokRequest || lower.Contains("[tiktok]"))
+            if (isCleanTikTokRequest)
             {
                 return "A fonte sem marca-d'água selecionada deixou de estar disponível para este vídeo. O download foi encerrado sem utilizar outra fonte não verificada.";
             }

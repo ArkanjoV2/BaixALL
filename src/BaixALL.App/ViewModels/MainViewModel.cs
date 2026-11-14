@@ -426,7 +426,18 @@ public partial class MainViewModel : ObservableObject
                     HasVideoInfo = true;
                     OnPropertyChanged(nameof(ShowWatermarkWarning));
                     OnPropertyChanged(nameof(ShowUnknownWatermarkNotice));
-                    ShowNotification("Não foi possível confirmar a ausência de marca-d'água nos metadados deste vídeo. Selecione manualmente uma qualidade caso deseje baixar.", "Warning");
+
+                    bool hasDownloadableUnknownVideoOption = FormatOptions.Any(
+                        o => !o.IsAudioOnly && o.WatermarkStatus == WatermarkStatus.Unknown && !string.IsNullOrWhiteSpace(o.FormatSelector));
+
+                    if (hasDownloadableUnknownVideoOption)
+                    {
+                        ShowNotification("Não foi possível confirmar a ausência de marca-d'água nos metadados deste vídeo. Selecione manualmente uma qualidade caso deseje baixar.", "Warning");
+                    }
+                    else
+                    {
+                        ShowNotification("Não foi possível confirmar a ausência de marca-d'água e nenhum formato não verificado possui identificador utilizável para download seguro.", "Warning");
+                    }
                 }
                 else
                 {

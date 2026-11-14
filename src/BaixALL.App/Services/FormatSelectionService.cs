@@ -922,57 +922,68 @@ public class FormatSelectionService : IFormatSelectionService
         {
             info.WatermarkStatus = WatermarkStatus.Unknown;
 
-            var uniqueHeights = unknownFormats
-                .Where(f => f.Height.HasValue && f.Height.Value > 0)
-                .Select(f => f.Height!.Value)
-                .Distinct()
-                .OrderByDescending(h => h)
+            var usableUnknownFormats = unknownFormats
+                .Where(f => !string.IsNullOrWhiteSpace(f.FormatId) &&
+                            f.WatermarkStatus == WatermarkStatus.Unknown &&
+                            ClassifyTikTokFormatWatermark(f) == WatermarkStatus.Unknown &&
+                            !f.IsUnplayable &&
+                            f.HasVideo)
                 .ToList();
 
-            var bestHeight = uniqueHeights.FirstOrDefault();
-            var bestWidth = unknownFormats
-                .Where(f => f.Height == bestHeight && f.Width.HasValue && f.Width.Value > 0)
-                .Select(f => f.Width)
-                .FirstOrDefault();
-
-            var bestLabel = "Qualidade disponível (Marca-d'água não verificada)";
-            if (bestHeight > 0)
+            if (usableUnknownFormats.Count > 0)
             {
-                var resName = GetTikTokResolutionLabel(bestHeight, bestWidth);
-                bestLabel = $"Qualidade até {resName} (Marca-d'água não verificada)";
-            }
+                var uniqueHeights = usableUnknownFormats
+                    .Where(f => f.Height.HasValue && f.Height.Value > 0)
+                    .Select(f => f.Height!.Value)
+                    .Distinct()
+                    .OrderByDescending(h => h)
+                    .ToList();
 
-            options.Add(new FormatOption
-            {
-                Label = bestLabel,
-                Height = bestHeight > 0 ? bestHeight : null,
-                FormatSelector = BuildUnknownTikTokSelector(unknownFormats),
-                IsBestQuality = false, // NUNCA seleciona automaticamente formato não verificado como fonte limpa
-                IsAudioOnly = false,
-                WatermarkStatus = WatermarkStatus.Unknown,
-                RequiresWatermarkConsent = false,
-                Description = "O extrator não forneceu informações suficientes para confirmar o estado da marca-d'água."
-            });
-
-            foreach (var height in uniqueHeights)
-            {
-                var width = unknownFormats
-                    .Where(f => f.Height == height && f.Width.HasValue && f.Width.Value > 0)
+                var bestHeight = uniqueHeights.FirstOrDefault();
+                var bestWidth = usableUnknownFormats
+                    .Where(f => f.Height == bestHeight && f.Width.HasValue && f.Width.Value > 0)
                     .Select(f => f.Width)
                     .FirstOrDefault();
 
-                var resName = GetTikTokResolutionLabel(height, width);
+                var bestLabel = "Qualidade disponível (Marca-d'água não verificada)";
+                if (bestHeight > 0)
+                {
+                    var resName = GetTikTokResolutionLabel(bestHeight, bestWidth);
+                    bestLabel = $"Qualidade até {resName} (Marca-d'água não verificada)";
+                }
+
                 options.Add(new FormatOption
                 {
-                    Label = $"{resName} • Marca-d'água não verificada",
-                    Height = height,
-                    FormatSelector = BuildUnknownTikTokSelector(unknownFormats, height),
-                    IsBestQuality = false,
+                    Label = bestLabel,
+                    Height = bestHeight > 0 ? bestHeight : null,
+                    FormatSelector = BuildUnknownTikTokSelector(usableUnknownFormats),
+                    IsBestQuality = false, // NUNCA seleciona automaticamente formato não verificado como fonte limpa
                     IsAudioOnly = false,
                     WatermarkStatus = WatermarkStatus.Unknown,
                     RequiresWatermarkConsent = false,
-                    Description = $"Vídeo até {resName} (estado da marca-d'água desconhecido)."
+                    Description = "O extrator não forneceu informações suficientes para confirmar o estado da marca-d'água."
                 });
+
+                foreach (var height in uniqueHeights)
+                {
+                    var width = usableUnknownFormats
+                        .Where(f => f.Height == height && f.Width.HasValue && f.Width.Value > 0)
+                        .Select(f => f.Width)
+                        .FirstOrDefault();
+
+                    var resName = GetTikTokResolutionLabel(height, width);
+                    options.Add(new FormatOption
+                    {
+                        Label = $"{resName} • Marca-d'água não verificada",
+                        Height = height,
+                        FormatSelector = BuildUnknownTikTokSelector(usableUnknownFormats, height),
+                        IsBestQuality = false,
+                        IsAudioOnly = false,
+                        WatermarkStatus = WatermarkStatus.Unknown,
+                        RequiresWatermarkConsent = false,
+                        Description = $"Vídeo até {resName} (estado da marca-d'água desconhecido)."
+                    });
+                }
             }
         }
         else if (watermarkedFormats.Count > 0)
@@ -1049,11 +1060,17 @@ public class FormatSelectionService : IFormatSelectionService
     public static string BuildCleanTikTokResolutionSelector(IReadOnlyList<VideoFormatRaw> cleanFormats, int maxHeight) =>
         BuildVerifiedCleanTikTokSelector(cleanFormats, maxHeight);
 
-    private static string BuildUnknownTikTokSelector(IReadOnlyList<VideoFormatRaw> unknownFormats, int? maxHeight = null)
+    public static string BuildUnknownTikTokSelector(IReadOnlyList<VideoFormatRaw> unknownFormats, int? maxHeight = null)
     {
+        if (unknownFormats == null)
+        {
+            throw new ArgumentNullException(nameof(unknownFormats));
+        }
+
         var candidates = unknownFormats
             .Where(f => !string.IsNullOrWhiteSpace(f.FormatId) &&
                         f.WatermarkStatus == WatermarkStatus.Unknown &&
+                        ClassifyTikTokFormatWatermark(f) == WatermarkStatus.Unknown &&
                         !f.IsUnplayable &&
                         f.HasVideo &&
                         (!maxHeight.HasValue || (f.Height.HasValue && f.Height.Value > 0 && f.Height.Value <= maxHeight.Value)))
@@ -1066,14 +1083,12 @@ public class FormatSelectionService : IFormatSelectionService
             .Distinct(StringComparer.Ordinal)
             .ToList();
 
-        if (candidates.Count > 0)
+        if (candidates.Count == 0)
         {
-            return string.Join("/", candidates);
+            throw new InvalidOperationException("Nenhum formato de estado não verificado possui format_id utilizável para construir o seletor.");
         }
 
-        return maxHeight.HasValue
-            ? $"best[height<={maxHeight.Value}][format_id!=download][vcodec!=bytevc2][vcodec!=none]"
-            : "best[format_id!=download][vcodec!=bytevc2][vcodec!=none]";
+        return string.Join("/", candidates);
     }
 
     private static int IsPreferredTikTokCodec(string? vcodec)
